@@ -29,3 +29,13 @@ node_modules/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Kept out of version control on purpose.
+# The planning documents and the roadmap are working notes rather than
+# deliverables, and uwuapps-theme.md is canonical for the whole uwu suite
+# rather than for this repository. Nothing committed links to any of them,
+# and docs/js/nav.js does not publish the roadmap.
+feed-project-plan-v2.md
+feed-infrastructure-v2.mermaid
+uwuapps-theme.md
+docs/next-steps.md

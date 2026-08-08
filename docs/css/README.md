@@ -5,7 +5,7 @@ defines.
 
 | File | Contains |
 | --- | --- |
-| `theme.css` | The shared theme system, copied from `uwuapps-theme.md` |
+| `theme.css` | The shared theme system, copied from the uwu suite spec |
 | `docs.css` | Documentation layout only |
 
 ## theme.css
@@ -13,9 +13,12 @@ defines.
 A byte for byte copy of the same file in `main-site/css/`. Seven brand
 colours by two modes, fourteen combinations, all meeting WCAG AA.
 
-Do not edit it here. A change that belongs to every uwu app goes in
-`uwuapps-theme.md` first and is copied into both sites. A change that
-belongs to the docs goes in `docs.css`.
+Do not edit it here. A change that belongs to every uwu app goes in the
+shared spec first and is copied into both sites. A change that belongs to
+the docs goes in `docs.css`.
+
+That spec, `uwuapps-theme.md`, is canonical for the whole uwu suite and is
+kept outside this repository on purpose.
 
 ## docs.css
 

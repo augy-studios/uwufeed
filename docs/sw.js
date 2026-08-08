@@ -47,7 +47,6 @@ const CONTENT = [
   "/content/shared-auth.md",
   "/content/self-hosting.md",
   "/content/faq.md",
-  "/next-steps.md",
 ];
 
 self.addEventListener("install", (event) => {

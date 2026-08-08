@@ -89,8 +89,7 @@ describing everything as though it already exists.
 
 Both ingestion tiers work: push through WebSub, and polling with
 conditional requests and adaptive backoff. Phases 3 through 7 cover the
-bots, accounts, Twitch, breadth and hardening. See
-[what comes next](#/next-steps).
+bots, accounts, Twitch, breadth and hardening.
 
 ## Is it really free
 

@@ -53,7 +53,6 @@ export const SECTIONS = [
       { id: "shared-auth", title: "The shared auth tables", file: "content/shared-auth.md" },
       { id: "self-hosting", title: "Self hosting", file: "content/self-hosting.md" },
       { id: "faq", title: "Questions", file: "content/faq.md" },
-      { id: "next-steps", title: "What comes next", file: "next-steps.md" },
     ],
   },
 ];

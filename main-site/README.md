@@ -72,7 +72,9 @@ say so.
 - Colours only ever come from tokens, so all 14 brand and mode
   combinations stay readable at WCAG AA.
 
-The full specification is [`../uwuapps-theme.md`](../uwuapps-theme.md).
+The full specification is `uwuapps-theme.md`, the shared uwu suite theme
+spec. It is kept outside this repository, since it is canonical for every
+uwu app rather than for this one, so `css/theme.css` here is a copy of it.
 
 ## What works today
 

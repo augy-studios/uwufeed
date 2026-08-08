@@ -12,11 +12,10 @@ workers.
 | Path | Contains |
 | --- | --- |
 | `index.html` | The shell. Topbar, sidebar, content column, on this page rail |
-| `css/theme.css` | The shared theme system, copied from `uwuapps-theme.md` |
+| `css/theme.css` | The shared theme system, copied from the uwu suite spec |
 | `css/docs.css` | Documentation layout |
 | `js/` | Router, Markdown renderer, search, theme |
 | `content/` | Every page, as Markdown |
-| `next-steps.md` | What Phase 2 needs. A deliverable, and also a page in the site |
 | `UFD-*.png` | App icons, shared with the main site |
 | `sw.js` | Shell precache plus every page, so the docs work offline |
 | `vercel.json` | Headers and region |

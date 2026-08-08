@@ -94,7 +94,6 @@ the VPS.
   `cd docs && python3 -m http.server 8000`
 - [`docs/content/quick-start.md`](docs/content/quick-start.md) is the
   fastest path to a working notification
-- [`docs/next-steps.md`](docs/next-steps.md) is what Phase 3 needs
 - [`db/schema.md`](db/schema.md) is the contract between the JavaScript and
   Python halves
 
