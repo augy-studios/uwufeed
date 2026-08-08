@@ -18,6 +18,12 @@
             "schedule": "*/15 * * * *"
         }
     ],
+    "rewrites": [
+        {
+            "source": "/((?!api/|js/|css/|images/|sitemap.xml|robots.txt|manifest.json|sw.js|favicon.ico|.well-known/).*)",
+            "destination": "/index.html"
+        }
+    ],
     "headers": [
         {
             "source": "/sw.js",

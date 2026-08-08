@@ -48,6 +48,27 @@
             </button>
         </header>
 
+        <nav class="sidebar glass hidden" id="sidebar" aria-label="Sections">
+            <a class="nav-item" data-route="overview" href="/dashboard">
+                <span data-icon="list"></span>Dashboard
+            </a>
+            <a class="nav-item" data-route="feed" href="/feed">
+                <span data-icon="inbox"></span>Feed
+            </a>
+            <a class="nav-item" data-route="sources" href="/sources">
+                <span data-icon="rss"></span>Sources
+            </a>
+            <a class="nav-item" data-route="destinations" href="/destinations">
+                <span data-icon="bell"></span>Destinations
+            </a>
+            <a class="nav-item" data-route="spaces" href="/servers">
+                <span data-icon="shield"></span>Servers
+            </a>
+            <a class="nav-item" data-route="account" href="/account">
+                <span data-icon="user"></span>Account
+            </a>
+        </nav>
+
         <div class="scope-bar glass hidden" id="scopeBar">
             <label class="scope-label" for="scopePicker">Viewing</label>
             <select id="scopePicker" aria-label="Which account to view">
@@ -57,16 +78,88 @@
         </div>
 
         <nav class="tabs glass" id="tabs" role="tablist">
-            <button class="tab active" type="button" role="tab" aria-selected="true" data-panel="panelFeed">
-                <span data-icon="list"></span>Feed
-            </button>
-            <button class="tab" type="button" role="tab" aria-selected="false" data-panel="panelSources">
-                <span data-icon="plus"></span>Sources
-            </button>
-            <button class="tab" type="button" role="tab" aria-selected="false" data-panel="panelAccount">
+            <a class="tab" data-route="overview" href="/dashboard">
+                <span data-icon="list"></span>Home
+            </a>
+            <a class="tab" data-route="feed" href="/feed">
+                <span data-icon="inbox"></span>Feed
+            </a>
+            <a class="tab" data-route="sources" href="/sources">
+                <span data-icon="rss"></span>Sources
+            </a>
+            <a class="tab" data-route="account" href="/account">
                 <span data-icon="user"></span>Account
-            </button>
+            </a>
         </nav>
+
+        <section class="panel glass hidden" id="panelHome">
+            <div class="hero">
+                <p class="eyebrow">Push first feed aggregator</p>
+                <h1 class="hero-title">Seconds, not thirteen minutes.</h1>
+                <p class="hero-lede">Follow a YouTube channel, a blog, a subreddit or anything
+                    with a feed. New posts arrive on your phone, in Telegram, in Discord or over
+                    ntfy, usually before the tab you left open notices.</p>
+                <div class="btn-row">
+                    <button class="btn" type="button" id="homeStart">Create an account</button>
+                    <a class="btn secondary" href="https://docs.feed.uwuapps.org"
+                        target="_blank" rel="noopener noreferrer">
+                        <span data-icon="external"></span>Read the docs
+                    </a>
+                </div>
+            </div>
+
+            <h2>Live numbers</h2>
+            <p class="route-hint">From the database, cached for an hour, never invented.</p>
+            <div class="stat-grid" id="homeStats"></div>
+
+            <h2>How it works</h2>
+            <p>When a source is added, uwuFeed fetches it once and looks for a hub. A hub means
+                the publisher announces new posts, so the source joins the push tier and is never
+                polled. No hub means polling, with conditional requests and an interval that
+                adapts between a minute and an hour.</p>
+            <p>That one check at signup is the whole difference between two second and thirteen
+                minute latency, and it costs a single HTTP request.</p>
+
+            <h2>Where it arrives</h2>
+            <div class="stat-grid">
+                <div class="stat"><span data-icon="bell"></span><strong>Web push</strong>
+                    <span class="route-hint">Even with the app closed</span></div>
+                <div class="stat"><span data-icon="external"></span><strong>Telegram</strong>
+                    <span class="route-hint">A chat, a group or a channel</span></div>
+                <div class="stat"><span data-icon="shield"></span><strong>Discord</strong>
+                    <span class="route-hint">Any channel, per source</span></div>
+                <div class="stat"><span data-icon="inbox"></span><strong>ntfy</strong>
+                    <span class="route-hint">No Google services needed</span></div>
+            </div>
+
+            <h2>Free, and built to stay that way</h2>
+            <p>Sources are shared, so a thousand people following one channel is one fetch. The
+                push tier costs nothing while idle, polling uses conditional requests and adaptive
+                backoff, and dead feeds retire themselves. There is a donation link and nothing
+                behind it.</p>
+        </section>
+
+        <section class="panel glass hidden" id="panelOverview">
+            <h1 id="overviewGreeting">Welcome back</h1>
+            <p class="route-hint" id="overviewLede">Here is how your feeds are doing.</p>
+            <div class="stat-grid" id="overviewStats"></div>
+
+            <h2>Jump to</h2>
+            <div class="stat-grid">
+                <a class="stat linky" data-route="feed" href="/feed">
+                    <span data-icon="inbox"></span><strong>Feed</strong>
+                    <span class="route-hint">Everything you follow</span></a>
+                <a class="stat linky" data-route="sources" href="/sources">
+                    <span data-icon="rss"></span><strong>Sources</strong>
+                    <span class="route-hint">Add and route them</span></a>
+                <a class="stat linky" data-route="destinations" href="/destinations">
+                    <span data-icon="bell"></span><strong>Destinations</strong>
+                    <span class="route-hint">Where posts arrive</span></a>
+                <a class="stat linky" data-route="spaces" href="/servers">
+                    <span data-icon="shield"></span><strong>Servers</strong>
+                    <span class="route-hint">Spaces you manage</span></a>
+            </div>
+        </section>
 
         <section class="panel glass" id="panelFeed" role="tabpanel">
             <h1>Your feed</h1>
@@ -104,6 +197,42 @@
                 </button>
             </div>
             <input type="file" id="opmlFile" accept=".opml,.xml,text/xml" hidden>
+        </section>
+
+        <section class="panel glass hidden" id="panelDestinations">
+            <h1>Destinations</h1>
+            <div class="banner hidden" id="destinationsBanner"></div>
+            <h2>Notifications</h2>
+            <p class="route-hint" id="pushHint"></p>
+            <div class="btn-row">
+                <button class="btn secondary" type="button" id="pushToggle" data-on="no">
+                    <span data-icon="bell"></span><span class="label">Enable notifications</span>
+                </button>
+            </div>
+
+            <h2>Delivery times</h2>
+            <p class="route-hint">Quiet hours and digests, per destination.</p>
+            <div class="destination-list" id="destinationList"></div>
+
+            <h2>ntfy</h2>
+            <p class="route-hint">Push to a phone without Google services. A topic name is a
+                password, so use the generated one rather than something memorable.</p>
+            <div class="field">
+                <input type="text" id="ntfyTopic" placeholder="Topic" aria-label="ntfy topic">
+                <button class="btn secondary" type="button" id="ntfyAdd">Add</button>
+            </div>
+            <p class="route-hint" id="ntfyHint"></p>
+
+        </section>
+
+        <section class="panel glass hidden" id="panelSpaces">
+            <h1>Servers and groups</h1>
+            <p class="route-hint">Servers, groups and channels you administer, and where the
+                bot is. Each keeps its own sources, because they belong to everyone there
+                rather than to you. Your access is rechecked with Discord or Telegram every
+                time this list loads.</p>
+            <div class="destination-list" id="spaceList"></div>
+
         </section>
 
         <section class="panel glass hidden" id="panelAccount" role="tabpanel">
@@ -184,27 +313,6 @@
             </div>
 
             <div id="accountPanel" class="hidden">
-                <h2>Notifications</h2>
-                <p class="route-hint" id="pushHint"></p>
-                <div class="btn-row">
-                    <button class="btn secondary" type="button" id="pushToggle" data-on="no">
-                        <span data-icon="bell"></span><span class="label">Enable notifications</span>
-                    </button>
-                </div>
-
-                <h2>Delivery times</h2>
-                <p class="route-hint">Quiet hours and digests, per destination.</p>
-                <div class="destination-list" id="destinationList"></div>
-
-                <h2>ntfy</h2>
-                <p class="route-hint">Push to a phone without Google services. A topic name is a
-                    password, so use the generated one rather than something memorable.</p>
-                <div class="field">
-                    <input type="text" id="ntfyTopic" placeholder="Topic" aria-label="ntfy topic">
-                    <button class="btn secondary" type="button" id="ntfyAdd">Add</button>
-                </div>
-                <p class="route-hint" id="ntfyHint"></p>
-
                 <h2>Connect a chat</h2>
                 <p class="route-hint">Link a Telegram chat so it shares these sources. Each source can
                     then be sent to some destinations rather than all of them, from the Sources tab.
@@ -222,13 +330,6 @@
                     password reset is sent, and it is what your servers are listed from.</p>
                 <div class="destination-list" id="identityList"></div>
 
-                <h2>Servers and groups</h2>
-                <p class="route-hint">Servers, groups and channels you administer, and where the
-                    bot is. Each keeps its own sources, because they belong to everyone there
-                    rather than to you. Your access is rechecked with Discord or Telegram every
-                    time this list loads.</p>
-                <div class="destination-list" id="spaceList"></div>
-
                 <div id="mergeSection" class="hidden">
                     <h2>Combine an account</h2>
                     <p class="route-hint">A chat you used before signing in has its own sources.
@@ -245,6 +346,29 @@
                         <span data-icon="key"></span>Set up a passkey on this device
                     </button>
                 </div>
+
+                <h2>Password</h2>
+                <p class="route-hint">Changing it ends every other signed in browser and leaves this
+                    one alone.</p>
+                <form class="stack" id="passwordForm">
+                    <input type="password" id="currentPassword" placeholder="Current password"
+                        aria-label="Current password" autocomplete="current-password" minlength="8"
+                        required>
+                    <input type="password" id="newPassword" placeholder="New password"
+                        aria-label="New password" autocomplete="new-password" minlength="8" required>
+                    <div class="banner hidden" id="passwordBanner"></div>
+                    <button class="btn" type="submit" id="passwordSubmit">Change password</button>
+                </form>
+
+                <h2>Session</h2>
+                <div class="btn-row">
+                    <button class="btn secondary" type="button" id="signOut">Sign out</button>
+                </div>
+
+
+                <h2 class="danger-heading">Danger zone</h2>
+                <p class="route-hint">Everything here is either hard to undo or impossible
+                    to. Read before clicking.</p>
 
                 <h2>Recovery codes</h2>
                 <p class="route-hint" id="recoveryCodesHint">Ten single use codes. They are the way
@@ -264,22 +388,25 @@
                 </form>
                 <div class="link-result hidden" id="recoveryCodesResult"></div>
 
-                <h2>Password</h2>
-                <p class="route-hint">Changing it ends every other signed in browser and leaves this
-                    one alone.</p>
-                <form class="stack" id="passwordForm">
-                    <input type="password" id="currentPassword" placeholder="Current password"
-                        aria-label="Current password" autocomplete="current-password" minlength="8"
-                        required>
-                    <input type="password" id="newPassword" placeholder="New password"
-                        aria-label="New password" autocomplete="new-password" minlength="8" required>
-                    <div class="banner hidden" id="passwordBanner"></div>
-                    <button class="btn" type="submit" id="passwordSubmit">Change password</button>
-                </form>
-
-                <h2>Session</h2>
+                <h2>Sign out everywhere</h2>
+                <p class="route-hint">Ends every signed in browser, phone and tablet, including
+                    this one. If you think somebody else has your account, this is the fastest
+                    way to take it back.</p>
                 <div class="btn-row">
-                    <button class="btn secondary" type="button" id="signOut">Sign out</button>
+                    <button class="btn danger" type="button" id="signOutAll">
+                        <span data-icon="alert"></span>Sign out of all devices
+                    </button>
+                </div>
+
+                <h2>Delete account</h2>
+                <p class="route-hint">Removes the account, everything it follows, its
+                    destinations, its linked services, its passkeys and its recovery codes.
+                    Sources themselves are shared and stay, because other people follow them.
+                    This cannot be undone.</p>
+                <div class="btn-row">
+                    <button class="btn danger" type="button" id="deleteAccount">
+                        <span data-icon="trash"></span>Delete my account
+                    </button>
                 </div>
             </div>
         </section>
@@ -302,6 +429,34 @@
             <div class="btn-row modal-actions">
                 <button class="btn" type="button" id="confirmYes">Confirm</button>
                 <button class="btn secondary" type="button" id="confirmNo">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop hidden" id="dangerModal">
+        <div class="modal glass" role="dialog" aria-modal="true" aria-labelledby="dangerTitle">
+            <div class="modal-head">
+                <h2 id="dangerTitle">Are you sure?</h2>
+                <button class="icon-btn small" type="button" data-close-modal="dangerModal"
+                    aria-label="Close">
+                    <span data-icon="close"></span>
+                </button>
+            </div>
+
+            <p class="step-count" id="dangerStep"></p>
+            <div class="modal-step" id="dangerBody"></div>
+
+            <form class="stack hidden" id="dangerForm">
+                <input type="text" id="dangerConfirm" class="hidden" autocomplete="off">
+                <input type="password" id="dangerPassword" class="hidden"
+                    placeholder="Your password" aria-label="Your password"
+                    autocomplete="current-password">
+            </form>
+            <div class="banner hidden" id="dangerBanner"></div>
+
+            <div class="btn-row modal-actions">
+                <button class="btn danger" type="button" id="dangerNext">Continue</button>
+                <button class="btn secondary" type="button" id="dangerCancel">Cancel</button>
             </div>
         </div>
     </div>

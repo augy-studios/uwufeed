@@ -40,6 +40,9 @@ VPS, in [`../../workers/`](../../workers/).
 | `/api/account/identities` | GET, DELETE | Working |
 | `/api/account/merge` | GET, POST | Working |
 | `/api/spaces` | GET | Working |
+| `/api/stats` | GET | Working, public, cached an hour |
+| `/api/auth/logout-all` | POST | Working |
+| `/api/account/delete` | POST | Working |
 | `/api/items/list` | GET | Working |
 | `/api/subscriptions/add`, `/list`, `/remove`, `/route` | GET, POST | Working |
 | `/api/targets/webpush` | GET, POST, DELETE | Working |

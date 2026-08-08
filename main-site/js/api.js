@@ -72,6 +72,8 @@ export const api = {
       body: { source_id: sourceId, target_ids: targetIds },
     }),
 
+  // The only endpoint that answers without a session.
+  stats: () => request("/api/stats"),
   listSpaces: () => request("/api/spaces"),
   listIdentities: () => request("/api/account/identities"),
   unlinkIdentity: (id) =>
@@ -99,6 +101,10 @@ export const api = {
   register: (email, password, username) =>
     request("/api/auth/register", { method: "POST", body: { email, password, username } }),
   logout: () => request("/api/auth/logout", { method: "POST" }),
+  logoutAll: (password) =>
+    request("/api/auth/logout-all", { method: "POST", body: { password } }),
+  deleteAccount: (confirm, password) =>
+    request("/api/account/delete", { method: "POST", body: { confirm, password } }),
   linkCode: () => request("/api/auth/link", { method: "POST" }),
 
   requestReset: (email) => request("/api/auth/reset", { method: "POST", body: { email } }),
@@ -178,6 +184,8 @@ const MESSAGES = {
   not_a_chat_account: "That account has its own sign in, so it cannot be merged.",
   not_your_account: "That account is not connected to yours.",
   discord_oauth_not_configured: "Discord sign in is not set up on this instance.",
+  confirmation_did_not_match: "That did not match your username. Type it exactly.",
+  cannot_delete_a_space: "This is a server or group account, which belongs to everyone in it.",
 };
 
 export function describe(err) {

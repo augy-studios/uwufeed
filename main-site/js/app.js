@@ -12,7 +12,8 @@ import * as auth from "./auth.js";
 import * as feed from "./feed.js";
 import * as sources from "./sources.js";
 import * as destinations from "./destinations.js";
-import { downloadOpml, parseOpml, readFile } from "./opml.js";
+import { downloadOpml, parseOpml, readFile } from "./opml.js";
+import * as router from "./router.js";
 import { pushSupported, currentSubscription, subscribe, unsubscribe } from "./push.js";
 import {
   assertPasskey,
@@ -32,6 +33,10 @@ function paintAuthState() {
   document.body.classList.toggle("signed-in", signedIn);
   el("authPanel").classList.toggle("hidden", signedIn);
   el("accountPanel").classList.toggle("hidden", !signedIn);
+  // The sidebar is for people with somewhere to go. On narrow screens CSS
+  // hides it and the tab bar takes over.
+  el("sidebar").classList.toggle("hidden", !signedIn);
+  el("tabs").classList.toggle("hidden", !signedIn);
   el("sourceForm").classList.toggle("hidden", !signedIn);
   el("sourcesSignedOut").classList.toggle("hidden", signedIn);
   el("feedSignedOut").classList.toggle("hidden", signedIn);
@@ -130,6 +135,7 @@ function wireAuth() {
       banner(status, "ok", null);
       form.reset();
       paintAuthState();
+      router.reconcile(true);
       await refreshAll();
       // Issued at registration, and backfilled on a first sign in for an
       // account that predates them. Either way this is the only showing.
@@ -161,6 +167,7 @@ function wireAuth() {
 
     await auth.logout();
     paintAuthState();
+    router.reconcile(false);
   });
 }
 
@@ -283,6 +290,142 @@ function wireReset() {
   });
 }
 
+// ---- views ----
+
+const PANELS = {
+  home: "panelHome",
+  overview: "panelOverview",
+  feed: "panelFeed",
+  sources: "panelSources",
+  destinations: "panelDestinations",
+  spaces: "panelSpaces",
+  account: "panelAccount",
+};
+
+function showPanel(id) {
+  for (const [routeId, panelId] of Object.entries(PANELS)) {
+    el(panelId).classList.toggle("hidden", routeId !== id);
+  }
+  document.querySelectorAll("[data-route]").forEach((link) => {
+    link.classList.toggle("active", link.dataset.route === id);
+  });
+}
+
+// Each view loads what it needs when it is opened, rather than everything
+// on every navigation. The feed is the exception: it paginates, so it keeps
+// whatever it already has unless the scope changed.
+async function enterRoute(id) {
+  showPanel(id);
+
+  if (!auth.state.signedIn) {
+    if (id === "home") await loadPublicStats();
+    return;
+  }
+
+  if (id === "overview") await loadOverview();
+  if (id === "feed") await feed.loadFeed(el("itemList"), el("feedBanner"), el("loadMore"));
+  if (id === "sources") await sources.load(el("sourceList"), el("sourcesBanner"));
+  if (id === "destinations") {
+    await destinations.load(el("destinationList"), el("destinationsBanner"));
+    await paintPushState();
+  }
+  if (id === "spaces") await loadScope();
+  if (id === "account") {
+    await Promise.all([loadIdentities(), refreshRecoveryCount()]);
+    await paintPasskeyOffer();
+  }
+}
+
+function onRoute({ route, as }) {
+  if (!route) return;
+
+  // The scope lives in the URL, so a space dashboard can be linked to. The
+  // client module is the one that actually appends it to requests.
+  if ((as || null) !== (currentScope() || null)) {
+    setScope(as);
+    feed.reset();
+    paintScopeNote();
+    if (el("scopePicker")) el("scopePicker").value = as || "";
+  }
+
+  enterRoute(route.id);
+}
+
+// ---- public numbers ----
+
+const STAT_LABELS = [
+  ["sources", "sources tracked"],
+  ["items", "posts seen"],
+  ["accounts", "accounts"],
+];
+
+function statCard(value, label) {
+  return `<div class="stat"><strong>${escapeHtml(String(value))}</strong>
+    <span class="route-hint">${escapeHtml(label)}</span></div>`;
+}
+
+function compact(n) {
+  if (n === null || n === undefined) return "?";
+  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
+  return String(n);
+}
+
+async function loadPublicStats() {
+  const box = el("homeStats");
+  try {
+    const data = await api.stats();
+    const cards = STAT_LABELS.map(([key, label]) => statCard(compact(data[key]), label));
+
+    // Only shown once there is enough delivered for a median to mean
+    // anything. The endpoint returns null rather than a figure invented
+    // from three samples.
+    if (data.median_push_latency_ms) {
+      cards.push(
+        statCard(`${(data.median_push_latency_ms / 1000).toFixed(1)}s`, "median push latency")
+      );
+    }
+    if (data.push_share !== null && data.push_share !== undefined) {
+      cards.push(statCard(`${data.push_share}%`, "on the push tier"));
+    }
+    box.innerHTML = cards.join("");
+  } catch {
+    // A marketing page must not break because a count did.
+    box.innerHTML = "";
+  }
+}
+
+// ---- overview ----
+
+async function loadOverview() {
+  const name = auth.state.username || auth.state.email || "";
+  el("overviewGreeting").textContent = name ? `Hey, ${name}` : "Welcome back";
+
+  const scopedTo = spaces.find((s) => String(s.id) === String(currentScope()));
+  el("overviewLede").textContent = scopedTo
+    ? `Managing ${scopedTo.label}. This is shared with everyone who administers it.`
+    : "Here is how your feeds are doing.";
+
+  const box = el("overviewStats");
+  try {
+    const [sourceData, targetData] = await Promise.all([api.listSources(), api.listTargets()]);
+    const active = (targetData.targets || []).filter((t) => t.active).length;
+    const failing = (sourceData.sources || []).filter((s) => s.failing).length;
+
+    box.innerHTML = [
+      statCard(sourceData.count, `of ${sourceData.limit} sources`),
+      statCard(active, active === 1 ? "destination" : "destinations"),
+      // Worth surfacing rather than burying: a failing source is the thing
+      // somebody would want to know without going looking.
+      statCard(failing, failing === 1 ? "source failing" : "sources failing"),
+      statCard(spaces.length, spaces.length === 1 ? "space managed" : "spaces managed"),
+    ].join("");
+  } catch (err) {
+    box.innerHTML = "";
+    banner(el("accountBanner"), "error", describe(err));
+  }
+}
+
 // ---- coming back from Discord ----
 
 // The callback puts the outcome in the fragment rather than the query, so
@@ -358,14 +501,21 @@ function paintScopeNote() {
     `Your access is checked with ${where} each time this list loads.`;
 }
 
+function wireHome() {
+  el("homeStart").addEventListener("click", () => {
+    router.go("account");
+    // Open the form in registration mode, since that is what was asked for.
+    if (el("authForm").dataset.mode !== "register") el("authToggle").click();
+  });
+}
+
 function wireScope() {
-  el("scopePicker").addEventListener("change", async () => {
-    setScope(el("scopePicker").value);
-    paintScopeNote();
+  el("scopePicker").addEventListener("change", () => {
     banner(el("accountBanner"), "ok", null);
     banner(el("sourcesBanner"), "ok", null);
-    feed.reset();
-    await refreshAll();
+    // Through the URL rather than directly, so the back button works and a
+    // space dashboard can be linked to. onRoute does the rest.
+    router.setScopeInUrl(el("scopePicker").value);
   });
 }
 
@@ -409,7 +559,11 @@ function renderSpaces() {
 async function loadIdentities() {
   const box = el("identityList");
   try {
-    const { identities } = await api.listIdentities();
+    const data = await api.listIdentities();
+    const { identities } = data;
+    // What the danger modal needs to know before it asks for anything.
+    account.has_password = data.has_password;
+    account.name = data.name;
     if (!identities.length) {
       box.innerHTML =
         '<p class="route-hint">Nothing connected. Linking Telegram or Discord gives you a ' +
@@ -640,6 +794,173 @@ async function paintPasskeyOffer() {
     el("passkeyHint").textContent =
       "This device cannot do passkeys, so signing in here stays a password.";
   }
+}
+
+// ---- the danger zone ----
+
+// One stepped modal for every irreversible action, because they all need
+// the same thing: a few screens that each say something different, and a
+// last step that asks for proof.
+//
+// Different text per step rather than the same warning repeated. A
+// confirmation that says the same thing three times teaches people to click
+// through it without reading, which is worse than one screen.
+function dangerFlow({ title, steps, confirmLabel, needsName, action }) {
+  return new Promise((resolve) => {
+    let step = 0;
+
+    const body = el("dangerBody");
+    const nextBtn = el("dangerNext");
+    const cancelBtn = el("dangerCancel");
+    const backdrop = el("dangerModal");
+    const form = el("dangerForm");
+    const confirmField = el("dangerConfirm");
+    const passwordField = el("dangerPassword");
+
+    const last = () => step === steps.length - 1;
+
+    function paint() {
+      el("dangerTitle").textContent = title;
+      el("dangerStep").textContent = `Step ${step + 1} of ${steps.length}`;
+      body.innerHTML = steps[step];
+      nextBtn.textContent = last() ? confirmLabel : "Continue";
+
+      // Proof is only asked for on the final step, so the earlier ones read
+      // as explanation rather than as a form to get past.
+      form.classList.toggle("hidden", !last());
+      confirmField.classList.toggle("hidden", !last() || !needsName);
+      passwordField.classList.toggle("hidden", !last() || !account.has_password);
+      if (needsName) confirmField.placeholder = `Type ${account.name || "your username"}`;
+      hydrateIcons(body);
+    }
+
+    function finish(result) {
+      nextBtn.removeEventListener("click", onNext);
+      cancelBtn.removeEventListener("click", onCancel);
+      backdrop.removeEventListener("click", onBackdrop);
+      document.removeEventListener("keydown", onKey);
+      closeModal("dangerModal");
+      form.reset();
+      banner(el("dangerBanner"), "ok", null);
+      resolve(result);
+    }
+
+    async function onNext() {
+      if (!last()) {
+        step += 1;
+        paint();
+        return;
+      }
+
+      nextBtn.disabled = true;
+      try {
+        const result = await action({
+          confirm: confirmField.value.trim(),
+          password: passwordField.value,
+        });
+        finish(result);
+      } catch (err) {
+        banner(el("dangerBanner"), "error", describe(err));
+      } finally {
+        nextBtn.disabled = false;
+      }
+    }
+
+    const onCancel = () => finish(null);
+    const onBackdrop = (e) => {
+      if (e.target === backdrop) finish(null);
+    };
+    const onKey = (e) => {
+      if (e.key === "Escape") finish(null);
+    };
+
+    nextBtn.addEventListener("click", onNext);
+    cancelBtn.addEventListener("click", onCancel);
+    backdrop.addEventListener("click", onBackdrop);
+    document.addEventListener("keydown", onKey);
+
+    paint();
+    openModal("dangerModal");
+    nextBtn.focus();
+  });
+}
+
+// How this account signs in, so the modal knows whether to ask for a
+// password. Filled by loadIdentities rather than guessed.
+const account = { has_password: false, name: null };
+
+function wireSignOutAll() {
+  el("signOutAll").addEventListener("click", async () => {
+    const result = await dangerFlow({
+      title: "Sign out everywhere",
+      confirmLabel: "Sign out everywhere",
+      needsName: false,
+      steps: [
+        `<p class="modal-body">This ends every signed in browser, phone and tablet,
+          <strong>including this one</strong>. You will be signed out here as soon as it
+          finishes.</p>
+         <p class="route-hint">Nothing you follow changes, and connected chats and servers keep
+          receiving posts. Only sign ins are ended.</p>`,
+        `<p class="modal-body">Anyone using your account elsewhere is signed out too, which is
+          the point. If somebody else has access, change your password afterwards, or they can
+          simply sign in again.</p>
+         <p class="route-hint">Passkeys and recovery codes keep working. This ends sessions,
+          not ways in.</p>`,
+        account.has_password
+          ? '<p class="modal-body">Confirm with your password.</p>'
+          : `<p class="modal-body">This account signs in without a password, so there is nothing
+             to type. Continue when you are ready.</p>`,
+      ],
+      action: ({ password }) => api.logoutAll(password),
+    });
+
+    if (!result) return;
+
+    // The session ending is the point, so the interface follows it rather
+    // than pretending it is still signed in.
+    auth.applySignedOut();
+    paintAuthState();
+    router.reconcile(false);
+    banner(
+      el("authBanner"),
+      "ok",
+      `Signed out of ${result.sessions_ended} ${
+        result.sessions_ended === 1 ? "device" : "devices"
+      }, including this one.`
+    );
+  });
+}
+
+function wireDeleteAccount() {
+  el("deleteAccount").addEventListener("click", async () => {
+    const result = await dangerFlow({
+      title: "Delete your account",
+      confirmLabel: "Delete my account",
+      needsName: true,
+      steps: [
+        `<p class="modal-body">This removes your account, everything it follows, its
+          destinations, its linked services, its passkeys and its recovery codes.</p>
+         <p class="route-hint">Sources themselves are shared and stay, because other people
+          follow them. Nothing anybody else sees changes.</p>`,
+        `<p class="modal-body">Servers and groups you manage are <strong>not</strong> deleted.
+          They belong to everyone in them and keep their own sources. You simply stop managing
+          them.</p>
+         <p class="route-hint">There is no undo and no export. If you want your sources, use
+          OPML export from the Sources page first.</p>`,
+        `<p class="modal-body">Type your name to confirm${
+          account.has_password ? ", and enter your password" : ""
+        }.</p>`,
+      ],
+      action: ({ confirm, password }) => api.deleteAccount(confirm, password),
+    });
+
+    if (!result) return;
+
+    auth.applySignedOut();
+    paintAuthState();
+    router.reconcile(false);
+    banner(el("authBanner"), "ok", "Account deleted.");
+  });
 }
 
 // ---- changing a known password ----
@@ -952,22 +1273,6 @@ function wireModals() {
   el("themeBtn").addEventListener("click", () => openModal("themeModal"));
 }
 
-function wireTabs() {
-  const tabs = el("tabs");
-  tabs.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-panel]");
-    if (!btn) return;
-    tabs.querySelectorAll(".tab").forEach((element) => {
-      const active = element === btn;
-      element.classList.toggle("active", active);
-      element.setAttribute("aria-selected", String(active));
-    });
-    document.querySelectorAll(".panel").forEach((panel) => {
-      panel.classList.toggle("hidden", panel.id !== btn.dataset.panel);
-    });
-  });
-}
-
 function registerServiceWorker() {
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");
 }
@@ -978,13 +1283,16 @@ async function boot() {
   updateThemeButtonIcon();
   buildThemeModal();
   wireModals();
-  wireTabs();
+
   wireAuth();
   wireReset();
   wirePassword();
   wireRecoveryCodes();
   wirePasskey();
-  wireScope();
+  wireScope();
+  wireHome();
+  wireSignOutAll();
+  wireDeleteAccount();
   wireIdentities();
   paintPasskeyOffer();
   wireSources();
@@ -1003,11 +1311,13 @@ async function boot() {
   handleUnauthorized(() => {
     auth.applySignedOut();
     paintAuthState();
+    router.reconcile(false);
   });
 
   // Optimistic, from the stored hint, so the shell does not flicker.
   auth.primeFromHint();
   paintAuthState();
+  router.start(onRoute, { signedIn: auth.state.signedIn });
 
   const outcome = readDiscordOutcome();
   if (outcome) {

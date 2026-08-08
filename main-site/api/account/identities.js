@@ -21,12 +21,22 @@ export default async function handler(req, res) {
 }
 
 async function list(res, userId) {
-  const rows = await select(
-    "uwufeed_identities",
-    `user_id=eq.${userId}&select=id,platform,display_name,verified_via,created_at&order=created_at.asc`
-  );
+  const [rows, user, passkeys] = await Promise.all([
+    select(
+      "uwufeed_identities",
+      `user_id=eq.${userId}&select=id,platform,display_name,verified_via,created_at&order=created_at.asc`
+    ),
+    selectOne("uwufeed_users", `id=eq.${userId}&select=password_hash,username,email`),
+    select("uwufeed_passkeys", `user_id=eq.${userId}&select=id`),
+  ]);
 
   return json(res, 200, {
+    // How this account can be signed into. The interface needs it to know
+    // whether to ask for a password before a destructive action, and
+    // guessing from a stored hint is how that goes wrong.
+    has_password: Boolean(user && user.password_hash),
+    passkeys: passkeys.length,
+    name: (user && (user.username || user.email)) || null,
     identities: rows.map((row) => ({
       id: row.id,
       platform: row.platform,
