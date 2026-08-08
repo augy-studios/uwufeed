@@ -1,0 +1,14 @@
+{
+  "name": "uwufeed",
+  "version": "1.0.0",
+  "description": "Feed notifications routed to Telegram and Discord",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "test": "node tests/run.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

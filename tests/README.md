@@ -3,21 +3,26 @@
 Verification for the parts of `main-site/api/` where being wrong is
 expensive: tokens, encryption, signatures and the account recovery paths.
 
-No dependency and no runner. Each file is a plain ES module that prints a
-line per check and exits non zero if any fail, which is the same trade the
-rest of this project makes.
+No dependency and no test framework. Each file is a plain ES module that
+prints a line per check and exits non zero if any fail, which is the same
+trade the rest of this project makes.
+
+```sh
+npm test
+```
+
+That is `tests/run.mjs`, which is the one piece of machinery here. It finds
+every `*.test.mjs` in this directory, runs them one at a time because
+several of them set `process.env` and replace `globalThis.fetch`, passes
+their output through unchanged, and exits non zero if any check failed or
+any suite died before it could report. A new file in this directory is
+picked up with no wiring.
+
+Any suite still runs perfectly well on its own, which is what to do when
+only one of them is interesting:
 
 ```sh
 node tests/resettoken.test.mjs
-node tests/recovery-and-passkeys.test.mjs
-node tests/auth-handlers.test.mjs
-node tests/gmail.test.mjs
-```
-
-Or all of them:
-
-```sh
-for f in tests/*.test.mjs; do node "$f" || exit 1; done
 ```
 
 They are outside `main-site/` on purpose. Vercel's root directory is
