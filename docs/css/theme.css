@@ -12,7 +12,10 @@ html, body { height: 100%; }
 input, textarea { user-select: text; }
 
 :link, :visited { color: var(--brand-ink); }
-a:hover { text-decoration: none; }
+/* No underline in any state. Colour is the affordance, and every link in
+   this project sits in a button, a card, a nav item or a list where the
+   shape already says it is one. */
+a, a:link, a:visited, a:hover, a:focus, a:active { text-decoration: none; }
 
 button {
   cursor: pointer;
