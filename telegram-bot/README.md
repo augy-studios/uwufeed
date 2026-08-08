@@ -98,7 +98,7 @@ failing silently. `buttons.prune()` clears anything older than 90 days.
 
 `TELEGRAM_API_ID`, `TELEGRAM_API_HASH`, `TELEGRAM_BOT_TOKEN`,
 `TELEGRAM_SQLITE_PATH`, `TELEGRAM_SESSION_NAME`, `WEB_APP_URL`,
-`DONATION_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`. See
+`DONATION_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`. See
 [`../.env.example`](../.env.example).
 
 The `.session` file Telethon writes is a credential. It is in

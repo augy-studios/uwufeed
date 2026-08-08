@@ -56,15 +56,17 @@ everything as though it exists.
 | --- | --- | --- |
 | 0 | Schema and migrations, item shape frozen | Done |
 | 1 | The push slice: WebSub, YouTube, one Discord webhook | Done |
-| 2 | The poll slice: RSS, adaptive backoff, retention | Not started |
+| 2 | The poll slice: RSS, adaptive backoff, retention | Done |
 | 3 | Telegram bot commands | Scaffolded |
 | 4 | Accounts, timeline, web push | Scaffolded |
 | 5 | Twitch and Discord bot commands | Scaffolded |
 | 6 | RSSHub, Bluesky, Mastodon, ntfy | Scaffolded |
 | 7 | Quotas, alerting, backups | Not started |
 
-Phase 1 works end to end: a real YouTube upload reaches Discord in under
-ten seconds.
+Both ingestion tiers work. A real YouTube upload reaches Discord in under
+ten seconds through the push tier, and a source without a hub is polled on
+an adaptive interval between 60 seconds and an hour, with conditional
+requests and retirement of dead feeds.
 
 Everything unbuilt answers clearly rather than failing. Vercel functions
 return `501` with the phase they belong to, and the bots reply with a short
@@ -88,7 +90,7 @@ the push tier as good for one lease period.
   `cd docs && python3 -m http.server 8000`
 - [`docs/content/quick-start.md`](docs/content/quick-start.md) is the
   fastest path to a working notification
-- [`docs/next-steps.md`](docs/next-steps.md) is what Phase 2 needs
+- [`docs/next-steps.md`](docs/next-steps.md) is what Phase 3 needs
 - [`db/schema.md`](db/schema.md) is the contract between the JavaScript and
   Python halves
 

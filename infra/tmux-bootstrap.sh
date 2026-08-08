@@ -29,10 +29,9 @@ tmux new-window -t "$SESSION" -n discord -c "$ROOT/discord-bot"
 tmux send-keys -t "$SESSION:discord" \
   ". .venv/bin/activate && python main.py" C-m
 
-# Phase 2. Left commented rather than deleted so it is one edit away.
-# tmux new-window -t "$SESSION" -n poller -c "$ROOT/workers"
-# tmux send-keys -t "$SESSION:poller" \
-#   ". .venv/bin/activate && python -m poller.main" C-m
+tmux new-window -t "$SESSION" -n poller -c "$ROOT/workers"
+tmux send-keys -t "$SESSION:poller" \
+  ". .venv/bin/activate && python -m poller.main" C-m
 
 tmux new-window -t "$SESSION" -n shell -c "$ROOT"
 

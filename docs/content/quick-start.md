@@ -39,7 +39,7 @@ environment variables in the project settings:
 
 ```text
 SUPABASE_URL
-SUPABASE_SERVICE_ROLE_KEY
+SUPABASE_SERVICE_KEY
 PUBLIC_BASE_URL
 WEBSUB_CALLBACK_SECRET
 ADMIN_TOKEN
@@ -71,8 +71,8 @@ The response tells you which tier it landed in:
 ```
 
 `"tier": "push"` means a hub was found and a subscription was requested.
-`"tier": "poll"` means there is no hub, and the poll tier that would handle
-it is still Phase 2.
+`"tier": "poll"` means there is no hub, so the poller picks it up on its
+next cycle.
 
 ## 4. Run the dispatcher
 
@@ -84,10 +84,25 @@ pip install -r requirements.txt
 python -m dispatcher.main
 ```
 
-With `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` and `DISCORD_WEBHOOK_URL`
+With `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` and `DISCORD_WEBHOOK_URL`
 in the environment. It prints the target it is delivering to, then waits.
 
-## 5. Wait for an upload
+## 5. Run the poller
+
+Only needed if any of your sources landed in the poll tier. Separate
+process, same virtualenv:
+
+```sh
+cd workers
+. .venv/bin/activate
+python -m poller.main
+```
+
+This one needs `SUPABASE_DB_URL_DIRECT`, the direct connection rather than
+the pooler, plus `USER_AGENT_CONTACT` so outbound requests identify
+themselves to feed hosts.
+
+## 6. Wait for an upload
 
 The next time that channel publishes, the hub calls
 `/api/hooks/websub`, the item is written, Realtime fires, and the
@@ -100,8 +115,8 @@ hand. The recipe is in `main-site/api/hooks/README.md`.
 
 - The web timeline, accounts and per user subscriptions, which are Phase 4
 - Bot commands for following sources, Phase 3 and Phase 5
-- The poll tier, Phase 2, so a source without a hub is stored and then left
-  alone
+- Fan out to more than one destination. Everything goes to the single
+  configured Discord webhook until targets exist
 
 :::warn Renew the leases
 `/api/cron/renew-leases` is still a stub. A WebSub lease lasts at most ten

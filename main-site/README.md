@@ -49,6 +49,14 @@ Other. No build command and no output directory: the files are served as
 they are. Environment variables go in the project settings, never in the
 repository.
 
+The app is `feed.uwuapps.org`. The documentation is a separate Vercel
+project on `docs.feed.uwuapps.org`, with root directory `docs`.
+
+`PUBLIC_BASE_URL` has to match the app's real origin exactly, because it is
+what hubs call back. A wrong value means every subscription verifies
+against nothing and no notification ever arrives, with no error anywhere to
+say so.
+
 ## Rules this code follows
 
 - Markup, styles and behaviour stay in separate files. No inline

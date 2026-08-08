@@ -9,7 +9,7 @@ import os
 import httpx
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
-SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
 
 _HEADERS = {
     "apikey": SERVICE_KEY,
@@ -20,7 +20,7 @@ _HEADERS = {
 
 def _client() -> httpx.AsyncClient:
     if not SUPABASE_URL or not SERVICE_KEY:
-        raise RuntimeError("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required")
+        raise RuntimeError("SUPABASE_URL and SUPABASE_SERVICE_KEY are required")
     return httpx.AsyncClient(
         base_url=f"{SUPABASE_URL}/rest/v1",
         headers=_HEADERS,

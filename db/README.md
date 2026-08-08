@@ -65,7 +65,7 @@ unique, and `uwu_sessions.user_id` is nullable.
 
 | Component | Connection |
 | --- | --- |
-| Vercel functions | PostgREST over HTTPS, `SUPABASE_URL` plus `SUPABASE_SERVICE_ROLE_KEY`. No connection pool to exhaust |
+| Vercel functions | PostgREST over HTTPS, `SUPABASE_URL` plus `SUPABASE_SERVICE_KEY`. No connection pool to exhaust |
 | Vercel, if raw SQL is ever needed | `SUPABASE_DB_URL_POOLER`, the transaction pooler, never the direct URL |
 | VPS workers and bots | `SUPABASE_DB_URL_DIRECT` for SQL, or PostgREST for simple reads and writes |
 

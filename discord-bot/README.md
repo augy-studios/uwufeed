@@ -111,7 +111,7 @@ failure.
 
 `DISCORD_BOT_TOKEN`, `DISCORD_SQLITE_PATH`, `DISCORD_DEV_GUILD_ID`,
 `WEB_APP_URL`, `DONATION_URL`, `SUPABASE_URL`,
-`SUPABASE_SERVICE_ROLE_KEY`. See [`../.env.example`](../.env.example).
+`SUPABASE_SERVICE_KEY`. See [`../.env.example`](../.env.example).
 
 Delivery to Discord in Phase 1 does not run here at all. It goes through a
 webhook from the dispatcher, in [`../workers/dispatcher/`](../workers/dispatcher/),

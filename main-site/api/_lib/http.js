@@ -71,6 +71,6 @@ export function timingSafeEqualString(a, b) {
   return diff === 0;
 }
 
-export const USER_AGENT = `uwuFeed/0.1 (+${process.env.PUBLIC_BASE_URL || "https://uwufeed.app"}; ${
+export const USER_AGENT = `uwuFeed/0.1 (+${process.env.PUBLIC_BASE_URL || "https://feed.uwuapps.org"}; ${
   process.env.USER_AGENT_CONTACT || "contact not configured"
 })`;

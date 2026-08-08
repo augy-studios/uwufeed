@@ -53,6 +53,15 @@ A **separate** Vercel project from the app, with the root directory set to
 It has no API, no environment variables and no secrets. It is static files
 and nothing else.
 
+| Site | Domain | Vercel root directory |
+| --- | --- | --- |
+| App | `feed.uwuapps.org` | `main-site` |
+| Docs | `docs.feed.uwuapps.org` | `docs` |
+
+Separate origins, so the two do not share a service worker, a cache or
+localStorage. That is why the artwork is duplicated rather than referenced
+across.
+
 ## Adding a page
 
 1. Write `content/your-page.md`.

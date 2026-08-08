@@ -17,11 +17,11 @@ BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 SQLITE_PATH = os.environ.get("TELEGRAM_SQLITE_PATH", "bot.sqlite3")
 SESSION_NAME = os.environ.get("TELEGRAM_SESSION_NAME", "uwufeed-telegram")
 
-WEB_APP_URL = os.environ.get("WEB_APP_URL", "https://uwufeed.app")
+WEB_APP_URL = os.environ.get("WEB_APP_URL", "https://feed.uwuapps.org")
 DONATION_URL = os.environ.get("DONATION_URL", "https://donate.stripe.com/28o2akeAr3hv0DK6oo")
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
-SUPABASE_SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
 
 
 def check() -> None:

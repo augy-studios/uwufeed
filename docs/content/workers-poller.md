@@ -3,8 +3,7 @@
 The poll tier. Everything without a hub ends up here, checked on an
 interval that adapts to how often the feed actually changes.
 
-**Status: Phase 2, not started.** The item shape half is written, because
-that is a contract rather than a feature.
+**Status: working.**
 
 ## The loop
 
@@ -20,6 +19,15 @@ select * from uwufeed_sources
 coordinator between them and without either blocking on the other's rows,
 so scaling up is starting a second process rather than designing a leader
 election.
+
+The claim and the release happen in one statement: the select takes the
+lock and the same statement pushes `next_check_at` forward, so the
+transaction commits before any network call. Holding it open across the
+fetch would pin the vacuum horizon for as long as the slowest feed takes to
+answer.
+
+A worker that dies mid fetch leaves that source scheduled a few minutes
+out, so it is retried rather than lost or stuck.
 
 Then per source: fetch conditionally, normalize, insert with the conflict
 handled by the database, reschedule, and record either a success or a

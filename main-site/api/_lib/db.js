@@ -2,7 +2,7 @@
 // connection, because that is how the pool gets exhausted.
 
 const URL_BASE = process.env.SUPABASE_URL;
-const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const KEY = process.env.SUPABASE_SERVICE_KEY;
 
 function requireConfig() {
   if (!URL_BASE || !KEY) throw new Error("supabase_not_configured");
@@ -76,4 +76,27 @@ export async function update(table, query, patch) {
 
 export async function rpc(fn, args) {
   return pgrest(`rpc/${fn}`, { method: "POST", body: args });
+}
+
+// Returns how many rows went, which is the only interesting output of a
+// retention pass. PostgREST reports it in content-range when asked.
+export async function remove(table, query) {
+  requireConfig();
+  const res = await fetch(`${URL_BASE}/rest/v1/${table}?${query}`, {
+    method: "DELETE",
+    headers: {
+      apikey: KEY,
+      authorization: `Bearer ${KEY}`,
+      prefer: "return=minimal,count=exact",
+    },
+  });
+
+  if (!res.ok) {
+    const raw = await res.text();
+    throw new Error(`postgrest ${res.status} deleting ${table}: ${raw.slice(0, 300)}`);
+  }
+
+  const range = res.headers.get("content-range") || "";
+  const deleted = parseInt(range.split("/")[1] || "0", 10);
+  return Number.isFinite(deleted) ? deleted : 0;
 }

@@ -10,7 +10,7 @@ tmux while working on them.
 | `uwufeed-dispatcher.service` | `python -m dispatcher.main` | Ready |
 | `uwufeed-telegram.service` | `telegram-bot/main.py` | Ready |
 | `uwufeed-discord.service` | `discord-bot/main.py` | Ready |
-| `uwufeed-poller.service` | `python -m poller.main` | Waits on Phase 2 |
+| `uwufeed-poller.service` | `python -m poller.main` | Ready |
 
 ## Assumptions
 
@@ -29,11 +29,13 @@ sudo -u uwufeed git clone <repo> /home/uwufeed/uwufeed
 ```sh
 sudo cp infra/systemd/uwufeed-*.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable --now uwufeed-dispatcher uwufeed-telegram uwufeed-discord
+sudo systemctl enable --now uwufeed-dispatcher uwufeed-poller \
+  uwufeed-telegram uwufeed-discord
 ```
 
-Leave `uwufeed-poller` disabled until Phase 2 exists. It starts, raises
-`NotImplementedError` and gets restarted forever otherwise.
+All four are ready to run. The poller needs `SUPABASE_DB_URL_DIRECT`, not
+the pooler, or its claim query behaves in ways that are unpleasant to
+debug.
 
 ## Watching them
 

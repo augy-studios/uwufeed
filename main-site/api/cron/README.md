@@ -9,7 +9,7 @@ Schedules are declared in [`../../vercel.json`](../../vercel.json).
 | File | Route | Schedule | Status |
 | --- | --- | --- | --- |
 | [`renew-leases.js`](renew-leases.js) | `/api/cron/renew-leases` | `0 3 * * *` | Stub |
-| [`cleanup.js`](cleanup.js) | `/api/cron/cleanup` | `0 4 * * *` | Stub |
+| [`cleanup.js`](cleanup.js) | `/api/cron/cleanup` | `0 4 * * *` | Working |
 | [`digest.js`](digest.js) | `/api/cron/digest` | `0 8 * * *` | Stub |
 | [`heartbeat.js`](heartbeat.js) | `/api/cron/heartbeat` | `*/15 * * * *` | Stub |
 
@@ -28,6 +28,24 @@ being published.
 It is still a stub. Until it is written, either resubscribe by hand through
 `/api/sources/subscribe`, or treat the push tier as good for one lease
 period only.
+
+## cleanup
+
+Deletes items with `fetched_at` older than 30 days, and `uwu_sessions` rows
+that have already expired. Answers with the counts, or `207` with an
+`errors` array if one pass failed and the other did not.
+
+Deliveries are not deleted directly. They carry `on delete cascade` from
+items, so they go with them.
+
+Two things it deliberately does not do:
+
+- **Retire sources.** The poller does that the moment a source hits the
+  failure limit, because it is the thing that saw the failure and the thing
+  that knows the subscriber count.
+- **Expire sessions.** It removes rows that already fail
+  `expires_at > now()`. Those sessions were dead already, so this logs
+  nobody out, in this app or any other sharing the table.
 
 ## Authorisation
 

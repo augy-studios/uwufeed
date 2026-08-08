@@ -8,7 +8,7 @@ what a serverless function cannot do. Request shaped work belongs in
 | Directory | What it does | Status |
 | --- | --- | --- |
 | [`dispatcher/`](dispatcher/) | Listens on Supabase Realtime, fans out to targets | Working, Discord only |
-| [`poller/`](poller/) | The poll tier, `next_check_at` batches | Stub, Phase 2, except `normalize.py` |
+| [`poller/`](poller/) | The poll tier, `next_check_at` batches | Working |
 | [`streams/`](streams/) | Bluesky and Mastodon long lived connections | Stub, Phase 6 |
 
 ## Setup
@@ -30,24 +30,29 @@ ships.
 ```sh
 cd workers
 python -m dispatcher.main
+python -m poller.main
 ```
 
-Run from this directory, as a module. The channel modules import their
-siblings with relative imports, so running `dispatcher/main.py` as a script
-fails on the first import.
+Two separate processes. Run from this directory, as modules: the submodules
+import their siblings relatively, so running a file as a script fails on
+the first import.
 
 Under tmux and systemd on the VPS, see [`../infra/`](../infra/).
 
 ## Database connections
 
 Workers are long lived, so they may use the direct connection,
-`SUPABASE_DB_URL_DIRECT`, rather than the pooler. The dispatcher currently
-uses PostgREST anyway because its queries are small, and that keeps it to
-one HTTP dependency. The poller will want real SQL, because
-`for update skip locked` has no REST equivalent.
+`SUPABASE_DB_URL_DIRECT`, rather than the pooler.
 
-Never point a worker at the transaction pooler for `skip locked` work.
-Transaction mode pooling and row locks held across statements do not mix.
+The two workers differ, on purpose:
+
+| Worker | Connection | Why |
+| --- | --- | --- |
+| Dispatcher | PostgREST over HTTPS | Its queries are a handful of small reads and writes, so REST keeps it to one dependency |
+| Poller | Direct, via psycopg | `for update skip locked` has no REST equivalent |
+
+Never point the poller at the transaction pooler. Transaction mode pooling
+and row locks do not mix, and the failure is subtle rather than loud.
 
 ## Item shape
 
@@ -58,6 +63,6 @@ halves of the project start writing different rows for the same feed.
 
 ## Environment
 
-`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_DB_URL_DIRECT`,
+`SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `SUPABASE_DB_URL_DIRECT`,
 `DISCORD_WEBHOOK_URL`, `USER_AGENT_CONTACT`, and later
 `VAPID_*` and `NTFY_BASE_URL`. See [`../.env.example`](../.env.example).

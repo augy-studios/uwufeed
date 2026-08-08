@@ -41,7 +41,7 @@ Environment variables:
 
 ```text
 SUPABASE_URL
-SUPABASE_SERVICE_ROLE_KEY
+SUPABASE_SERVICE_KEY
 PUBLIC_BASE_URL
 WEBSUB_CALLBACK_SECRET
 WEBSUB_LEASE_SECONDS
@@ -58,6 +58,16 @@ with no error to tell you.
 
 This site is a separate Vercel project with root directory `docs`. It is
 entirely static and shares nothing with the app but the theme.
+
+The live deployment uses two domains:
+
+| Site | Domain | Vercel root directory |
+| --- | --- | --- |
+| App | `feed.uwuapps.org` | `main-site` |
+| Docs | `docs.feed.uwuapps.org` | `docs` |
+
+They are separate origins, so nothing is shared between them at runtime,
+not the service worker, not the cache, not `localStorage`.
 
 ## 4. The VPS
 

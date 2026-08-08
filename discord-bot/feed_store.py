@@ -15,17 +15,17 @@ TODO Phase 5. Planned surface:
 
 import httpx
 
-from config import SUPABASE_SERVICE_ROLE_KEY, SUPABASE_URL
+from config import SUPABASE_SERVICE_KEY, SUPABASE_URL
 
 
 def client() -> httpx.AsyncClient:
-    if not SUPABASE_URL or not SUPABASE_SERVICE_ROLE_KEY:
-        raise RuntimeError("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required")
+    if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
+        raise RuntimeError("SUPABASE_URL and SUPABASE_SERVICE_KEY are required")
     return httpx.AsyncClient(
         base_url=f"{SUPABASE_URL}/rest/v1",
         headers={
-            "apikey": SUPABASE_SERVICE_ROLE_KEY,
-            "authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
+            "apikey": SUPABASE_SERVICE_KEY,
+            "authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
             "content-type": "application/json",
         },
         timeout=httpx.Timeout(15.0),

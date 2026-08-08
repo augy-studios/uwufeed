@@ -57,8 +57,9 @@ second floor on poll intervals.
 - The web app, Telegram bot and Discord bot each have their own section.
 
 :::note Current state
-uwuFeed is being built in phases. Phase 1, the push path, works end to end:
-a YouTube upload reaches Discord in under ten seconds. Accounts, the
+uwuFeed is being built in phases. Both ingestion tiers now work: a YouTube
+upload reaches Discord in under ten seconds through the push tier, and
+sources without a hub are polled on an adaptive interval. Accounts, the
 timeline and the bot commands are still landing. Every page here marks what
 works today and what does not.
 :::

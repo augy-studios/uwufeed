@@ -33,7 +33,8 @@ VPS, in [`../../workers/`](../../workers/).
 | `/api/targets/webpush` | POST, DELETE | Stub, Phase 4 |
 | `/api/targets/ntfy` | POST, DELETE | Stub, Phase 6 |
 | `/api/cron/renew-leases` | GET | Stub, scheduled daily |
-| `/api/cron/digest`, `/cleanup`, `/heartbeat` | GET | Stub, scheduled |
+| `/api/cron/cleanup` | GET | Working, scheduled daily |
+| `/api/cron/digest`, `/heartbeat` | GET | Stub, scheduled |
 
 Stubs answer `501` with the phase they belong to, so a caller gets a clear
 signal rather than a 404 that looks like a routing bug.
@@ -65,7 +66,7 @@ WebSub secret. See [`hooks/README.md`](hooks/README.md).
 
 ## Environment
 
-`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `PUBLIC_BASE_URL`,
+`SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `PUBLIC_BASE_URL`,
 `WEBSUB_CALLBACK_SECRET`, `WEBSUB_LEASE_SECONDS`, `ADMIN_TOKEN`,
 `CRON_SECRET`, `USER_AGENT_CONTACT`. See [`../../.env.example`](../../.env.example).
 

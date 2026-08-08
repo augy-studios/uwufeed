@@ -87,8 +87,9 @@ is indistinguishable from a channel that stopped posting.
 It is being built in stages, and the docs mark what works today rather than
 describing everything as though it already exists.
 
-Phase 1, the push path, works end to end. Phases 2 through 7 cover polling,
-the bots, accounts, Twitch, breadth and hardening. See
+Both ingestion tiers work: push through WebSub, and polling with
+conditional requests and adaptive backoff. Phases 3 through 7 cover the
+bots, accounts, Twitch, breadth and hardening. See
 [what comes next](#/next-steps).
 
 ## Is it really free

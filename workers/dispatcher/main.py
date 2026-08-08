@@ -22,7 +22,7 @@ from .templates import context_from_item
 load_dotenv()
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
-SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
 WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "")
 
 QUEUE: asyncio.Queue = asyncio.Queue(maxsize=1000)
@@ -119,7 +119,7 @@ async def listen(target_id: int) -> None:
 
 async def main() -> None:
     if not (SUPABASE_URL and SERVICE_KEY):
-        raise SystemExit("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required")
+        raise SystemExit("SUPABASE_URL and SUPABASE_SERVICE_KEY are required")
     if not WEBHOOK_URL:
         raise SystemExit("DISCORD_WEBHOOK_URL is required")
 
