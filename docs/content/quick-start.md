@@ -15,10 +15,9 @@ path, so it runs against your own deployment rather than a hosted service.
 Apply the migrations in `db/migrations/` in filename order, either through
 the Supabase SQL editor or with psql.
 
-The shared auth tables, `uwu_users` and `uwu_sessions`, are not created
-here. They belong to the uwu suite as a whole and already exist. Three
-uwuFeed tables hold a foreign key into `uwu_users(id)`, so it has to be
-there before `0005` runs.
+Everything is created by these files, including accounts. uwuFeed owns
+`uwufeed_users` and `uwufeed_sessions` rather than sharing the suite wide
+tables, so there is nothing to set up beforehand.
 
 ```sh
 for f in db/migrations/[0-9]*.sql; do

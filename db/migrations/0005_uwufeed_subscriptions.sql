@@ -2,7 +2,7 @@
 
 create table if not exists uwufeed_subscriptions (
   id         bigint generated always as identity primary key,
-  user_id    uuid not null references uwu_users(id) on delete cascade,
+  user_id    uuid not null references uwufeed_users(id) on delete cascade,
   source_id  bigint not null references uwufeed_sources(id) on delete cascade,
   created_at timestamptz not null default now(),
 

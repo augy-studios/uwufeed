@@ -44,7 +44,7 @@ const CONTENT = [
   "/content/workers-poller.md",
   "/content/workers-streams.md",
   "/content/item-shape.md",
-  "/content/shared-auth.md",
+  "/content/accounts.md",
   "/content/self-hosting.md",
   "/content/faq.md",
 ];

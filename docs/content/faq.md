@@ -63,9 +63,10 @@ part of the interface exposes another user's list.
 
 ## Why not Supabase Auth
 
-Because `uwu_users` and `uwu_sessions` are shared across the other uwu
-apps, and one identity across them is the point. Adding a second identity
-system would mean maintaining both forever.
+Because uwuFeed creates accounts from bot chats, and Supabase Auth has no
+notion of an account with no email and no password. Its own tables also
+mean the constraints are uwuFeed's to choose, and that it can be deployed
+standalone.
 
 ## Can I export my subscriptions
 

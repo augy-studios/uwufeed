@@ -13,23 +13,39 @@ import buttons
 import commands
 import config
 import db
+from commands import remove
+
+# Callback kind to handler. A button carries a token, the token resolves to
+# a kind, and the kind is dispatched here.
+HANDLERS = {"remove": remove.on_confirm}
 
 
 async def on_callback(event) -> None:
     """Every inline button goes through here.
 
-    The button carries a token, not a payload, so a callback still resolves
-    after a restart or a redeploy. An unknown token means the row was
-    pruned, and saying so beats failing silently.
+    The button carries a token rather than a payload, so a callback still
+    resolves after a restart or a redeploy. An unknown token means the row
+    was pruned, and saying so beats failing silently.
     """
+    if event.data == b"cancel":
+        await event.edit("Left alone.")
+        return
+
     entry = buttons.resolve(event.data)
     if entry is None:
         await event.answer("That button has expired. Run the command again.", alert=True)
         return
 
-    # TODO Phase 3: dispatch on entry["kind"] once list, remove, latest and
-    # settings actually draw buttons.
-    await event.answer("Not wired up yet.")
+    handler = HANDLERS.get(entry["kind"])
+    if handler is None:
+        await event.answer("That button is no longer supported.", alert=True)
+        return
+
+    try:
+        await handler(event, entry)
+    except Exception as err:
+        print(f"callback {entry['kind']} failed: {type(err).__name__}: {err}")
+        await event.answer("That did not work. Try the command again.", alert=True)
 
 
 def build_client() -> TelegramClient:
@@ -42,6 +58,10 @@ def build_client() -> TelegramClient:
 async def main() -> None:
     config.check()
     db.init()
+
+    pruned = buttons.prune()
+    if pruned:
+        print(f"pruned {pruned} expired buttons")
 
     client = build_client()
     await client.start(bot_token=config.BOT_TOKEN)

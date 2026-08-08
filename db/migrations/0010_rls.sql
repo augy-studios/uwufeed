@@ -2,9 +2,9 @@
 -- policies denies anon and authenticated outright. The service role bypasses
 -- RLS, and every server component uses it.
 --
--- uwu_users and uwu_sessions are deliberately absent. They predate this
--- project and are shared with the other uwu apps, so changing their grants
--- from here could break an app that is not in this repository.
+-- uwufeed_users and uwufeed_sessions are absent here because 0001 and 0002
+-- enable RLS on themselves. The suite wide uwu_users and uwu_sessions are
+-- absent because nothing in this project touches them.
 
 alter table uwufeed_sources       enable row level security;
 alter table uwufeed_items         enable row level security;

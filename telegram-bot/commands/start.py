@@ -1,11 +1,17 @@
 """The start command: what this is, every command, and two links.
 
 There is no help command. Everything a new chat needs is here.
+
+/start also carries the deep link payload used to connect a web account,
+because Telegram delivers it as an argument to this command and nowhere
+else.
 """
 
 from telethon import Button, events
 
 from config import DONATION_URL, WEB_APP_URL
+
+from . import link
 
 COMMANDS = [
     ("start", "This message, with every command listed"),
@@ -15,7 +21,7 @@ COMMANDS = [
     ("pause", "Hold delivery here, run it again to resume"),
     ("latest", "The most recent items, on demand"),
     ("status", "Health of the sources this chat follows"),
-    ("settings", "Quiet hours, message format, digest instead of instant"),
+    ("settings", "Delivery preferences for this chat"),
     ("link", "Connect this chat to a web account"),
 ]
 
@@ -28,7 +34,7 @@ INTRO = (
 
 OUTRO = (
     "Free forever, with no account needed to start. "
-    "The same subscriptions work on the web app and in Discord."
+    "Connect a web account with /link and the same sources work everywhere."
 )
 
 
@@ -47,5 +53,12 @@ def keyboard() -> list:
 def register(client) -> None:
     @client.on(events.NewMessage(pattern=r"^/start(?:@\w+)?(?:\s|$)"))
     async def handler(event) -> None:
+        # A deep link from the app arrives as /start <token>. Telegram
+        # offers no other way to hand a payload to a bot on first contact.
+        parts = (event.raw_text or "").split(maxsplit=1)
+        if len(parts) > 1 and parts[1].strip():
+            await link.apply_token(event, parts[1].strip())
+            raise events.StopPropagation
+
         await event.respond(render(), parse_mode="html", buttons=keyboard(), link_preview=False)
         raise events.StopPropagation

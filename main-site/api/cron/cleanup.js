@@ -28,12 +28,12 @@ export default async function handler(req, res) {
     result.errors.push(`items: ${err.message}`);
   }
 
-  // uwu_sessions is shared with the rest of the uwu suite. This only
-  // removes rows that already fail the expires_at > now() check, so it
-  // logs nobody out, in any app.
+  // Only removes rows that already fail the expires_at > now() check, so
+  // it logs nobody out. uwufeed_sessions has an index on expires_at, so
+  // this is not a sequential scan.
   try {
     const now = new Date().toISOString();
-    result.sessions = await remove("uwu_sessions", `expires_at=lt.${encodeURIComponent(now)}`);
+    result.sessions = await remove("uwufeed_sessions", `expires_at=lt.${encodeURIComponent(now)}`);
   } catch (err) {
     result.errors.push(`sessions: ${err.message}`);
   }

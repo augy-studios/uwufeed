@@ -8,38 +8,37 @@ in this directory describes that database. Nothing here runs on its own.
 - [`migrations/`](migrations/) plain SQL, applied in filename order.
 - [`schema.md`](schema.md) the normalized item shape, the contract between
   the JavaScript and Python halves of the project.
-- [`shared-auth.md`](shared-auth.md) the shape of the pre-existing
-  `uwu_users` and `uwu_sessions` tables. Reference, not a migration.
+- [`accounts.md`](accounts.md) how uwuFeed accounts work, and why they are
+  not the suite wide tables.
 
 ## Naming
 
-Every table carries the `uwufeed_` prefix, apart from `uwu_users` and
-`uwu_sessions`, which keep the suite wide naming because they are shared
-with the other uwu apps. SQLite tables inside the bots take no prefix at
-all, and SQLite never holds feed data.
+Every table carries the `uwufeed_` prefix, including the accounts tables.
+SQLite tables inside the bots take no prefix at all, and SQLite never holds
+feed data.
 
-## The auth tables are owned elsewhere
+## uwuFeed owns its accounts
 
-`uwu_users` and `uwu_sessions` already exist in Supabase and are shared
-across the suite. Nothing in this directory creates them, alters them, or
-changes their grants, because an app that is not in this repository is
-also using them.
+`uwufeed_users` and `uwufeed_sessions` are created here and belong to this
+project. They are deliberately not the suite wide `uwu_users` and
+`uwu_sessions`, because uwuFeed creates accounts from bot chats and that is
+not something one app should do to a table the others read.
 
-uwuFeed only reads them and holds foreign keys into `uwu_users(id)`, which
-is `uuid`. If the shape of those tables ever changes, this project follows
-rather than leads.
+Nothing in this repository touches the shared tables at all, which also
+means uwuFeed can be deployed standalone.
 
-Their exact definition is recorded in [`shared-auth.md`](shared-auth.md),
-along with the three things about it that are easy to get wrong: the email
-column is case sensitive rather than `citext`, `username` is required and
-unique, and `uwu_sessions.user_id` is nullable.
+The tradeoff is accepted and worth stating: an account from another uwu app
+does not sign in here.
+
+The full shape and the reasoning behind each column are in
+[`accounts.md`](accounts.md).
 
 ## Tables
 
 | Table | Holds |
 | --- | --- |
-| `uwu_users` | Account identity. Pre-existing, shared, not created here |
-| `uwu_sessions` | Opaque session tokens. Pre-existing, shared, not created here |
+| `uwufeed_users` | Account identity. Created here, owned by uwuFeed |
+| `uwufeed_sessions` | Sessions. The token is stored hashed |
 | `uwufeed_sources` | One row per feed, shared across all users |
 | `uwufeed_items` | Normalized items, deduped by `(source_id, external_id)` |
 | `uwufeed_subscriptions` | Which user follows which source |

@@ -1,20 +1,29 @@
-"""latest: the most recent items, on demand.
-
-TODO Phase 3. The work:
-  - Read the newest items across this chat's subscriptions, capped at ten.
-  - Render with the same context the dispatcher uses, so an item looks the
-    same whether it was pushed or asked for.
-  - Paginate with persistent buttons from buttons.py, so an older message
-    still pages correctly after a restart.
-"""
+"""latest: the most recent items, on demand."""
 
 from telethon import events
 
-PENDING = "Recent items on demand arrive in the next release."
+import accounts
+import feed_store
+import text
+
+EMPTY = "Nothing yet. Send /add with a link to follow something."
 
 
 def register(client) -> None:
     @client.on(events.NewMessage(pattern=r"^/latest(?:@\w+)?(?:\s|$)"))
     async def handler(event) -> None:
-        await event.respond(PENDING)
+        user_id = accounts.linked_user(event.chat_id)
+        if not user_id:
+            await event.respond(EMPTY)
+            raise events.StopPropagation
+
+        items = await feed_store.latest_items(user_id, limit=10)
+        if not items:
+            await event.respond("Nothing has come in yet.")
+            raise events.StopPropagation
+
+        body = "\n\n".join(text.item_line(item) for item in items)
+        await event.respond(
+            f"<b>Latest</b>\n\n{body}", parse_mode="html", link_preview=False
+        )
         raise events.StopPropagation

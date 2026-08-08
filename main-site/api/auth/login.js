@@ -1,18 +1,37 @@
-// Email and password against uwu_users, session into uwu_sessions.
-//
-// TODO Phase 4. Verify with scrypt from node:crypto, compare in constant
-// time, create a session, set the HttpOnly cookie from _lib/session.js.
-// Same generic error for unknown email and wrong password, so the endpoint
-// is not a user enumeration oracle.
-//
-// Normalize the email the same way register.js does, with
-// session.normalizeEmail. The column is plain text rather than citext, so
-// normalising on only one of the two paths makes an account unreachable by
-// the address that created it. See db/shared-auth.md.
+// Email and password against uwufeed_users, session into uwufeed_sessions.
 
-import { methodNotAllowed, json } from "../_lib/http.js";
+import { selectOne } from "../_lib/db.js";
+import { json, readJsonBody, methodNotAllowed } from "../_lib/http.js";
+import { verifyPassword } from "../_lib/password.js";
+import { createSession, cookieHeader, normalizeEmail } from "../_lib/session.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return methodNotAllowed(res, ["POST"]);
-  return json(res, 501, { error: "not_implemented", phase: 4 });
+
+  const body = await readJsonBody(req);
+  if (!body) return json(res, 400, { error: "invalid_body" });
+
+  const email = normalizeEmail(body.email);
+  const password = typeof body.password === "string" ? body.password : "";
+
+  const user = email
+    ? await selectOne(
+        "uwufeed_users",
+        `email=eq.${encodeURIComponent(email)}&select=id,email,username,password_hash`
+      )
+    : null;
+
+  // Always verify against something, so a missing account and a wrong
+  // password take the same time and answer the same way. Otherwise this
+  // endpoint is a user enumeration oracle.
+  const ok = await verifyPassword(password, user ? user.password_hash : null);
+
+  if (!user || !ok) return json(res, 401, { error: "invalid_credentials" });
+
+  const { token, expiresAt } = await createSession(user.id);
+  res.setHeader("set-cookie", cookieHeader(token, expiresAt));
+
+  return json(res, 200, {
+    user: { id: user.id, email: user.email, username: user.username },
+  });
 }

@@ -13,7 +13,7 @@ dead target is not an exception, it is a fact to record.
 | Module | Transport | Status |
 | --- | --- | --- |
 | [`discord.py`](discord.py) | Webhook POST | Working |
-| [`telegram.py`](telegram.py) | Bot API `sendMessage` | Stub, Phase 3 |
+| [`telegram.py`](telegram.py) | Bot API `sendMessage` | Working |
 | [`webpush.py`](webpush.py) | VAPID, aes128gcm | Stub, Phase 4 |
 | [`ntfy.py`](ntfy.py) | HTTP POST to a topic | Stub, Phase 6 |
 

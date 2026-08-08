@@ -12,6 +12,11 @@ export function text(res, status, body) {
   res.send(body);
 }
 
+// 204 carries no body, so it must not be sent one.
+export function noContent(res) {
+  res.status(204).end();
+}
+
 export function methodNotAllowed(res, allowed) {
   res.setHeader("allow", allowed.join(", "));
   json(res, 405, { error: "method_not_allowed" });

@@ -57,8 +57,8 @@ everything as though it exists.
 | 0 | Schema and migrations, item shape frozen | Done |
 | 1 | The push slice: WebSub, YouTube, one Discord webhook | Done |
 | 2 | The poll slice: RSS, adaptive backoff, retention | Done |
-| 3 | Telegram bot commands | Scaffolded |
-| 4 | Accounts, timeline, web push | Scaffolded |
+| 3 | Telegram bot commands, and the auth core | Done |
+| 4 | Timeline, source management in the browser, web push | Auth done, UI pending |
 | 5 | Twitch and Discord bot commands | Scaffolded |
 | 6 | RSSHub, Bluesky, Mastodon, ntfy | Scaffolded |
 | 7 | Quotas, alerting, backups | Not started |
@@ -104,9 +104,14 @@ bundler, no build step. Vercel functions are plain JavaScript with no
 dependencies. Workers and both bots are Python. Supabase Postgres is the
 single source of truth for feed data, and SQLite is bot local state only.
 
-Every Postgres table carries the `uwufeed_` prefix, apart from the shared
-auth tables `uwu_users` and `uwu_sessions`, which keep the suite wide
-naming. SQLite tables inside the bots take no prefix.
+Every Postgres table carries the `uwufeed_` prefix, including the accounts
+tables. SQLite tables inside the bots take no prefix.
+
+uwuFeed owns its accounts in `uwufeed_users` and `uwufeed_sessions` rather
+than the suite wide `uwu_users` and `uwu_sessions`, because it creates
+accounts from bot chats and that is not something one app should do to a
+table the others read. The tradeoff is that an account from another uwu app
+does not sign in here. See [`db/accounts.md`](db/accounts.md).
 
 ## Configuration
 

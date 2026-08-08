@@ -1,6 +1,6 @@
 """PostgREST access for the dispatcher.
 
-The VPS could use a direct connection, but the dispatcher's queries are a
+The poller needs real SQL for `for update skip locked`. This one does a
 handful of small reads and writes, so REST keeps it to one dependency.
 """
 
@@ -28,49 +28,26 @@ def _client() -> httpx.AsyncClient:
     )
 
 
-async def ensure_system_target(webhook_url: str) -> int:
-    """The Phase 1 Discord webhook, as a real uwufeed_targets row.
+async def targets_for_item(item_id: int) -> list[dict]:
+    """Everyone who should receive this item.
 
-    Giving it a row rather than special casing it means deliveries are
-    recorded the normal way, so the composite primary key stops a restart
-    from re-sending.
+    item -> source -> everyone subscribed -> their active targets, minus
+    anything already delivered. A target with no owner cannot appear,
+    because a subscription needs a user.
     """
     async with _client() as client:
-        found = await client.get(
-            "/uwufeed_targets",
-            params={
-                "channel": "eq.discord",
-                "target_ref": f"eq.{webhook_url}",
-                "user_id": "is.null",
-                "select": "id",
-                "limit": "1",
-            },
-        )
-        found.raise_for_status()
-        rows = found.json()
-        if rows:
-            return int(rows[0]["id"])
-
-        created = await client.post(
-            "/uwufeed_targets",
-            headers={"prefer": "return=representation"},
-            json=[{"channel": "discord", "target_ref": webhook_url, "user_id": None}],
-        )
-        created.raise_for_status()
-        return int(created.json()[0]["id"])
+        res = await client.post("/rpc/uwufeed_targets_for_item", json={"p_item_id": item_id})
+        res.raise_for_status()
+        return res.json()
 
 
-async def pending_items(target_id: int, limit: int = 50) -> list[dict]:
-    """Items inserted while the dispatcher was down.
+async def pending_fanout(limit: int = 200) -> list[dict]:
+    """What was missed while this process was down.
 
-    One bounded query at startup, not a sweep. Steady state delivery comes
-    from Realtime.
+    One bounded query at startup, not a sweep.
     """
     async with _client() as client:
-        res = await client.post(
-            "/rpc/uwufeed_pending_deliveries",
-            json={"p_target_id": target_id, "p_limit": limit},
-        )
+        res = await client.post("/rpc/uwufeed_pending_fanout", json={"p_limit": limit})
         res.raise_for_status()
         return res.json()
 
@@ -101,6 +78,28 @@ async def mark_delivery(item_id: int, target_id: int, status: str) -> None:
             json={"status": status},
         )
         res.raise_for_status()
+
+
+async def deactivate_target(target_id: int) -> None:
+    """A blocked bot or a deleted webhook is permanent. Stop trying."""
+    async with _client() as client:
+        res = await client.patch(
+            "/uwufeed_targets",
+            params={"id": f"eq.{target_id}"},
+            headers={"prefer": "return=minimal"},
+            json={"active": False},
+        )
+        res.raise_for_status()
+
+
+async def get_item(item_id: int) -> dict | None:
+    async with _client() as client:
+        res = await client.get(
+            "/uwufeed_items", params={"id": f"eq.{item_id}", "select": "*", "limit": "1"}
+        )
+        res.raise_for_status()
+        rows = res.json()
+        return rows[0] if rows else None
 
 
 async def source_title(source_id: int) -> str | None:

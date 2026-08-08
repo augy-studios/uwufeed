@@ -22,12 +22,10 @@ Apply everything in `db/migrations/` in filename order. `0009_realtime.sql`
 errors if the table is already in the publication, so run it separately the
 first time.
 
-The numbering starts at `0003` on purpose. `uwu_users` and `uwu_sessions`
-are shared across the uwu suite, already exist, and are never created or
-altered from this repository. If you are deploying uwuFeed standalone
-rather than alongside the other uwu apps, you have to create those two
-tables yourself before `0005` runs, since three tables hold a foreign key
-into `uwu_users(id)`.
+Everything uwuFeed needs is created by these files, accounts included, so
+a standalone deployment needs nothing set up beforehand. See
+[accounts](#/accounts) for why it does not share the suite wide auth
+tables.
 
 Row level security is on for every table with no policies attached, so the
 anonymous key can read nothing. Access is service role only.
@@ -117,9 +115,66 @@ curl -X POST "$PUBLIC_BASE_URL/api/sources/resolve" \
 
 ## Secrets
 
-The service role key bypasses row level security entirely. Anything holding
-it has full access to the database, so it belongs in exactly two places:
-Vercel's environment settings, and a mode 600 `.env` on the VPS.
+Two kinds. Most come from somewhere: the Supabase keys from your project
+settings, the bot tokens from BotFather and the Discord developer portal.
+
+Four you generate yourself, and nothing will hand them to you:
+`ADMIN_TOKEN`, `CRON_SECRET`, `WEBSUB_CALLBACK_SECRET` and
+`LINK_TOKEN_SECRET`.
+
+### Generating them
+
+Any of these produces 32 random bytes, which is plenty for all four:
+
+```sh
+node -e "console.log(require('node:crypto').randomBytes(32).toString('base64url'))"
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+openssl rand -base64 32
+```
+
+On Windows, in PowerShell:
+
+```powershell
+$b = [byte[]]::new(32)
+([Security.Cryptography.RNGCryptoServiceProvider]::new()).GetBytes($b)
+[Convert]::ToBase64String($b)
+```
+
+Generate a **separate value for each**. Reusing one across two means
+leaking one leaks both, and they have different blast radii.
+
+Do not use a password manager's "memorable" generator, a UUID, or anything
+you thought of yourself. These are compared byte for byte by machines and
+never typed by a person, so there is no reason for them to be anything but
+random.
+
+### Where each one goes, and what changing it costs
+
+| Variable | Set it in | Rotating it |
+| --- | --- | --- |
+| `CRON_SECRET` | Vercel only | Free. Take effect on the next deploy |
+| `ADMIN_TOKEN` | Vercel **and** `telegram-bot/.env` | Free, if you change both. Change one and `/add` starts failing |
+| `LINK_TOKEN_SECRET` | Vercel **and** both bot `.env` files | Free, if you change all of them. Any link code already issued stops working, which lasts ten minutes |
+| `WEBSUB_CALLBACK_SECRET` | Vercel only | **Expensive.** See below |
+
+### Rotating WEBSUB_CALLBACK_SECRET breaks every push source
+
+The callback URL handed to every hub contains an HMAC derived from this
+value. Change it and every URL a hub already holds stops verifying, so the
+push tier goes quiet on the next lease renewal for every source at once.
+
+Recovering means resubscribing everything through
+`/api/sources/subscribe`, which the nightly cron will eventually do on its
+own, but only as each lease comes up for renewal, so it takes up to ten
+days to fully heal.
+
+Set it once and leave it alone unless it leaks.
+
+### The service role key
+
+`SUPABASE_SERVICE_KEY` bypasses row level security entirely. Anything
+holding it has full access to the database, so it belongs in exactly two
+places: Vercel's environment settings, and a mode 600 `.env` on the VPS.
 
 Never in the repository, never in the browser, never in a bot message.
 

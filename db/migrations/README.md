@@ -4,23 +4,34 @@ Plain SQL, applied in filename order. No migration tool and no down
 migrations: every file is written to be safe to re-run, using
 `create table if not exists` and `create or replace`.
 
-## The auth tables are not here
+## If you have already applied 0003 to 0011
 
-`uwu_users` and `uwu_sessions` already exist in Supabase. They are shared
-across the uwu suite, they predate this project, and nothing in this
-directory creates, alters or grants on them.
+You do **not** need to re-run everything. Run these four, in this order:
 
-That is why the numbering starts at `0003`. The gap is deliberate: 0001 and
-0002 would have been those two tables. Renumbering would be worse than the
-gap, because these files may already have been applied somewhere.
+| File | Why |
+| --- | --- |
+| `0001_uwufeed_users.sql` | New table |
+| `0002_uwufeed_sessions.sql` | New table |
+| `0012_repoint_user_fks.sql` | Moves the user foreign keys off `uwu_users` |
+| `0013_fanout.sql` | Fan out functions for the dispatcher |
 
-Three tables carry a foreign key to `uwu_users(id)`, so that table has to
-exist before `0005` runs.
+`0001` has to run before `0012`, since the constraint it adds points at
+`uwufeed_users`.
 
-## Order
+`0005`, `0006` and `0007` were edited to reference `uwufeed_users`, but
+re-running them does nothing, because the tables already exist and
+`create table if not exists` skips them. `0012` is what actually repoints
+an existing database. That is the whole reason it exists.
+
+Do not re-run `0009_realtime.sql`. It errors if the table is already in the
+publication.
+
+## Order, from scratch
 
 | File | What it creates |
 | --- | --- |
+| `0001_uwufeed_users.sql` | `uwufeed_users`, plus the `pgcrypto` and `citext` extensions |
+| `0002_uwufeed_sessions.sql` | `uwufeed_sessions` |
 | `0003_uwufeed_sources.sql` | `uwufeed_sources` and the due and lease indexes |
 | `0004_uwufeed_items.sql` | `uwufeed_items` with `unique (source_id, external_id)` |
 | `0005_uwufeed_subscriptions.sql` | `uwufeed_subscriptions` |
@@ -28,8 +39,23 @@ exist before `0005` runs.
 | `0007_uwufeed_targets.sql` | `uwufeed_targets` |
 | `0008_uwufeed_deliveries.sql` | `uwufeed_deliveries` with the composite primary key |
 | `0009_realtime.sql` | adds `uwufeed_items` to the Realtime publication |
-| `0010_rls.sql` | RLS on the `uwufeed_` tables only, no policies, service role only |
-| `0011_pending_deliveries.sql` | `uwufeed_pending_deliveries()` for dispatcher catch up |
+| `0010_rls.sql` | RLS on the feed tables, no policies, service role only |
+| `0011_pending_deliveries.sql` | Superseded by `0013`, kept so the order stays stable |
+| `0012_repoint_user_fks.sql` | Repoints user foreign keys, a no-op on a fresh database |
+| `0013_fanout.sql` | `uwufeed_targets_for_item()` and `uwufeed_pending_fanout()` |
+
+## uwuFeed owns its accounts
+
+`uwufeed_users` and `uwufeed_sessions` belong to this project. They are
+deliberately **not** `uwu_users` and `uwu_sessions`, which are shared
+across the uwu suite: uwuFeed creates accounts from bot chats, and that is
+not something one app should do to a table the others read.
+
+The consequence is accepted and worth stating plainly: an account from
+another uwu app does not sign in here.
+
+Nothing in this directory touches the shared tables at all any more, which
+also means uwuFeed can be deployed standalone.
 
 ## Applying
 
@@ -41,9 +67,8 @@ for f in db/migrations/[0-9]*.sql; do
 done
 ```
 
-`0009_realtime.sql` is the one that is not idempotent. `alter publication
-... add table` errors if the table is already a member, which is harmless,
-but it will stop the loop above. Run it on its own the first time.
+`0009_realtime.sql` is the one that is not idempotent, so run it on its own
+the first time.
 
 ## Adding a migration
 

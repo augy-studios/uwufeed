@@ -3,7 +3,7 @@
 
 create table if not exists uwufeed_targets (
   id          bigint generated always as identity primary key,
-  user_id     uuid references uwu_users(id) on delete cascade,
+  user_id     uuid references uwufeed_users(id) on delete cascade,
   channel     text not null check (channel in ('telegram', 'discord', 'webpush', 'ntfy')),
   target_ref  text not null,
   template_id bigint references uwufeed_templates(id) on delete set null,

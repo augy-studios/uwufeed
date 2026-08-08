@@ -13,7 +13,7 @@ VPS, in [`../../workers/`](../../workers/).
 | --- | --- |
 | [`_lib/`](_lib/) | Shared modules. The underscore keeps Vercel from routing them |
 | [`hooks/`](hooks/) | Webhook receivers, the instant path |
-| [`auth/`](auth/) | Custom auth against `uwu_users` and `uwu_sessions` |
+| [`auth/`](auth/) | Custom auth against `uwufeed_users` and `uwufeed_sessions` |
 | [`sources/`](sources/) | Resolving a URL into a source, and hub subscriptions |
 | [`items/`](items/) | Reading the timeline |
 | [`targets/`](targets/) | Where notifications go, per channel |
@@ -28,7 +28,8 @@ VPS, in [`../../workers/`](../../workers/).
 | `/api/sources/resolve` | POST | Working |
 | `/api/sources/subscribe` | POST | Working |
 | `/api/sources/unsubscribe` | POST | Working |
-| `/api/auth/register`, `/login`, `/logout` | POST | Stub, Phase 4 |
+| `/api/auth/register`, `/login`, `/logout` | POST | Working |
+| `/api/auth/link` | POST | Working |
 | `/api/items/list` | GET | Stub, Phase 4 |
 | `/api/targets/webpush` | POST, DELETE | Stub, Phase 4 |
 | `/api/targets/ntfy` | POST, DELETE | Stub, Phase 6 |

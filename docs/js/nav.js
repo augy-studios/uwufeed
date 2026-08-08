@@ -50,7 +50,7 @@ export const SECTIONS = [
     title: "Reference",
     pages: [
       { id: "item-shape", title: "The item shape", file: "content/item-shape.md" },
-      { id: "shared-auth", title: "The shared auth tables", file: "content/shared-auth.md" },
+      { id: "accounts", title: "Accounts", file: "content/accounts.md" },
       { id: "self-hosting", title: "Self hosting", file: "content/self-hosting.md" },
       { id: "faq", title: "Questions", file: "content/faq.md" },
     ],

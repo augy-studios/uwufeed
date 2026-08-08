@@ -1,49 +1,47 @@
 # main-site/api/auth
 
-Custom authentication against `uwu_users` and `uwu_sessions`. Supabase
-Auth is not used anywhere in this project, and adding it later would split
-identity across two systems.
+Custom authentication against `uwufeed_users` and `uwufeed_sessions`.
+Supabase Auth is not used anywhere in this project.
 
-Both tables already exist and are shared across the uwu suite. This
-repository never creates or alters them. Their exact shape, and the three
-things about it that are easy to get wrong, are in
-[`../../../db/shared-auth.md`](../../../db/shared-auth.md). Read that
-before writing any of this.
+Those tables belong to uwuFeed and are created by `db/migrations/`. They
+are deliberately not the suite wide `uwu_users` and `uwu_sessions`, because
+uwuFeed creates accounts from bot chats and that is not something one app
+should do to a table the others read. The full reasoning is in
+[`../../../db/accounts.md`](../../../db/accounts.md).
 
 | File | Route | Status |
 | --- | --- | --- |
-| [`register.js`](register.js) | `POST /api/auth/register` | Stub, Phase 4 |
-| [`login.js`](login.js) | `POST /api/auth/login` | Stub, Phase 4 |
-| [`logout.js`](logout.js) | `POST /api/auth/logout` | Stub, Phase 4 |
+| [`register.js`](register.js) | `POST /api/auth/register` | Working |
+| [`login.js`](login.js) | `POST /api/auth/login` | Working |
+| [`logout.js`](logout.js) | `POST /api/auth/logout` | Working |
+| [`link.js`](link.js) | `POST /api/auth/link` | Working |
 
-Session helpers live in [`../_lib/session.js`](../_lib/session.js), also a
-stub.
+Helpers are in [`../_lib/session.js`](../_lib/), `../_lib/password.js` and
+`../_lib/linktoken.js`.
 
-## The shape it will take
+## Passwords
 
-- Passwords hashed with `scrypt` from `node:crypto`, so no dependency and
-  no build step. Parameters and salt stored inside the `password_hash`
-  string, so they can be raised later without a migration.
-- The session token is random, sent to the browser, and stored as a hash in
-  `uwu_sessions.token`. A database leak then does not hand over live
-  sessions.
-- Cookie is `HttpOnly`, `Secure`, `SameSite=Lax`, 30 days, name
-  `uwufeed_session`. Decided rather than assumed, see below.
-- Register and login return the same generic error for an unknown email and
-  a wrong password, so neither becomes a user enumeration oracle.
-- Registration collects a **username** as well as an email. `username` is
-  `not null` and unique on the existing table, so an insert without one
-  fails. The plan never mentions it.
-- `email` is plain `text`, not `citext`, so uniqueness is case sensitive.
-  Lowercase and trim on both registration and login, or the same person
-  gets two accounts and the second one is unreachable by the address that
-  created it. `normalizeEmail` in `_lib/session.js` is the one place that
-  should happen.
-- A duplicate is a database error to catch rather than a select to run
-  first. Username and email have separate unique constraints, so the two
-  cases are distinguishable and deserve different messages.
-- `uwu_sessions.user_id` is nullable. Treat a null as an invalid session
-  rather than trusting the foreign key to guarantee a user.
+`scrypt` from `node:crypto`, so no dependency and no build step. The cost
+parameters live inside the stored string:
+
+```text
+scrypt$16384$8$1$<salt base64>$<hash base64>
+```
+
+They can be raised later without a migration, because every hash carries
+the parameters it was made with and old hashes keep verifying.
+
+`verifyPassword` returns false for a null hash without special casing,
+which is what a bot created account has.
+
+## Sessions
+
+The raw token goes to the browser in an `HttpOnly`, `Secure`,
+`SameSite=Lax` cookie, valid 30 days. Only `sha256(token)` is stored, so a
+database leak does not hand over live sessions.
+
+Expiry is checked in the query rather than in JavaScript, so a clock
+difference cannot extend a session.
 
 ## Why the token is in a cookie and not localStorage
 
@@ -57,32 +55,43 @@ A token in an `HttpOnly` cookie cannot be read by JavaScript at all, so an
 XSS cannot exfiltrate it. The cost is CSRF exposure, which `SameSite=Lax`
 covers.
 
-uwuFeed's API is same origin with its front end, so the cross-origin
-argument for localStorage does not apply, and the trade is simply the
-smaller risk against the larger one. Cookie wins.
+uwuFeed's API is same origin with its front end, so the cross origin
+argument does not apply and the trade is simply the smaller risk against
+the larger one. `js/api.js` already sends `credentials: "same-origin"`.
 
-`js/api.js` already sends `credentials: "same-origin"`, so the browser
-attaches it with no client code.
+`localStorage` holds one auth related thing, under `uwufeed.session`: a
+username and display name so the shell renders signed in chrome on first
+paint. It never contains the token, and a 401 clears it.
 
-## Session lifetime lives in the database
+## Registration
 
-`uwu_sessions.expires_at` is an absolute timestamp written when the row is
-created, so uwuFeed's 30 days is uwuFeed's alone and does not constrain any
-other app sharing the table.
+Email and password are required, username is optional. All three
+constraints are enforced by the database rather than by a select first,
+because checking first loses the race between two simultaneous
+registrations. A duplicate comes back as `409` with `email_taken` or
+`username_taken`, which are distinguishable because the constraints are
+separate.
 
-Expiry is never managed on the client. A value in `localStorage` is
-editable in devtools, and the server has to read `expires_at` to validate
-the token anyway, so a client side copy is either redundant or
-contradicting the authority.
+`email` and `username` are `citext`, so uniqueness is case insensitive
+without any normalising in application code.
 
-`localStorage` does hold one auth related thing, under `uwufeed.session`: a
-username and display name so the shell can render signed in chrome on first
-paint without waiting for a round trip. It is a hint. It never contains the
-token, and a 401 clears it. See `js/auth.js`.
+## Login does not leak which accounts exist
 
-## Why not Supabase Auth
+An unknown email and a wrong password both answer `401 invalid_credentials`.
+The password is verified even when no user was found, against a null hash
+that never matches, so the two paths take the same work and the endpoint is
+not a user enumeration oracle.
 
-`uwu_users` and `uwu_sessions` are shared across the uwu suite. One
-identity across the apps is the point, and RLS is off the table anyway
-because every server component uses the service role and no request
-carries a Supabase JWT.
+## Linking a chat
+
+`POST /api/auth/link` issues a short lived signed token for the signed in
+user, plus a `t.me` deep link that hands it to the Telegram bot in one tap.
+
+The token is **signed, not stored**: version, user id, expiry and a
+truncated HMAC, base64url encoded to 42 characters, which fits inside
+Telegram's 64 character deep link payload. So there is no table to keep, no
+expiry sweep, and no round trip from the bot back to the site.
+
+The bot verifies it locally with the same `LINK_TOKEN_SECRET`. Both
+implementations are tested against each other, because a change to one
+without the other silently rejects every link attempt as forged.

@@ -71,7 +71,7 @@ on the VPS where the dispatcher reads it.
 
 ## cleanup
 
-Deletes items with `fetched_at` older than 30 days, and `uwu_sessions` rows
+Deletes items with `fetched_at` older than 30 days, and `uwufeed_sessions` rows
 that have already expired. Answers with the counts, or `207` with an
 `errors` array if one pass failed and the other did not.
 
@@ -85,7 +85,8 @@ Two things it deliberately does not do:
   that knows the subscriber count.
 - **Expire sessions.** It removes rows that already fail
   `expires_at > now()`. Those sessions were dead already, so this logs
-  nobody out, in this app or any other sharing the table.
+  nobody out. `uwufeed_sessions` has an index on `expires_at`, so the
+  delete is not a sequential scan.
 
 ## Authorisation
 

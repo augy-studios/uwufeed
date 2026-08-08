@@ -13,7 +13,7 @@ listed in `../js/nav.js`.
 | Telegram bot | `telegram-overview.md`, `telegram-commands.md`, `telegram-running.md` |
 | Discord bot | `discord-overview.md`, `discord-commands.md`, `discord-running.md` |
 | Workers | `workers-overview.md`, `workers-dispatcher.md`, `workers-poller.md`, `workers-streams.md` |
-| Reference | `item-shape.md`, `shared-auth.md`, `self-hosting.md`, `faq.md` |
+| Reference | `item-shape.md`, `accounts.md`, `self-hosting.md`, `faq.md` |
 
 The roadmap is deliberately not published. It lives outside version control
 as working notes, so nothing in the nav points at it. `nav.js` can load a

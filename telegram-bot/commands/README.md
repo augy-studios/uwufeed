@@ -7,17 +7,17 @@ own Telethon handler, so adding a command is adding a file and one line in
 | Module | Command | Status |
 | --- | --- | --- |
 | `start.py` | `/start` | Working |
-| `add.py` | `/add` | Stub, Phase 3 |
-| `list.py` | `/list` | Stub, Phase 3 |
-| `remove.py` | `/remove` | Stub, Phase 3 |
-| `pause.py` | `/pause` | Working, the flag is stored |
-| `latest.py` | `/latest` | Stub, Phase 3 |
-| `status.py` | `/status` | Stub, Phase 3 |
-| `settings.py` | `/settings` | Stub, Phase 3 |
-| `link.py` | `/link` | Stub, Phase 3 |
+| `add.py` | `/add` | Working |
+| `list.py` | `/list` | Working |
+| `remove.py` | `/remove` | Working, with a confirm button |
+| `pause.py` | `/pause` | Working |
+| `latest.py` | `/latest` | Working |
+| `status.py` | `/status` | Working |
+| `settings.py` | `/settings` | Working, partial |
+| `link.py` | `/link` | Working |
 
-Stubs answer with a short sentence saying the feature is coming. Silence
-reads like a broken bot.
+Commands that change what a chat follows go through `permissions.py`
+first. In a group only admins may change things, and anyone may read.
 
 ## Adding a command
 

@@ -12,14 +12,14 @@ followed in any of the three is the same source everywhere.
 | Command | What it does | Status |
 | --- | --- | --- |
 | `/start` | What this is, every command, and links to the app and the donation page | Working |
-| `/add` | Follow a channel, a blog or a feed | Phase 3 |
-| `/list` | Everything this chat follows | Phase 3 |
-| `/remove` | Stop following one of them | Phase 3 |
-| `/pause` | Hold delivery here, run it again to resume | Working, stored |
-| `/latest` | The most recent items, on demand | Phase 3 |
-| `/status` | Health of the sources this chat follows | Phase 3 |
-| `/settings` | Quiet hours, format, digest instead of instant | Phase 3 |
-| `/link` | Connect this chat to a web account | Phase 3, needs Phase 4 auth |
+| `/add` | Follow a channel, a blog or a feed | Working |
+| `/list` | Everything this chat follows | Working |
+| `/remove` | Stop following one of them | Working |
+| `/pause` | Hold delivery here, run it again to resume | Working |
+| `/latest` | The most recent items, on demand | Working |
+| `/status` | Health of the sources this chat follows | Working |
+| `/settings` | Delivery preferences for this chat | Working, partial |
+| `/link` | Connect this chat to a web account | Working |
 
 There is deliberately no help command. Everything belongs in `/start`, and
 two commands that print the same thing is one more thing to keep in sync.
