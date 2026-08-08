@@ -1,0 +1,25 @@
+[Unit]
+Description=uwuFeed Telegram bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=uwufeed
+WorkingDirectory=/home/uwufeed/uwufeed/telegram-bot
+EnvironmentFile=/home/uwufeed/uwufeed/.env
+ExecStart=/home/uwufeed/uwufeed/telegram-bot/.venv/bin/python main.py
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+# The Telethon session file and the SQLite database are written here.
+ReadWritePaths=/home/uwufeed/uwufeed/telegram-bot
+
+[Install]
+WantedBy=multi-user.target

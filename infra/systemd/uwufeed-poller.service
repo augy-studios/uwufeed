@@ -1,0 +1,24 @@
+[Unit]
+Description=uwuFeed poller, the poll tier
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=uwufeed
+WorkingDirectory=/home/uwufeed/uwufeed/workers
+EnvironmentFile=/home/uwufeed/uwufeed/.env
+ExecStart=/home/uwufeed/uwufeed/workers/.venv/bin/python -m poller.main
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/uwufeed/uwufeed
+
+[Install]
+WantedBy=multi-user.target

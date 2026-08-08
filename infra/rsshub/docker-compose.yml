@@ -1,0 +1,32 @@
+# RSSHub for the long tail. Phase 6.
+# Turns sites with no feed into RSS, which then goes through the poll tier
+# like any other feed.
+#
+# Bound to localhost on purpose. An open RSSHub instance gets found and
+# used by strangers within days.
+
+services:
+  rsshub:
+    image: diygod/rsshub:latest
+    container_name: uwufeed-rsshub
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:1200:1200"
+    environment:
+      NODE_ENV: production
+      CACHE_TYPE: redis
+      REDIS_URL: redis://redis:6379/
+      # Requests per minute per source IP. The poller is the only caller.
+      REQUEST_RETRY: "2"
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    container_name: uwufeed-rsshub-redis
+    restart: unless-stopped
+    volumes:
+      - rsshub-redis:/data
+
+volumes:
+  rsshub-redis:

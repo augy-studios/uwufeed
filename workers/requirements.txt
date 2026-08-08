@@ -1,0 +1,9 @@
+httpx>=0.27,<1.0
+realtime>=2.0,<3.0
+python-dotenv>=1.0,<2.0
+
+# Phase 2, the poller
+# feedparser>=6.0,<7.0
+
+# Phase 6, the stream listeners
+# websockets>=12.0,<14.0

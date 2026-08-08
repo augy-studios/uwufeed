@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <script src="/js/theme-preload.js"></script>
+
+    <link rel="manifest" href="/manifest.json" />
+
+    <meta charset="utf-8">
+    <title>uwuFeed | UwU Apps</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Push first feed aggregator; your subscriptions arriving in seconds, not minutes.">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="uwuFeed | UwU Apps" />
+    <meta property="og:site_name" content="UwU Apps" />
+    <meta property="og:description" content="Push first feed aggregator; your subscriptions arriving in seconds, not minutes." />
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Jua">
+    <link rel="stylesheet" href="/css/theme.css">
+    <link rel="stylesheet" href="/css/app.css">
+    <meta name="theme-color" content="#ccffcc" />
+
+    <!-- Embed Image -->
+    <link rel="apple-touch-icon" href="/UFD-main.png">
+    <link rel="icon" href="/favicon.ico">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:image:src" content="/UFD-main.png">
+    <meta property="og:image" content="/UFD-main.png" />
+</head>
+
+<body>
+    <div class="wrap">
+        <header class="topbar glass">
+            <div class="brand">
+                <span class="brand-mark" data-icon="rss"></span>
+                <span class="brand-name">uwuFeed</span>
+            </div>
+            <a class="chip-btn" href="https://donate.stripe.com/28o2akeAr3hv0DK6oo" target="_blank"
+                rel="noopener noreferrer">
+                <span data-icon="coffee"></span>
+                <span class="chip-label">Buy Augy a Coffee</span>
+            </a>
+            <button class="icon-btn" id="themeBtn" type="button" aria-label="Theme">
+                <span data-icon="sun"></span>
+            </button>
+        </header>
+
+        <nav class="tabs glass" id="tabs" role="tablist">
+            <button class="tab active" type="button" role="tab" aria-selected="true" data-panel="panelFeed">
+                <span data-icon="list"></span>Feed
+            </button>
+            <button class="tab" type="button" role="tab" aria-selected="false" data-panel="panelSources">
+                <span data-icon="plus"></span>Sources
+            </button>
+            <button class="tab" type="button" role="tab" aria-selected="false" data-panel="panelAccount">
+                <span data-icon="user"></span>Account
+            </button>
+        </nav>
+
+        <section class="panel glass" id="panelFeed" role="tabpanel">
+            <h1>Your feed</h1>
+            <div class="banner hidden" id="feedBanner"></div>
+            <div class="item-list" id="itemList"></div>
+        </section>
+
+        <section class="panel glass hidden" id="panelSources" role="tabpanel">
+            <h1>Sources</h1>
+            <p>Paste a channel, a blog or a feed. Anything with a hub is subscribed to directly and
+                arrives within seconds. Everything else is polled.</p>
+            <div class="field">
+                <input type="url" id="sourceUrl" placeholder="https://www.youtube.com/@somechannel"
+                    aria-label="Source URL">
+                <button class="btn" type="button" id="sourceAdd"><span data-icon="plus"></span>Add</button>
+            </div>
+            <div class="banner hidden" id="sourcesBanner"></div>
+
+            <h2>OPML</h2>
+            <div class="btn-row">
+                <button class="btn secondary" type="button" id="opmlImport">
+                    <span data-icon="upload"></span>Import
+                </button>
+                <button class="btn secondary" type="button" id="opmlExport">
+                    <span data-icon="download"></span>Export
+                </button>
+            </div>
+            <input type="file" id="opmlFile" accept=".opml,.xml,text/xml" hidden>
+        </section>
+
+        <section class="panel glass hidden" id="panelAccount" role="tabpanel">
+            <h1>Account</h1>
+            <p>Accounts, notifications and per source settings arrive in Phase 4. Until then,
+                delivery runs to a single Discord webhook.</p>
+            <div class="btn-row">
+                <button class="btn secondary" type="button" id="pushToggle" disabled>
+                    <span data-icon="bell"></span>Enable notifications
+                </button>
+            </div>
+        </section>
+
+        <footer class="footer">
+            Made with <span class="heart" data-icon="heart"></span> by Augy Studios
+        </footer>
+    </div>
+
+    <div class="modal-backdrop hidden" id="themeModal">
+        <div class="modal glass" role="dialog" aria-modal="true" aria-labelledby="themeModalTitle">
+            <div class="modal-head">
+                <h2 id="themeModalTitle">Theme</h2>
+                <button class="icon-btn small" type="button" data-close-modal="themeModal" aria-label="Close">
+                    <span data-icon="close"></span>
+                </button>
+            </div>
+            <p class="modal-section-label">Mode</p>
+            <div class="mode-toggle" id="modeToggle">
+                <button class="mode-btn" type="button" data-mode="light" aria-pressed="false"><span
+                        data-icon="sun"></span>Light</button>
+                <button class="mode-btn" type="button" data-mode="dark" aria-pressed="false"><span
+                        data-icon="moon"></span>Dark</button>
+            </div>
+            <p class="modal-section-label">Brand colour</p>
+            <div class="swatch-grid" id="swatchGrid"></div>
+        </div>
+    </div>
+
+    <script type="module" src="/js/app.js"></script>
+</body>
+
+</html>

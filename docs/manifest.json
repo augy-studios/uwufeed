@@ -1,0 +1,30 @@
+{
+    "name": "uwuFeed docs",
+    "short_name": "uwuFeed docs",
+    "description": "Documentation for uwuFeed: the web app, the Telegram bot, the Discord bot and the workers.",
+    "icons": [{
+            "src": "/UFD-192.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        },
+        {
+            "src": "/UFD-512.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ],
+    "start_url": "/",
+    "theme_color": "#cfc",
+    "background_color": "#cfc",
+    "display": "standalone",
+    "display_override": ["minimal-ui", "browser"],
+    "orientation": "any",
+    "id": "uwufeed-docs",
+    "dir": "ltr",
+    "scope": "/",
+    "lang": "en",
+    "categories": [
+        "productivity",
+        "utilities"
+    ]
+}

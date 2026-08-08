@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <script src="/js/theme-preload.js"></script>
+
+    <link rel="manifest" href="/manifest.json" />
+
+    <meta charset="utf-8">
+    <title>uwuFeed docs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Documentation for uwuFeed: the web app, the Telegram bot, the Discord bot and the workers.">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="uwuFeed docs" />
+    <meta property="og:site_name" content="UwU Apps" />
+    <meta property="og:description" content="Documentation for uwuFeed: the web app, the Telegram bot, the Discord bot and the workers." />
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Jua">
+    <link rel="stylesheet" href="/css/theme.css">
+    <link rel="stylesheet" href="/css/docs.css">
+    <meta name="theme-color" content="#ccffcc" />
+
+    <link rel="apple-touch-icon" href="/UFD-main.png">
+    <link rel="icon" href="/favicon.ico">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:image:src" content="/UFD-main.png">
+    <meta property="og:image" content="/UFD-main.png" />
+</head>
+
+<body>
+    <header class="topbar">
+        <button class="icon-btn small" id="menuBtn" type="button" aria-label="Open the navigation">
+            <span data-icon="menu"></span>
+        </button>
+
+        <a class="brand" href="#/introduction">
+            <span class="brand-mark" data-icon="rss"></span>
+            <span class="brand-name">uwuFeed</span>
+            <span class="brand-tag">docs</span>
+        </a>
+
+        <div class="topbar-spacer"></div>
+
+        <div class="search">
+            <div class="search-field">
+                <span data-icon="search"></span>
+                <input type="search" id="searchInput" placeholder="Search the docs" aria-label="Search the docs"
+                    autocomplete="off">
+                <span class="search-hint">/</span>
+            </div>
+            <div class="search-results hidden" id="searchResults"></div>
+        </div>
+
+        <a class="chip-btn" href="https://donate.stripe.com/28o2akeAr3hv0DK6oo" target="_blank"
+            rel="noopener noreferrer">
+            <span data-icon="coffee"></span>
+            <span class="chip-label">Buy Augy a Coffee</span>
+        </a>
+
+        <button class="icon-btn" id="themeBtn" type="button" aria-label="Theme">
+            <span data-icon="sun"></span>
+        </button>
+    </header>
+
+    <div class="sidebar-scrim hidden" id="sidebarScrim"></div>
+
+    <div class="shell">
+        <aside class="sidebar" id="sidebar">
+            <nav id="sidebarNav" aria-label="Documentation"></nav>
+        </aside>
+
+        <main class="content">
+            <p class="breadcrumb" id="breadcrumb"></p>
+            <article class="article" id="article"></article>
+            <nav class="pager" id="pager" aria-label="Previous and next page"></nav>
+        </main>
+
+        <aside class="toc" id="toc" aria-label="On this page"></aside>
+    </div>
+
+    <footer class="docs-footer">
+        Made with <span class="heart" data-icon="heart"></span> by Augy Studios
+    </footer>
+
+    <div class="modal-backdrop hidden" id="themeModal">
+        <div class="modal glass" role="dialog" aria-modal="true" aria-labelledby="themeModalTitle">
+            <div class="modal-head">
+                <h2 id="themeModalTitle">Theme</h2>
+                <button class="icon-btn small" type="button" data-close-modal="themeModal" aria-label="Close">
+                    <span data-icon="close"></span>
+                </button>
+            </div>
+            <p class="modal-section-label">Mode</p>
+            <div class="mode-toggle" id="modeToggle">
+                <button class="mode-btn" type="button" data-mode="light" aria-pressed="false"><span
+                        data-icon="sun"></span>Light</button>
+                <button class="mode-btn" type="button" data-mode="dark" aria-pressed="false"><span
+                        data-icon="moon"></span>Dark</button>
+            </div>
+            <p class="modal-section-label">Brand colour</p>
+            <div class="swatch-grid" id="swatchGrid"></div>
+        </div>
+    </div>
+
+    <script type="module" src="/js/app.js"></script>
+</body>
+
+</html>

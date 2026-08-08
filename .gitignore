@@ -1,0 +1,31 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Bot local state and credentials
+*.sqlite3
+*.sqlite3-journal
+*.sqlite3-wal
+*.sqlite3-shm
+*.session
+*.session-journal
+
+# Node and Vercel
+node_modules/
+.vercel/
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,24 @@
+[Unit]
+Description=uwuFeed Discord bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=uwufeed
+WorkingDirectory=/home/uwufeed/uwufeed/discord-bot
+EnvironmentFile=/home/uwufeed/uwufeed/.env
+ExecStart=/home/uwufeed/uwufeed/discord-bot/.venv/bin/python main.py
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/uwufeed/uwufeed/discord-bot
+
+[Install]
+WantedBy=multi-user.target
