@@ -9,8 +9,8 @@ the hub subscription that follows from it.
 | [`subscribe.js`](subscribe.js) | `POST /api/sources/subscribe` | Working |
 | [`unsubscribe.js`](unsubscribe.js) | `POST /api/sources/unsubscribe` | Working |
 
-All three require `Authorization: Bearer $ADMIN_TOKEN` until Phase 4 adds
-real sessions. They fail closed if `ADMIN_TOKEN` is unset.
+All three require `Authorization: Bearer $ADMIN_TOKEN` until real sessions
+land. They fail closed if `ADMIN_TOKEN` is unset.
 
 ## resolve
 
@@ -42,8 +42,8 @@ fetches it took, how many items were seeded, and what the hub said.
 
 Seeding happens before the subscription exists, on purpose. The dispatcher
 delivers what it sees inserted, and nobody wants twenty old videos on the
-day they add a channel. Phase 3 should mark seeded items as already
-delivered rather than relying on the ordering here.
+day they add a channel. Seeded items should eventually be marked as
+already delivered rather than relying on the ordering here.
 
 ## subscribe and unsubscribe
 
@@ -73,5 +73,5 @@ adapter does not have to parse the feed URL to get it back.
 ## Not here yet
 
 Per user subscribing, which is `uwufeed_subscriptions` rather than
-`uwufeed_sources`, arrives with auth in Phase 4 and with the bots in Phase
-3. These three endpoints only manage the shared source rows.
+`uwufeed_sources`, arrives with auth on the site and with the bots. These
+three endpoints only manage the shared source rows.

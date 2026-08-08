@@ -1,7 +1,7 @@
 # The item shape
 
 One object, produced identically by the JavaScript and the Python halves of
-the project. It is the contract between them, frozen in Phase 0.
+the project. It is the contract between them, and it is frozen.
 
 The authoritative copy lives in `db/schema.md` in the repository. This page
 is the readable version.

@@ -1,8 +1,8 @@
 """Typed render context per item kind.
 
 Formatting is driven by these objects rather than hardcoded embeds, so a
-server admin can customise output without new code per platform. Phase 1
-ships the defaults; user templates from uwufeed_templates come later.
+server admin can customise output without new code per platform. The
+defaults ship here; user templates from uwufeed_templates come later.
 """
 
 from dataclasses import dataclass

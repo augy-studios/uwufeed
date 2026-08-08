@@ -7,9 +7,9 @@ listed in `EXTENSIONS` in `__init__.py`.
 | Module | Commands | Status |
 | --- | --- | --- |
 | `help.py` | `/help` | Working |
-| `sources.py` | `/add`, `/list`, `/remove` | Stubs, Phase 5 |
+| `sources.py` | `/add`, `/list`, `/remove` | Stubs |
 | `prefs.py` | `/pause`, `/settings`, `/link` | `/pause` works, rest are stubs |
-| `items.py` | `/latest`, `/status` | Stubs, Phase 5 |
+| `items.py` | `/latest`, `/status` | Stubs |
 
 Stubs answer with a short sentence saying the feature is coming. Silence
 reads like a broken bot.
@@ -39,7 +39,7 @@ reach.
 ## Interaction timing
 
 Discord gives three seconds to acknowledge an interaction. Anything that
-touches the network, which is most of Phase 5, has to
+touches the network, which is most of them, has to
 `await interaction.response.defer()` first and then use
 `interaction.followup.send()`. Resolving a feed URL involves one or two
 outbound fetches and will exceed three seconds regularly.

@@ -3,9 +3,8 @@
 Mirrors main-site/api/_lib/normalize.js. Both produce the same object from
 the same feed, and db/schema.md is the specification both follow.
 
-Phase 2 wires this to the adapters. It is written now because the item
-shape is frozen in Phase 0, and a contract with only one implementation is
-not a contract.
+Written ahead of the adapters that use it, because the item shape is
+frozen and a contract with only one implementation is not a contract.
 """
 
 import html

@@ -120,7 +120,7 @@ failure.
 `WEB_APP_URL`, `DONATION_URL`, `SUPABASE_URL`,
 `SUPABASE_SERVICE_KEY`. See [`../.env.example`](../.env.example).
 
-Delivery to Discord in Phase 1 does not run here at all. It goes through a
+Delivery to Discord does not run here at all. It goes through a
 webhook from the dispatcher, in [`../workers/dispatcher/`](../workers/dispatcher/),
 because webhooks have friendlier rate limits than the bot gateway.
 

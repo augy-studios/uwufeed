@@ -7,7 +7,7 @@ under ten seconds.
 | File | Route | Status |
 | --- | --- | --- |
 | [`websub.js`](websub.js) | `/api/hooks/websub` | Working |
-| [`eventsub.js`](eventsub.js) | `/api/hooks/eventsub` | Stub, Phase 5 |
+| [`eventsub.js`](eventsub.js) | `/api/hooks/eventsub` | Stub |
 
 ## websub.js
 

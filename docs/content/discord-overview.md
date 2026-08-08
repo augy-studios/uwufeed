@@ -74,5 +74,5 @@ file next to the bot. Nothing about feeds is copied there.
 `/help` and `/pause`.
 
 The rest are scaffolded and answer with a short note rather than silence.
-Following sources arrives in Phase 5, and `/link` additionally needs
-accounts on the site, which is Phase 4.
+Following sources arrives later, and `/link` additionally needs accounts
+on the site.

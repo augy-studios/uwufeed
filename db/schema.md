@@ -5,8 +5,8 @@ This file is the contract between the JavaScript half of the project
 `telegram-bot/`, `discord-bot/`). Both sides produce and consume exactly
 this object. Change it here first, in the same commit as the code.
 
-Frozen in Phase 0. Adding an optional field is a minor change, renaming or
-removing one is not.
+Frozen. Adding an optional field is a minor change, renaming or removing
+one is not.
 
 ## Shape
 

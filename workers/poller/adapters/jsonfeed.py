@@ -1,6 +1,6 @@
 """JSON Feed.
 
-Autodiscovered since Phase 1 and parsed since Phase 7. The spec is small
+Autodiscovered at signup and parsed here. The spec is small
 enough that this needs no library: it is a JSON document with an items
 array.
 

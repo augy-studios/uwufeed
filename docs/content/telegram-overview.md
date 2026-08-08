@@ -59,5 +59,5 @@ after 90 days. Run the command again.
 `/start` and `/pause`.
 
 The rest are scaffolded and answer with a short note rather than silence.
-Following sources arrives in Phase 3, and `/link` additionally needs
-accounts on the site, which is Phase 4.
+Following sources arrives later, and `/link` additionally needs accounts
+on the site.

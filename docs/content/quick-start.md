@@ -1,7 +1,7 @@
 # Quick start
 
-The fastest path to seeing a real notification arrive. This is the Phase 1
-path, so it runs against your own deployment rather than a hosted service.
+The fastest path to seeing a real notification arrive. It runs against
+your own deployment rather than a hosted service.
 
 ## What you need
 
@@ -113,8 +113,8 @@ hand. The recipe is in `main-site/api/hooks/README.md`.
 
 ## What is not wired up yet
 
-- The web timeline, accounts and per user subscriptions, which are Phase 4
-- Bot commands for following sources, Phase 3 and Phase 5
+- The web timeline, accounts and per user subscriptions
+- Bot commands for following sources
 - Fan out to more than one destination. Everything goes to the single
   configured Discord webhook until targets exist
 

@@ -1,4 +1,4 @@
--- Phase 7. Everything the system needs to say when it is broken, plus the
+-- Everything the system needs to say when it is broken, plus the
 -- preferences the dispatcher has to be able to read.
 
 -- ---- delivery preferences ----

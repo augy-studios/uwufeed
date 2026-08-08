@@ -100,7 +100,7 @@ subscriber count is logged.
 The count is there so the retirement can be announced rather than silent. A
 retired source that just stops is indistinguishable from a channel that
 stopped posting, and only the system knows which it was. Actually
-delivering that message needs per user targets, which is Phase 3.
+delivering that message needs per user targets.
 
 ## Push sources never appear here
 

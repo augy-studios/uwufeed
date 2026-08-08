@@ -72,5 +72,5 @@ reads them.
   `innerHTML`.
 - Show and hide is a single `.hidden` class flip. Timing lives in CSS, so
   reduced motion is handled in one place.
-- A 501 from the API means a phase has not started, and reads differently
-  in the UI from a real failure.
+- A 501 from the API means the endpoint is not built yet, and reads
+  differently in the UI from a real failure.

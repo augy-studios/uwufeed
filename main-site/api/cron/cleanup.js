@@ -1,5 +1,5 @@
-// Retention and tidying. uwufeed_items growing without bound is a Phase 2
-// problem, not a later one.
+// Retention and tidying. uwufeed_items growing without bound is a problem
+// to solve now, not a later one.
 
 import { remove, select, update } from "../_lib/db.js";
 import { json, methodNotAllowed } from "../_lib/http.js";

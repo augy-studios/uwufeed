@@ -73,8 +73,8 @@ export const api = {
   linkCode: () => request("/api/auth/link", { method: "POST" }),
 };
 
-// A 501 means the endpoint belongs to a phase that has not started, which
-// is a different thing from a failure and should read that way in the UI.
+// A 501 means the endpoint is not built yet, which is a different thing
+// from a failure and should read that way in the UI.
 export function isNotImplemented(err) {
   return err && err.status === 501;
 }

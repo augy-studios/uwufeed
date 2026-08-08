@@ -1,5 +1,5 @@
 -- A place a notification goes. user_id is null for system owned targets,
--- such as the single Discord webhook used in Phase 1.
+-- such as the single Discord webhook.
 
 create table if not exists uwufeed_targets (
   id          bigint generated always as identity primary key,

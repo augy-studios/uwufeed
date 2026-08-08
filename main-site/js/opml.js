@@ -1,5 +1,5 @@
 // OPML import and export. Parsing and serialising are done here; wiring
-// them to the API is Phase 4.
+// them to the API comes later.
 
 export function parseOpml(xml) {
   const doc = new DOMParser().parseFromString(xml, "application/xml");
@@ -67,6 +67,6 @@ export function readFile(file) {
   });
 }
 
-// TODO Phase 4: feed each parsed URL through /api/sources/resolve, one at a
+// TODO: feed each parsed URL through /api/sources/resolve, one at a
 // time with a small delay. A 200 source OPML import must not become 200
 // simultaneous outbound fetches.

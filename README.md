@@ -49,19 +49,19 @@ with its root directory set to `docs`.
 
 ## Current state
 
-Built in phases, and the docs mark what works today rather than describing
-everything as though it exists.
+The docs mark what works today rather than describing everything as though
+it exists.
 
-| Phase | What it is | State |
-| --- | --- | --- |
-| 0 | Schema and migrations, item shape frozen | Done |
-| 1 | The push slice: WebSub, YouTube, one Discord webhook | Done |
-| 2 | The poll slice: RSS, adaptive backoff, retention | Done |
-| 3 | Telegram bot commands, and the auth core | Done |
-| 4 | Timeline, source management in the browser, web push | Done |
-| 5 | Twitch and Discord bot commands | Done |
-| 6 | RSSHub, Bluesky, Mastodon, ntfy | Done |
-| 7 | Alerting, quiet hours, digests, backups | Done |
+| Area | State |
+| --- | --- |
+| Schema and migrations, item shape frozen | Done |
+| The push slice: WebSub, YouTube, one Discord webhook | Done |
+| The poll slice: RSS, adaptive backoff, retention | Done |
+| Telegram bot commands, and the auth core | Done |
+| Timeline, source management in the browser, web push | Done |
+| Twitch and Discord bot commands | Done |
+| RSSHub, Bluesky, Mastodon, ntfy | Done |
+| Alerting, quiet hours, digests, backups | Done |
 
 Both ingestion tiers work. A real YouTube upload reaches Discord in under
 ten seconds through the push tier, and a source without a hub is polled on
@@ -69,8 +69,8 @@ an adaptive interval between 60 seconds and an hour, with conditional
 requests and retirement of dead feeds.
 
 Everything unbuilt answers clearly rather than failing. Vercel functions
-return `501` with the phase they belong to, and the bots reply with a short
-sentence. Nothing fails silently.
+return `501`, and the bots reply with a short sentence. Nothing fails
+silently.
 
 ## Keeping the push tier alive
 

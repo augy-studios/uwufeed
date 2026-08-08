@@ -83,14 +83,14 @@ are told.
 The telling is the part that matters. A retired source that just goes quiet
 is indistinguishable from a channel that stopped posting.
 
-## Why does it say a phase number
+## Why does it say something is not built yet
 
-It is being built in stages, and the docs mark what works today rather than
+It is still being built, and the docs mark what works today rather than
 describing everything as though it already exists.
 
 Both ingestion tiers work: push through WebSub, and polling with
-conditional requests and adaptive backoff. Phases 3 through 7 cover the
-bots, accounts, Twitch, breadth and hardening.
+conditional requests and adaptive backoff. The bots, accounts, Twitch,
+breadth and hardening follow.
 
 ## Is it really free
 

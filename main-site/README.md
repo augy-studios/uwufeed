@@ -78,13 +78,13 @@ uwu app rather than for this one, so `css/theme.css` here is a copy of it.
 
 ## What works today
 
-Phase 1 is the push slice, so the working parts are server side:
+The push slice is what works, and it is server side:
 `/api/hooks/websub`, `/api/sources/resolve`, `/api/sources/subscribe` and
 `/api/sources/unsubscribe`.
 
 The front end is a real shell rather than a mock, but the timeline, adding
 sources from the browser, OPML import and notifications all depend on
-accounts, which is Phase 4. Those controls are present and say what they
+accounts. Those controls are present and say what they
 are waiting for rather than failing silently.
 
 ## Analytics

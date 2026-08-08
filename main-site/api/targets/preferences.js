@@ -2,7 +2,7 @@
 //
 // These live on uwufeed_targets rather than in either bot's SQLite, because
 // the dispatcher is the thing that has to honour them and it cannot read
-// SQLite. That was the whole reason they sat unread for two phases.
+// SQLite. That was the whole reason they sat unread for so long.
 
 import { select, update } from "../_lib/db.js";
 import { json, readJsonBody, methodNotAllowed } from "../_lib/http.js";

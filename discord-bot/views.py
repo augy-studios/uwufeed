@@ -82,5 +82,5 @@ def restore_all(bot) -> int:
 
     return restored
 
-# TODO Phase 5: the first real persistent views, list paging and remove
+# TODO: the first real persistent views, list paging and remove
 # confirmation, register themselves here with @register_kind.

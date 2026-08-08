@@ -55,7 +55,7 @@ confirmation. Use `warn` sparingly. A page with four warnings has none.
 - No em dashes. A comma, a semicolon or a full stop
 - No emoji
 - Mark what works today. Every page that describes unbuilt behaviour says
-  which phase it belongs to
+  so plainly
 - Explain the trade off, not only the behaviour. Why the dispatcher would
   rather lose a notification than repeat one is more useful than the fact
   that it claims a row first

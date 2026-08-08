@@ -1,6 +1,6 @@
 // Web push enrolment. The service worker handles the incoming push event.
 //
-// TODO Phase 4. Wire subscribe() to /api/targets/webpush once auth exists,
+// TODO. Wire subscribe() to /api/targets/webpush once auth exists,
 // since a target row needs a user to belong to.
 
 export function pushSupported() {

@@ -40,8 +40,8 @@ VPS, in [`../../workers/`](../../workers/).
 | `/api/cron/cleanup` | GET | Working, scheduled daily |
 | `/api/cron/digest`, `/heartbeat` | GET | Stub, scheduled |
 
-Stubs answer `501` with the phase they belong to, so a caller gets a clear
-signal rather than a 404 that looks like a routing bug.
+Stubs answer `501` rather than a 404 that looks like a routing bug, so a
+caller gets a clear signal.
 
 ## Database access
 
@@ -56,8 +56,8 @@ Writes go in with the conflict handled by the database:
 
 ## Authentication
 
-Until Phase 4 lands there is no user session, so the privileged endpoints
-in `sources/` require `Authorization: Bearer $ADMIN_TOKEN`. They fail
+There is no user session yet, so the privileged endpoints in `sources/`
+require `Authorization: Bearer $ADMIN_TOKEN`. They fail
 closed: an unset `ADMIN_TOKEN` answers `503` rather than running
 unauthenticated.
 

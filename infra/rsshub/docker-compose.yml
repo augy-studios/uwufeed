@@ -1,4 +1,4 @@
-# RSSHub for the long tail. Phase 6.
+# RSSHub for the long tail.
 # Turns sites with no feed into RSS, which then goes through the poll tier
 # like any other feed.
 #
