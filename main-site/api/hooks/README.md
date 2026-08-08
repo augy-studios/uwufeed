@@ -27,6 +27,22 @@ and counts a failure.
 verifies the signature, normalizes the entries and inserts them with the
 conflict handled by Postgres.
 
+## Deployment protection will silently kill this
+
+The live project has Vercel SSO protection enabled for everything except
+custom domains. That is the right setting, and it makes one rule absolute:
+
+**`PUBLIC_BASE_URL` must be the custom domain, `https://feed.uwuapps.org`.**
+
+Point it at a `*.vercel.app` deployment URL and every hub request lands on
+a Vercel login page instead of this handler. The hub gets a 401, gives up,
+and the push tier never receives anything. Nothing in the application logs
+records it, because the request never reaches the application.
+
+The same applies to preview deployments: a preview URL is protected, so
+WebSub cannot be exercised end to end from a preview. Testing the push path
+needs either production or a tunnel.
+
 ## Why this endpoint is public
 
 A hub has no credentials to present, so the route has to be reachable.

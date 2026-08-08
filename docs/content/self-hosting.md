@@ -55,6 +55,20 @@ DISCORD_WEBHOOK_URL
 subscription verifies against nothing and no notification ever arrives,
 with no error to tell you.
 
+:::warn Deployment protection and the callback URL
+If the project has Vercel Authentication or password protection enabled,
+set it to apply to everything **except** custom domains, and make
+`PUBLIC_BASE_URL` the custom domain.
+
+A protected URL answers a hub with a login page rather than the webhook
+receiver. The hub sees a 401, gives up, and the push tier receives nothing
+ever again. Nothing appears in the application logs, because the request
+never reaches the application.
+
+It also means preview deployments cannot exercise the push path, since
+preview URLs are protected. Test it on production or through a tunnel.
+:::
+
 ## 3. The docs
 
 This site is a separate Vercel project with root directory `docs`. It is
