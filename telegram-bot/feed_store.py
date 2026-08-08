@@ -74,6 +74,48 @@ async def set_identity(user_id: str, platform_user_id: int, display_name: str | 
             ],
         )
         res.raise_for_status()
+async def record_space(user_id: str, platform_id: int, label: str | None, space_user_id: str) -> None:
+    """Note that this identity manages this group.
+
+    Access, never ownership. The group keeps its own account and its own
+    sources; this only says who may see them from the app.
+
+    Telegram has no live permission check the way Discord's MANAGE_GUILD is,
+    so for Telegram these rows are the authority rather than a cache.
+    """
+    async with _client() as client:
+        space = await client.post(
+            "/uwufeed_spaces",
+            params={"on_conflict": "platform,platform_id"},
+            headers={"prefer": "resolution=merge-duplicates,return=representation"},
+            json=[
+                {
+                    "user_id": space_user_id,
+                    "platform": "telegram",
+                    "platform_id": str(platform_id),
+                    "label": label,
+                }
+            ],
+        )
+        space.raise_for_status()
+        space_id = space.json()[0]["id"]
+
+        found = await client.get(
+            "/uwufeed_identities",
+            params={"user_id": f"eq.{user_id}", "platform": "eq.telegram", "select": "id"},
+        )
+        found.raise_for_status()
+        rows = found.json()
+        if not rows:
+            return
+
+        link = await client.post(
+            "/uwufeed_space_managers",
+            params={"on_conflict": "space_id,identity_id"},
+            headers={"prefer": "resolution=ignore-duplicates,return=minimal"},
+            json=[{"space_id": space_id, "identity_id": rows[0]["id"]}],
+        )
+        link.raise_for_status()
 
 
 async def merge_user(from_user: str, into_user: str) -> dict:
@@ -143,7 +185,14 @@ async def ensure_target(user_id: str, chat_id: int) -> int:
         created = await client.post(
             "/uwufeed_targets",
             headers={"prefer": "return=representation"},
-            json=[{"user_id": user_id, "channel": "telegram", "target_ref": str(chat_id)}],
+            json=[
+                {
+                    "user_id": user_id,
+                    "channel": "telegram",
+                    "target_ref": str(chat_id),
+                    "added_via": "telegram",
+                }
+            ],
         )
         created.raise_for_status()
         return int(created.json()[0]["id"])
@@ -230,14 +279,26 @@ async def count_subscriptions(user_id: str) -> int:
         return int(total) if total.isdigit() else 0
 
 
-async def subscribe(user_id: str, source_id: int) -> bool:
-    """False means the user already followed it."""
+async def subscribe(user_id: str, source_id: int, origin_label: str | None = None) -> bool:
+    """False means the user already followed it.
+
+    added_via is stamped here rather than inferred later. A merge deletes
+    the account a row came from, so the surface has to be recorded at the
+    moment it is known.
+    """
     async with _client() as client:
         res = await client.post(
             "/uwufeed_subscriptions",
             params={"on_conflict": "user_id,source_id"},
             headers={"prefer": "resolution=ignore-duplicates,return=representation"},
-            json=[{"user_id": user_id, "source_id": source_id}],
+            json=[
+                {
+                    "user_id": user_id,
+                    "source_id": source_id,
+                    "added_via": "telegram",
+                    "origin_label": origin_label,
+                }
+            ],
         )
         res.raise_for_status()
         return bool(res.json())

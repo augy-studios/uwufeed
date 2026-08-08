@@ -98,6 +98,21 @@
 .panel { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 .panel h1 { font-size: 1.15rem; color: var(--brand-ink); }
 .panel h2 { font-size: 1rem; color: var(--brand-ink); }
+
+/* An h2 starts a new section. The panel's flat 12px gap puts a heading as
+   close to the section above it as to its own text, which reads as one long
+   list rather than several sections. The first h2 is exempt, since the
+   panel title is already directly above it.
+
+   Descendant rather than child, because the Account tab wraps its sections
+   in a signed in and a signed out div, so its headings are not direct
+   children of the panel. :first-of-type is scoped to whichever of those
+   contains it, which is exactly the exemption wanted. */
+.panel h2:not(:first-of-type) {
+  margin-top: 14px;
+  padding-top: 18px;
+  border-top: 1px solid var(--surface-border);
+}
 .panel p { font-size: 0.9rem; color: var(--muted); line-height: 1.5; }
 
 /* ---- forms ---- */

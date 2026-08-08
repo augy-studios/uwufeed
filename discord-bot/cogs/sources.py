@@ -57,7 +57,7 @@ class Sources(commands.Cog):
             return
 
         source = result["source"]
-        added = await feed_store.subscribe(user_id, source["id"])
+        added = await feed_store.subscribe(user_id, source["id"], interaction.guild.name)
         title = source.get("title") or source["feed_url"]
 
         if not added:

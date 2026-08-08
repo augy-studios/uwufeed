@@ -27,6 +27,18 @@ ERRORS = {
 }
 
 
+def _where(event) -> str | None:
+    """A label for where a source was added, kept for provenance.
+
+    A merge deletes the account a row came from, so this is denormalised on
+    purpose: it has to survive that deletion to be worth anything.
+    """
+    if event.is_private:
+        return "Telegram, direct message"
+    title = getattr(getattr(event, "chat", None), "title", None)
+    return f"Telegram, {title}" if title else "Telegram group"
+
+
 def register(client) -> None:
     @client.on(events.NewMessage(pattern=r"^/add(?:@\w+)?(?:\s|$)"))
     async def handler(event) -> None:
@@ -59,7 +71,7 @@ def register(client) -> None:
             raise events.StopPropagation
 
         source = result["source"]
-        added = await feed_store.subscribe(user_id, source["id"])
+        added = await feed_store.subscribe(user_id, source["id"], _where(event))
 
         if not added:
             await event.respond(f"Already following <b>{_esc(source['title'])}</b>.",

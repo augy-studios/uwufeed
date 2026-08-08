@@ -137,6 +137,14 @@ class Prefs(commands.Cog):
         # a password reset something the whole channel can read.
         await feed_store.set_identity(user_id, interaction.user.id, interaction.user.name)
 
+        # The server keeps its own account. Recording it as a space lets the
+        # app list it, though for Discord the live Manage Server check is
+        # what actually decides access.
+        guild_user = await accounts.ensure_user(interaction.guild_id, interaction.guild.name)
+        await feed_store.record_space(
+            user_id, interaction.guild_id, interaction.guild.name, guild_user
+        )
+
         await interaction.followup.send(
             "Connected to your account.\n\n"
             "This server keeps its own sources, because they belong to everyone here rather "

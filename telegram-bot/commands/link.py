@@ -29,6 +29,10 @@ EXPIRED = (
 )
 
 
+def _title(event) -> str | None:
+    return getattr(getattr(event, "chat", None), "title", None)
+
+
 def register(client) -> None:
     @client.on(events.NewMessage(pattern=r"^/link(?:@\w+)?(?:\s|$)"))
     async def handler(event) -> None:
@@ -70,6 +74,11 @@ async def apply_token(event, token: str) -> None:
     # sources. Merging one into whichever member linked first would hand
     # that member everybody else's feed.
     if not event.is_private:
+        # The group keeps its own account. Recording it as a space is what
+        # lets the app list it later, since Telegram has no live permission
+        # check to rebuild the list from.
+        group_user = await accounts.ensure_user(event.chat_id, _title(event))
+        await feed_store.record_space(user_id, event.chat_id, _title(event), group_user)
         await event.respond(
             "Connected to your account.\n\nThis group keeps its own sources, because they "
             "belong to everyone here rather than to one person. Your own sources are in the app."

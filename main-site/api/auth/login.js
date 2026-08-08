@@ -12,15 +12,13 @@ export default async function handler(req, res) {
   const body = await readJsonBody(req);
   if (!body) return json(res, 400, { error: "invalid_body" });
 
-  const email = normalizeEmail(body.email);
+  // Either an email or a username. Both columns are citext, so matching is
+  // case insensitive in the database rather than by convention here, and
+  // the two cannot collide because a username cannot contain an @.
+  const identifier = normalizeEmail(body.identifier ?? body.email);
   const password = typeof body.password === "string" ? body.password : "";
 
-  const user = email
-    ? await selectOne(
-        "uwufeed_users",
-        `email=eq.${encodeURIComponent(email)}&select=id,email,username,password_hash`
-      )
-    : null;
+  const user = identifier ? await findByIdentifier(identifier) : null;
 
   // Always verify against something, so a missing account and a wrong
   // password take the same time and answer the same way. Otherwise this
@@ -46,4 +44,16 @@ export default async function handler(req, res) {
     user: { id: user.id, email: user.email, username: user.username },
     recovery_codes: recoveryCodes,
   });
+}
+
+// One field on the form, and the shape of what was typed says which column
+// to look in. An email has to contain an @ and a username cannot, since
+// registration restricts them to letters, numbers and underscores. So this
+// is a rule rather than a guess, and there is no ambiguous case to resolve.
+function findByIdentifier(value) {
+  const column = value.includes("@") ? "email" : "username";
+  return selectOne(
+    "uwufeed_users",
+    `${column}=eq.${encodeURIComponent(value)}&select=id,email,username,password_hash`
+  );
 }

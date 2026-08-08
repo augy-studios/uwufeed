@@ -66,7 +66,10 @@ export const api = {
   removeWebPush: (subscription) =>
     request("/api/targets/webpush", { method: "DELETE", body: { subscription } }),
 
-  login: (email, password) => request("/api/auth/login", { method: "POST", body: { email, password } }),
+  // One field. The server decides whether it is an email or a username
+  // by whether it contains an @.
+  login: (identifier, password) =>
+    request("/api/auth/login", { method: "POST", body: { identifier, password } }),
   register: (email, password, username) =>
     request("/api/auth/register", { method: "POST", body: { email, password, username } }),
   logout: () => request("/api/auth/logout", { method: "POST" }),
@@ -108,7 +111,7 @@ export function isSignedOut(err) {
 
 // Error codes the API returns, in words a person can act on.
 const MESSAGES = {
-  invalid_credentials: "That email and password do not match.",
+  invalid_credentials: "That does not match an account. Check the email or username, and the password.",
   email_taken: "There is already an account with that email.",
   username_taken: "That username is taken.",
   password_too_short: "Passwords need at least 8 characters.",

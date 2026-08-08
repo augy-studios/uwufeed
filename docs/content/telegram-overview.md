@@ -56,8 +56,9 @@ after 90 days. Run the command again.
 
 ## What works today
 
-`/start` and `/pause`.
+Every command. Following sources, listing them, removing them, on demand
+items, source health, per chat settings, and connecting the chat to a web
+account.
 
-The rest are scaffolded and answer with a short note rather than silence.
-Following sources arrives later, and `/link` additionally needs accounts
-on the site.
+Quiet hours and digests are the exception: both are set from the web app
+rather than from here.

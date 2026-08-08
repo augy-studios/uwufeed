@@ -93,6 +93,15 @@ function wireAuth() {
       ? "I already have an account"
       : "I need an account";
     el("authUsername").classList.toggle("hidden", !registering);
+
+    // Registration needs a real address, so the browser validates it as one.
+    // Signing in takes either, and the server decides which by the @.
+    const identifier = el("authEmail");
+    identifier.type = registering ? "email" : "text";
+    identifier.placeholder = registering ? "Email" : "Email or username";
+    identifier.setAttribute("aria-label", identifier.placeholder);
+    identifier.autocomplete = registering ? "email" : "username";
+
     banner(status, "ok", null);
   });
 

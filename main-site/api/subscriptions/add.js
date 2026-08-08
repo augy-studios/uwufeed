@@ -35,7 +35,9 @@ export default async function handler(req, res) {
 
   const inserted = await insertIgnoreDuplicates(
     "uwufeed_subscriptions",
-    [{ user_id: session.userId, source_id: result.source.id }],
+    // Stamped now rather than inferred later. A merge deletes the account a
+    // row came from, so the surface has to be recorded while it is known.
+    [{ user_id: session.userId, source_id: result.source.id, added_via: "web" }],
     ["user_id", "source_id"]
   );
   const added = Array.isArray(inserted) && inserted.length > 0;

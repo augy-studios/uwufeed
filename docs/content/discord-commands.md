@@ -3,14 +3,14 @@
 | Command | What it does | Status |
 | --- | --- | --- |
 | `/help` | What this is, every command, and two links | Works |
-| `/add` | Follow a channel, a blog or a feed | Planned |
-| `/list` | Everything this server follows | Planned |
-| `/remove` | Stop following one of them | Planned |
+| `/add` | Follow a channel, a blog or a feed | Works |
+| `/list` | Everything this server follows | Works |
+| `/remove` | Stop following one of them | Works |
 | `/pause` | Hold delivery here, run it again to resume | Works |
-| `/latest` | The most recent items, on demand | Planned |
-| `/status` | Health of the sources this server follows | Planned |
-| `/settings` | Which channel receives posts, quiet hours, digest | Planned |
-| `/link` | Connect this server to a web account | Planned |
+| `/latest` | The most recent items, on demand | Works |
+| `/status` | Health of the sources this server follows | Works |
+| `/settings` | Chooses the channel that receives posts | Works |
+| `/link` | Connect this server to a web account | Works |
 
 ## help
 

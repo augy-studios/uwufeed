@@ -73,8 +73,8 @@ export function primeFromHint() {
 // Both return the whole response rather than just the state, because
 // registration and a first sign in can carry a fresh set of recovery codes
 // that is shown once and never again.
-export async function login(email, password) {
-  const data = await api.login(email, password);
+export async function login(identifier, password) {
+  const data = await api.login(identifier, password);
   applyUser(data.user);
   return data;
 }
