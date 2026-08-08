@@ -111,9 +111,64 @@ export default async function handler(req, res) {
     }
   }
 
+  // Twitch is not WebSub and has no lease, so it never appears in the queue
+  // above. A revoked EventSub subscription is otherwise completely
+  // invisible: no error, no expiry, just silence.
+  summary.twitch = await recheckTwitch(summary);
+
   await reportIfWrong(summary);
 
   return json(res, summary.errors.length ? 207 : 200, summary);
+}
+
+async function recheckTwitch(summary) {
+  const { configured, appToken } = await import("../_lib/twitch.js");
+  if (!configured()) return { skipped: "not_configured" };
+
+  let live;
+  try {
+    const token = await appToken();
+    const res = await fetch("https://api.twitch.tv/helix/eventsub/subscriptions?status=enabled", {
+      headers: {
+        authorization: `Bearer ${token}`,
+        "client-id": process.env.TWITCH_CLIENT_ID,
+      },
+    });
+    if (!res.ok) throw new Error(`helix ${res.status}`);
+    const body = await res.json();
+    live = new Set(
+      (body.data || []).map((sub) => String(sub.condition?.broadcaster_user_id || ""))
+    );
+  } catch (err) {
+    summary.errors.push(`twitch recheck: ${err.message}`);
+    return { error: err.message };
+  }
+
+  let sources = [];
+  try {
+    sources = await select(
+      "uwufeed_sources",
+      "platform=eq.twitch&retired_at=is.null&external_ref=not.is.null&select=id,title,external_ref"
+    );
+  } catch (err) {
+    summary.errors.push(`twitch sources: ${err.message}`);
+    return { error: err.message };
+  }
+
+  const missing = sources.filter((s) => !live.has(String(s.external_ref)));
+  if (missing.length) {
+    await alert("Twitch subscriptions are missing", [
+      `**${missing.length}** Twitch sources have no enabled EventSub subscription, ` +
+        "so going live will not be announced for them.",
+      missing
+        .slice(0, 10)
+        .map((s) => `- ${s.title || s.external_ref}`)
+        .join("\n"),
+      "Re-add them to recreate the subscription.",
+    ]);
+  }
+
+  return { checked: sources.length, missing: missing.length };
 }
 
 function isUnverified(source, now) {

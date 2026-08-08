@@ -29,7 +29,7 @@ def build_embed(ctx: RenderContext) -> dict:
     }
     if ctx.url:
         embed["url"] = ctx.url
-    body = summary_for(ctx)
+    body = summary_for(ctx, limit=3500 if ctx.kind == "digest" else 300)
     if body:
         embed["description"] = body[:4096]
     if ctx.thumbnail_url:

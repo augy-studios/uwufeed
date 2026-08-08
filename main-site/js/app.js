@@ -11,6 +11,7 @@ import { api, describe, handleUnauthorized } from "./api.js";
 import * as auth from "./auth.js";
 import * as feed from "./feed.js";
 import * as sources from "./sources.js";
+import * as destinations from "./destinations.js";
 import { downloadOpml, parseOpml, readFile } from "./opml.js";
 import { pushSupported, currentSubscription, subscribe, unsubscribe } from "./push.js";
 
@@ -39,6 +40,7 @@ function paintAuthState() {
     banner(el("sourcesBanner"), "ok", null);
     el("itemList").innerHTML = "";
     el("sourceList").innerHTML = "";
+    el("destinationList").innerHTML = "";
     el("loadMore").classList.add("hidden");
     feed.reset();
   }
@@ -48,6 +50,7 @@ async function refreshAll() {
   await Promise.all([
     feed.loadFeed(el("itemList"), el("feedBanner"), el("loadMore")),
     sources.load(el("sourceList"), el("sourcesBanner")),
+    destinations.load(el("destinationList"), el("accountBanner")),
   ]);
 }
 
@@ -428,6 +431,9 @@ async function boot() {
   wirePush();
   wireLink();
   wireNtfy();
+  destinations.wire(el("destinationList"), el("accountBanner"), () =>
+    destinations.load(el("destinationList"), el("accountBanner"))
+  );
   registerServiceWorker();
 
   // Any 401, from any call, means the session is gone whatever the hint

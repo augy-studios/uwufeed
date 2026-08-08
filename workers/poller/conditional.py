@@ -36,6 +36,28 @@ class FetchResult:
     etag: str | None = None
     last_modified: str | None = None
     error: str | None = None
+    # Set by the caller, which knows whether the feed URL points at RSSHub.
+    via_rsshub: bool = False
+
+    @property
+    def gone(self) -> bool:
+        """410 Gone means the publisher removed it deliberately.
+
+        Waiting for 20 failures is 20 pointless requests against a server
+        that has already told us to stop.
+        """
+        return self.status == 410
+
+    @property
+    def route_failure(self) -> bool:
+        """An RSSHub route that broke rather than a source that died.
+
+        RSSHub answers 404 for a route it no longer has, and routes
+        disappear when the sites they scrape change. Counted as a source
+        failure it retires somebody's healthy subscription because a
+        scraper changed.
+        """
+        return self.status in (404, 503) and self.via_rsshub
 
 
 async def fetch(client: httpx.AsyncClient, source: dict) -> FetchResult:
@@ -62,8 +84,12 @@ async def fetch(client: httpx.AsyncClient, source: dict) -> FetchResult:
             last_modified=source.get("last_modified"),
         )
 
+    via = _is_rsshub(source.get("feed_url"))
+
     if res.status_code != 200:
-        return FetchResult(ok=False, status=res.status_code, error=f"http {res.status_code}")
+        return FetchResult(
+            ok=False, status=res.status_code, error=f"http {res.status_code}", via_rsshub=via
+        )
 
     body = res.content
     if len(body) > MAX_BYTES:
@@ -72,9 +98,15 @@ async def fetch(client: httpx.AsyncClient, source: dict) -> FetchResult:
     return FetchResult(
         ok=True,
         status=200,
+        via_rsshub=via,
         body=body,
         # Only carry a validator forward if the server actually sent one.
         # Reusing the old value against a new body causes a permanent 304.
         etag=res.headers.get("etag"),
         last_modified=res.headers.get("last-modified"),
     )
+
+
+def _is_rsshub(feed_url: str | None) -> bool:
+    base = os.environ.get("RSSHUB_BASE_URL", "").rstrip("/")
+    return bool(base and feed_url and str(feed_url).startswith(base))

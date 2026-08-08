@@ -8,6 +8,7 @@ whatever that transport needs to reach it.
 | --- | --- | --- |
 | [`webpush.js`](webpush.js) | `GET, POST, DELETE /api/targets/webpush` | Working |
 | [`list.js`](list.js) | `GET /api/targets/list` | Working |
+| [`preferences.js`](preferences.js) | `POST /api/targets/preferences` | Working |
 | [`ntfy.js`](ntfy.js) | `GET, POST, DELETE /api/targets/ntfy` | Working |
 
 The other two channels do not enrol over HTTP. A Telegram target is created

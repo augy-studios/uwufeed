@@ -61,7 +61,7 @@ everything as though it exists.
 | 4 | Timeline, source management in the browser, web push | Done |
 | 5 | Twitch and Discord bot commands | Done |
 | 6 | RSSHub, Bluesky, Mastodon, ntfy | Done |
-| 7 | Quotas, alerting, backups | Not started |
+| 7 | Alerting, quiet hours, digests, backups | Done |
 
 Both ingestion tiers work. A real YouTube upload reaches Discord in under
 ten seconds through the push tier, and a source without a hub is polled on

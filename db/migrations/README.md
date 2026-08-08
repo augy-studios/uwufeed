@@ -15,6 +15,7 @@ You do **not** need to re-run everything. Run these, in this order:
 | `0012_repoint_user_fks.sql` | Moves the user foreign keys off `uwu_users` |
 | `0013_fanout.sql` | Fan out functions for the dispatcher |
 | `0014_subscription_targets.sql` | Per source routing to specific destinations |
+| `0015_hardening.sql` | Delivery preferences, last_checked_at, deferred status, health functions |
 
 `0001` has to run before `0012`, since the constraint it adds points at
 `uwufeed_users`.
@@ -45,6 +46,7 @@ publication.
 | `0012_repoint_user_fks.sql` | Repoints user foreign keys, a no-op on a fresh database |
 | `0013_fanout.sql` | `uwufeed_targets_for_item()` and `uwufeed_pending_fanout()` |
 | `0014_subscription_targets.sql` | Per source routing, and both fan out functions updated |
+| `0015_hardening.sql` | Quiet hours and digest on targets, `last_checked_at`, the `deferred` delivery status, and the health and release functions |
 
 ## uwuFeed owns its accounts
 

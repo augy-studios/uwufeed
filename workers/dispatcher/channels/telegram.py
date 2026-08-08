@@ -37,7 +37,8 @@ def build_message(ctx: RenderContext) -> str:
     head = f'<a href="{esc(ctx.url)}">{title}</a>' if ctx.url else f"<b>{title}</b>"
 
     lines = [f"<b>{esc(prefix)} from {esc(ctx.source_name)}</b>", head]
-    body = summary_for(ctx, limit=280)
+    # A digest body is a list, so it gets more room than a summary.
+    body = summary_for(ctx, limit=3000 if ctx.kind == "digest" else 280)
     if body:
         lines.append(esc(body))
     return "\n\n".join(lines)

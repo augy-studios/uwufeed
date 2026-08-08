@@ -19,6 +19,7 @@ const ASSETS = [
   "/js/api.js",
   "/js/feed.js",
   "/js/sources.js",
+  "/js/destinations.js",
   "/js/opml.js",
   "/js/push.js",
   "/js/auth.js",

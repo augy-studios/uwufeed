@@ -15,8 +15,10 @@ import signal
 import httpx
 from dotenv import load_dotenv
 
+import alerts
+
 from . import backoff, conditional, db
-from .adapters import for_platform
+from .adapters import parse_body
 
 load_dotenv()
 
@@ -39,14 +41,45 @@ async def handle_source(pool, client: httpx.AsyncClient, source: dict) -> None:
     result = await conditional.fetch(client, source)
 
     if not result.ok:
-        failures = fail_count + 1
+        # An RSSHub route that broke is not this source dying. Counted as a
+        # failure it retires a healthy subscription because somebody else's
+        # scraper changed, so it is reported and left alone.
+        if result.route_failure:
+            await db.reschedule(
+                pool,
+                source_id,
+                interval=backoff.failure_interval(current),
+                etag=source.get("etag"),
+                last_modified=source.get("last_modified"),
+                fail_count=fail_count,
+            )
+            await alerts.alert(
+                "An RSSHub route stopped working",
+                [
+                    f"`{source['feed_url']}` answered {result.status}.",
+                    "The source is untouched. RSSHub routes break when the sites they "
+                    "scrape change, and this would otherwise retire a healthy subscription.",
+                ],
+            )
+            return
+
+        # 410 Gone is the publisher saying so outright. Waiting for twenty
+        # failures is twenty pointless requests.
+        failures = backoff.RETIRE_AFTER_FAILURES if result.gone else fail_count + 1
+
         if backoff.should_retire(failures):
             subscribers = await db.retire(pool, source_id, failures)
+            reason = "the feed is gone" if result.gone else f"{failures} consecutive failures"
+            print(f"retired source {source_id} after {reason}: {source['feed_url']}")
             # Say it. A retired source that goes quiet is indistinguishable
             # from a channel that stopped posting, and only we know which.
-            print(
-                f"retired source {source_id} after {failures} failures, "
-                f"{subscribers} subscribers affected: {source['feed_url']}"
+            await alerts.alert(
+                "A source was retired",
+                [
+                    f"**{source.get('title') or source['feed_url']}**",
+                    f"Reason: {reason}.",
+                    f"{subscribers} subscriber(s) will stop receiving it.",
+                ],
             )
             return
 
@@ -64,7 +97,7 @@ async def handle_source(pool, client: httpx.AsyncClient, source: dict) -> None:
     found = 0
     if not result.not_modified:
         try:
-            rows = for_platform(source.get("platform"))(result.body, source)
+            rows = parse_body(result.body, source)
             found = await db.insert_items(pool, rows)
         except Exception as err:
             # A parse or insert failure is this source's problem, not the

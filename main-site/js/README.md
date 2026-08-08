@@ -14,6 +14,7 @@ carries its `.js` extension.
 | `api.js` | Every call to `/api`, in one place | Working |
 | `feed.js` | The timeline, with cursor paging | Working |
 | `sources.js` | Following, unfollowing and per source routing | Working |
+| `destinations.js` | Quiet hours and digest, per destination | Working |
 | `opml.js` | Parsing and building OPML | Working |
 | `push.js` | Web push enrolment | Working |
 | `auth.js` | Sign in, sign up, sign out, and the session hint | Working |

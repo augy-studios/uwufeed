@@ -20,7 +20,8 @@ export default async function handler(req, res) {
 
   const rows = await select(
     "uwufeed_targets",
-    `user_id=eq.${session.userId}&select=id,channel,target_ref,active,created_at` +
+    `user_id=eq.${session.userId}` +
+      "&select=id,channel,target_ref,active,created_at,quiet_from,quiet_to,digest,timezone" +
       "&order=created_at.asc"
   );
 
@@ -33,6 +34,10 @@ export default async function handler(req, res) {
       // a chat id is not useful to the browser.
       hint: describe(row.channel, row.target_ref),
       active: row.active,
+      quiet_from: row.quiet_from ? String(row.quiet_from).slice(0, 5) : null,
+      quiet_to: row.quiet_to ? String(row.quiet_to).slice(0, 5) : null,
+      digest: Boolean(row.digest),
+      timezone: row.timezone || "UTC",
     })),
   });
 }

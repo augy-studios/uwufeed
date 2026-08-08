@@ -8,6 +8,7 @@ is deployed by Vercel and nothing here is imported by application code.
 | [`systemd/`](systemd/) | Unit files for the dispatcher, both bots and the poller |
 | [`rsshub/`](rsshub/) | RSSHub container, for the long tail |
 | [`tmux-bootstrap.sh`](tmux-bootstrap.sh) | Start every process in one tmux session |
+| [`backup.sh`](backup.sh) | Back up the bot SQLite files, which nothing else covers |
 
 ## What runs on the VPS and why
 
@@ -82,14 +83,23 @@ never a direct connection.
 
 ## Backups
 
-Phase 7, and worth writing down before then: Supabase's own backups cover
-Postgres. The bot SQLite files are not covered by anything and hold button
-state, per chat preferences and account links. Losing them means every
-button in both bots' history stops working.
+Supabase covers Postgres. The bot SQLite files are covered by nothing else
+and hold button state, per chat preferences and the chat to account
+mapping. Losing one means every button in that bot's history stops working
+and every linked chat forgets which account it belongs to.
 
 ```sh
-sqlite3 telegram-bot/bot.sqlite3 ".backup /home/uwufeed/backups/telegram.sqlite3"
+./infra/backup.sh
 ```
+
+Daily, from crontab:
+
+```text
+0 5 * * * /home/uwufeed/uwufeed/infra/backup.sh
+```
+
+It uses `sqlite3 .backup` rather than `cp`, because copying a database
+while the bot has it open can capture a torn write.
 
 ## Time
 

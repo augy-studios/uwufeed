@@ -55,6 +55,8 @@ export const api = {
     }),
 
   listTargets: () => request("/api/targets/list"),
+  setTargetPreferences: (prefs) =>
+    request("/api/targets/preferences", { method: "POST", body: prefs }),
   ntfySuggestion: () => request("/api/targets/ntfy"),
   addNtfy: (topic) => request("/api/targets/ntfy", { method: "POST", body: { topic } }),
 
@@ -95,6 +97,10 @@ const MESSAGES = {
   feed_fetch_failed: "The feed was found but could not be read.",
   invalid_url: "That does not look like a link.",
   invalid_topic: "Topics need 8 to 64 letters, numbers, dashes or underscores.",
+  quiet_hours_need_both: "Set both a start and an end time, or neither.",
+  invalid_time: "Times look like 23:00.",
+  invalid_timezone: "That is not a timezone name.",
+  target_not_found: "That destination is not yours.",
   unsupported_scheme: "Only http and https links work.",
   not_signed_in: "Sign in first.",
   offline: "You appear to be offline.",

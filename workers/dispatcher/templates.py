@@ -57,11 +57,27 @@ HEADLINES = {
     "article": "New post from {source}",
     "post": "New post from {source}",
     "stream": "{source} is live",
+    "digest": "While you were away",
 }
 
 
 def headline(ctx: RenderContext) -> str:
     return HEADLINES.get(ctx.kind, HEADLINES["post"]).format(source=ctx.source_name)
+
+
+# A digest is one message standing in for several, so it borrows the same
+# context rather than giving every channel a second render path.
+def digest_context(count: int, body: str) -> RenderContext:
+    return RenderContext(
+        kind="digest",
+        title=f"{count} new items while you were away",
+        url=None,
+        author=None,
+        summary=body,
+        thumbnail_url=None,
+        published_at=None,
+        source_title="uwuFeed",
+    )
 
 
 def summary_for(ctx: RenderContext, limit: int = 300) -> str | None:

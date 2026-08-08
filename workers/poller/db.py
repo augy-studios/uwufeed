@@ -49,9 +49,10 @@ update uwufeed_sources
 
 RETIRE_SQL = """
 update uwufeed_sources
-   set retired_at    = now(),
-       next_check_at = null,
-       fail_count    = %(fail_count)s
+   set retired_at      = now(),
+       next_check_at   = null,
+       last_checked_at = now(),
+       fail_count      = %(fail_count)s
  where id = %(id)s
 """
 

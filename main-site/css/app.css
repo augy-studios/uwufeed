@@ -321,6 +321,34 @@
 
 #loadMore { align-self: center; }
 
+/* ---- delivery times ---- */
+.destination-list { display: flex; flex-direction: column; gap: 8px; }
+.destination {
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--surface-strong);
+  border: 1px solid var(--surface-border);
+  font-size: 0.86rem;
+}
+.destination summary { cursor: pointer; color: var(--brand-ink); }
+.destination i { color: var(--muted-strong); font-style: normal; font-size: 0.78rem; }
+.destination .field { margin: 8px 0; }
+.destination input[type="time"] {
+  height: 38px;
+  padding: 0 10px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  color: var(--ink);
+  font-size: 0.86rem;
+}
+.destination code {
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: var(--surface);
+  font-size: 0.76rem;
+}
+
 /* ---- confirm dialog ---- */
 .modal-body {
   font-size: 0.9rem;

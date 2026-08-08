@@ -10,8 +10,7 @@ Schedules are declared in [`../../vercel.json`](../../vercel.json).
 | --- | --- | --- | --- |
 | [`renew-leases.js`](renew-leases.js) | `/api/cron/renew-leases` | `0 3 * * *` | Working |
 | [`cleanup.js`](cleanup.js) | `/api/cron/cleanup` | `0 4 * * *` | Working |
-| [`digest.js`](digest.js) | `/api/cron/digest` | `0 8 * * *` | Stub |
-| [`heartbeat.js`](heartbeat.js) | `/api/cron/heartbeat` | `*/15 * * * *` | Stub |
+| [`heartbeat.js`](heartbeat.js) | `/api/cron/heartbeat` | `*/15 * * * *` | Working |
 
 Sub daily schedules need a Vercel plan that allows them. On Hobby, cron
 frequency is limited to once a day, so `heartbeat` has to move to the VPS
@@ -105,3 +104,19 @@ thirty lines used only here.
 curl -H "authorization: Bearer $CRON_SECRET" \
   "$PUBLIC_BASE_URL/api/cron/renew-leases"
 ```
+
+## There is no digest cron
+
+Digests and quiet hours are handled by the dispatcher, not from here, and
+`digest.js` was deleted rather than left as a stub.
+
+A cron cannot send. Sending means Discord webhooks, the Telegram Bot API,
+VAPID encryption and ntfy, all of which live in
+`workers/dispatcher/channels/` in Python. A digest cron would either
+duplicate all four in JavaScript, or exist only to set a flag the
+dispatcher then acts on, which is a scheduled job to trigger a job.
+
+So the dispatcher holds a delivery when its destination is inside quiet
+hours, and releases it when the window passes. A destination with `digest`
+set gets one message for everything held rather than one message each.
+Same mechanism, no second schedule.

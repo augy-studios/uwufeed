@@ -52,6 +52,36 @@ async def pending_fanout(limit: int = 200) -> list[dict]:
         return res.json()
 
 
+async def in_quiet_hours(target: dict) -> bool:
+    """Ask Postgres, not Python.
+
+    A window that wraps midnight plus a timezone plus daylight saving is
+    three ways to get this wrong. One implementation, in SQL, used by both
+    this check and the release query.
+    """
+    if not target.get("quiet_from") or not target.get("quiet_to"):
+        return False
+    async with _client() as client:
+        res = await client.post(
+            "/rpc/uwufeed_in_quiet_hours",
+            json={
+                "p_from": target["quiet_from"],
+                "p_to": target["quiet_to"],
+                "p_tz": target.get("timezone") or "UTC",
+            },
+        )
+        res.raise_for_status()
+        return bool(res.json())
+
+
+async def due_deferred(limit: int = 200) -> list[dict]:
+    """Held deliveries whose quiet window has passed."""
+    async with _client() as client:
+        res = await client.post("/rpc/uwufeed_due_deferred", json={"p_limit": limit})
+        res.raise_for_status()
+        return res.json()
+
+
 async def claim_delivery(item_id: int, target_id: int) -> bool:
     """Insert the delivery row before sending.
 

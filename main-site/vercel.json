@@ -1,8 +1,11 @@
 {
     "$schema": "https://openapi.vercel.sh/vercel.json",
     "cleanUrls": true,
-    "regions": ["sin1"],
-    "crons": [{
+    "regions": [
+        "sin1"
+    ],
+    "crons": [
+        {
             "path": "/api/cron/renew-leases",
             "schedule": "0 3 * * *"
         },
@@ -11,27 +14,28 @@
             "schedule": "0 4 * * *"
         },
         {
-            "path": "/api/cron/digest",
-            "schedule": "0 8 * * *"
-        },
-        {
             "path": "/api/cron/heartbeat",
             "schedule": "*/15 * * * *"
         }
     ],
-    "headers": [{
+    "headers": [
+        {
             "source": "/sw.js",
-            "headers": [{
-                "key": "cache-control",
-                "value": "public, max-age=0, must-revalidate"
-            }]
+            "headers": [
+                {
+                    "key": "cache-control",
+                    "value": "public, max-age=0, must-revalidate"
+                }
+            ]
         },
         {
             "source": "/js/(.*)",
-            "headers": [{
-                "key": "cache-control",
-                "value": "public, max-age=0, must-revalidate"
-            }]
+            "headers": [
+                {
+                    "key": "cache-control",
+                    "value": "public, max-age=0, must-revalidate"
+                }
+            ]
         }
     ]
 }

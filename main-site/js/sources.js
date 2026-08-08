@@ -2,7 +2,7 @@
 // goes.
 
 import { api, describe } from "./api.js";
-import { hydrateIcons, escapeHtml, banner } from "./ui.js";
+import { hydrateIcons, escapeHtml, banner, confirmDialog } from "./ui.js";
 
 let cache = { sources: [], targets: [] };
 
@@ -100,6 +100,16 @@ export function wire(listEl, statusEl, onChange) {
   listEl.addEventListener("click", async (e) => {
     const btn = e.target.closest("[data-remove]");
     if (!btn) return;
+
+    const title = btn.closest(".source").querySelector(".source-title").textContent;
+    const sure = await confirmDialog({
+      title: "Stop following?",
+      body: `${title} will stop arriving. The feed itself is untouched, and you can follow it again later.`,
+      confirmLabel: "Stop following",
+      cancelLabel: "Keep it",
+    });
+    if (!sure) return;
+
     btn.disabled = true;
     try {
       await api.removeSource(Number(btn.dataset.remove));
