@@ -387,3 +387,40 @@
   .wrap { padding: 10px; }
   .item-thumb { width: 72px; height: 41px; }
 }
+
+/* ---- scope bar ---- */
+/* Which account everything below is about. Only shown when there is a
+   choice to make, since a picker with one option is just noise. */
+.scope-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  flex-wrap: wrap;
+}
+.scope-label { font-size: 0.78rem; color: var(--muted); }
+.scope-bar select {
+  flex: 1 1 160px;
+  min-width: 0;
+  padding: 6px 8px;
+  border-radius: 10px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+}
+.scope-note { font-size: 0.78rem; color: var(--muted); flex-basis: 100%; }
+
+/* A space scope is somebody else's room, so it should not look identical to
+   your own feed. */
+body.scoped .scope-bar { border-left: 3px solid var(--brand-ink); }
+
+/* ---- provenance ---- */
+.chip-origin {
+  font-size: 0.7rem;
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--surface-border);
+  color: var(--muted);
+  white-space: nowrap;
+}

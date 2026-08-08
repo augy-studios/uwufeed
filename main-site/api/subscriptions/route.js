@@ -6,12 +6,18 @@
 import { select, remove, insertIgnoreDuplicates, selectOne } from "../_lib/db.js";
 import { json, readJsonBody, methodNotAllowed } from "../_lib/http.js";
 import { readSession } from "../_lib/session.js";
+import { resolveScope } from "../_lib/scope.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return methodNotAllowed(res, ["POST"]);
 
   const session = await readSession(req);
   if (!session) return json(res, 401, { error: "not_signed_in" });
+
+  // ?as=<space id> acts as a server or group this person manages.
+  // The permission check lives in resolveScope, not here.
+  const scope = await resolveScope(session, new URL(req.url, "http://localhost").searchParams.get("as"));
+  if (scope.error) return json(res, 403, { error: scope.error });
 
   const body = await readJsonBody(req);
   const sourceId = body && body.source_id;
@@ -22,7 +28,7 @@ export default async function handler(req, res) {
   // plus a target id would let anyone reroute someone else's feed.
   const subscription = await selectOne(
     "uwufeed_subscriptions",
-    `user_id=eq.${session.userId}&source_id=eq.${encodeURIComponent(sourceId)}&select=id`
+    `user_id=eq.${scope.userId}&source_id=eq.${encodeURIComponent(sourceId)}&select=id`
   );
   if (!subscription) return json(res, 404, { error: "not_following_that_source" });
 
@@ -30,7 +36,7 @@ export default async function handler(req, res) {
   // unknown or borrowed one is dropped rather than silently honoured.
   const owned = await select(
     "uwufeed_targets",
-    `user_id=eq.${session.userId}&select=id`
+    `user_id=eq.${scope.userId}&select=id`
   );
   const ownedIds = new Set(owned.map((row) => Number(row.id)));
   const wanted = targetIds.map(Number).filter((id) => ownedIds.has(id));

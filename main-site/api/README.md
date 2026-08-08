@@ -33,6 +33,13 @@ VPS, in [`../../workers/`](../../workers/).
 | `/api/auth/link` | POST | Working |
 | `/api/auth/password` | POST | Working |
 | `/api/auth/reset`, `/reset-confirm` | POST | Working |
+| `/api/auth/recovery` | POST | Working |
+| `/api/auth/passkey` | POST | Working |
+| `/api/auth/discord/start`, `/callback` | GET | Working |
+| `/api/account/recovery-codes` | GET, POST | Working |
+| `/api/account/identities` | GET, DELETE | Working |
+| `/api/account/merge` | GET, POST | Working |
+| `/api/spaces` | GET | Working |
 | `/api/items/list` | GET | Working |
 | `/api/subscriptions/add`, `/list`, `/remove`, `/route` | GET, POST | Working |
 | `/api/targets/webpush` | GET, POST, DELETE | Working |

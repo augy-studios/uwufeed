@@ -4,6 +4,7 @@
 import { select } from "../_lib/db.js";
 import { json, methodNotAllowed } from "../_lib/http.js";
 import { readSession } from "../_lib/session.js";
+import { resolveScope } from "../_lib/scope.js";
 
 const LABELS = {
   telegram: "Telegram chat",
@@ -18,9 +19,14 @@ export default async function handler(req, res) {
   const session = await readSession(req);
   if (!session) return json(res, 401, { error: "not_signed_in" });
 
+  // ?as=<space id> acts as a server or group this person manages.
+  // The permission check lives in resolveScope, not here.
+  const scope = await resolveScope(session, new URL(req.url, "http://localhost").searchParams.get("as"));
+  if (scope.error) return json(res, 403, { error: scope.error });
+
   const rows = await select(
     "uwufeed_targets",
-    `user_id=eq.${session.userId}` +
+    `user_id=eq.${scope.userId}` +
       "&select=id,channel,target_ref,active,created_at,quiet_from,quiet_to,digest,timezone" +
       "&order=created_at.asc"
   );

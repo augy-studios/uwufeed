@@ -40,21 +40,47 @@ async function request(path, { method = "GET", body } = {}) {
   return payload;
 }
 
+// Which account the interface is acting as: the person, or a server or
+// group they manage. One module holds it so no caller has to remember to
+// pass it, and the server checks the permission regardless.
+let scopeId = null;
+
+export function setScope(id) {
+  scopeId = id || null;
+}
+
+export function currentScope() {
+  return scopeId;
+}
+
+function scoped(path) {
+  if (!scopeId) return path;
+  return path + (path.includes("?") ? "&" : "?") + `as=${encodeURIComponent(scopeId)}`;
+}
+
 export const api = {
   listItems: (cursor) =>
-    request(`/api/items/list${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`),
+    request(scoped(`/api/items/list${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`)),
 
-  listSources: () => request("/api/subscriptions/list"),
-  addSource: (url) => request("/api/subscriptions/add", { method: "POST", body: { url } }),
+  listSources: () => request(scoped("/api/subscriptions/list")),
+  addSource: (url) => request(scoped("/api/subscriptions/add"), { method: "POST", body: { url } }),
   removeSource: (sourceId) =>
-    request("/api/subscriptions/remove", { method: "POST", body: { source_id: sourceId } }),
+    request(scoped("/api/subscriptions/remove"), { method: "POST", body: { source_id: sourceId } }),
   routeSource: (sourceId, targetIds) =>
-    request("/api/subscriptions/route", {
+    request(scoped("/api/subscriptions/route"), {
       method: "POST",
       body: { source_id: sourceId, target_ids: targetIds },
     }),
 
-  listTargets: () => request("/api/targets/list"),
+  listSpaces: () => request("/api/spaces"),
+  listIdentities: () => request("/api/account/identities"),
+  unlinkIdentity: (id) =>
+    request("/api/account/identities", { method: "DELETE", body: { id } }),
+  mergePreview: (from) =>
+    request(`/api/account/merge?from=${encodeURIComponent(from)}`),
+  merge: (from) => request("/api/account/merge", { method: "POST", body: { from } }),
+
+  listTargets: () => request(scoped("/api/targets/list")),
   setTargetPreferences: (prefs) =>
     request("/api/targets/preferences", { method: "POST", body: prefs }),
   ntfySuggestion: () => request("/api/targets/ntfy"),
@@ -145,6 +171,13 @@ const MESSAGES = {
   user_not_verified: "Your device needs to check it is you, with biometrics or a screen lock.",
   origin_mismatch: "Something is wrong with this page's address. Do not continue.",
   unknown_step: "Something went wrong. Try again.",
+  not_your_space: "You do not manage that server or group any more.",
+  unknown_space: "That server or group is not here.",
+  last_way_in: "That is the only way into this account. Set a password or keep some recovery codes first.",
+  cannot_merge_a_space: "A server or group is shared, so it is never merged into one person's account.",
+  not_a_chat_account: "That account has its own sign in, so it cannot be merged.",
+  not_your_account: "That account is not connected to yours.",
+  discord_oauth_not_configured: "Discord sign in is not set up on this instance.",
 };
 
 export function describe(err) {

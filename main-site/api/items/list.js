@@ -3,6 +3,7 @@
 import { select } from "../_lib/db.js";
 import { json, methodNotAllowed } from "../_lib/http.js";
 import { readSession } from "../_lib/session.js";
+import { resolveScope } from "../_lib/scope.js";
 
 // Matches what the service worker precaches.
 const PAGE_SIZE = 50;
@@ -13,9 +14,14 @@ export default async function handler(req, res) {
   const session = await readSession(req);
   if (!session) return json(res, 401, { error: "not_signed_in" });
 
+  // ?as=<space id> acts as a server or group this person manages.
+  // The permission check lives in resolveScope, not here.
+  const scope = await resolveScope(session, new URL(req.url, "http://localhost").searchParams.get("as"));
+  if (scope.error) return json(res, 403, { error: scope.error });
+
   const subs = await select(
     "uwufeed_subscriptions",
-    `user_id=eq.${session.userId}&select=source_id`
+    `user_id=eq.${scope.userId}&select=source_id`
   );
   if (!subs.length) return json(res, 200, { items: [], cursor: null });
 

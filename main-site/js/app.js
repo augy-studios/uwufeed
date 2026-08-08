@@ -7,7 +7,7 @@ import {
   initTheme,
 } from "./theme.js";
 import { hydrateIcons, openModal, closeModal, banner, escapeHtml, confirmDialog } from "./ui.js";
-import { api, describe, handleUnauthorized } from "./api.js";
+import { api, describe, handleUnauthorized, setScope, currentScope } from "./api.js";
 import * as auth from "./auth.js";
 import * as feed from "./feed.js";
 import * as sources from "./sources.js";
@@ -40,6 +40,14 @@ function paintAuthState() {
   if (!signedIn) {
     // A signed out account tab should carry nothing from the last session:
     // no stale link code, no notification state, no leftover message.
+    // A scope is somebody else's room. It must not survive a sign out.
+    setScope(null);
+    spaces = [];
+    el("scopeBar").classList.add("hidden");
+    el("scopePicker").value = "";
+    el("identityList").innerHTML = "";
+    el("spaceList").innerHTML = "";
+    document.body.classList.remove("scoped");
     el("linkResult").classList.add("hidden");
     el("linkResult").innerHTML = "";
     // A reset result is a password in plain sight. It must not survive a
@@ -65,8 +73,10 @@ function paintAuthState() {
     el("loadMore").classList.add("hidden");
     feed.reset();
   } else {
-    // Cosmetic, so it is not awaited and a failure changes nothing.
+    // Cosmetic, so they are not awaited and a failure changes nothing.
     refreshRecoveryCount();
+    loadIdentities();
+    loadScope();
   }
 }
 
@@ -270,6 +280,183 @@ function wireReset() {
         ? "Code accepted, and that was your last one. Choose a new password."
         : `Code accepted, ${remaining} left. Choose a new password.`
     );
+  });
+}
+
+// ---- coming back from Discord ----
+
+// The callback puts the outcome in the fragment rather than the query, so
+// it never reaches a server log or a referrer. Read it once, then strip it,
+// so a refresh does not replay the message.
+const DISCORD_OUTCOMES = {
+  signed_in: ["ok", "Signed in with Discord."],
+  created: ["ok", "Account created with Discord. Your recovery codes are on the Account tab."],
+  linked: ["ok", "Discord connected."],
+  already_linked: ["ok", "That Discord account is already connected."],
+  cancelled: ["ok", null],
+  "error:bad_state": ["error", "That sign in did not start here. Try again from this page."],
+  "error:discord_belongs_to_another_account": [
+    "error",
+    "That Discord account is already on a different uwuFeed account.",
+  ],
+  "error:discord_unavailable": ["error", "Discord could not be reached. Try again."],
+  "error:discord_oauth_not_configured": ["error", "Discord sign in is not set up here."],
+};
+
+function readDiscordOutcome() {
+  const match = /[#&]discord=([^&]+)/.exec(window.location.hash);
+  if (!match) return null;
+
+  history.replaceState(null, "", window.location.pathname + window.location.search);
+  return decodeURIComponent(match[1]);
+}
+
+// ---- scope: you, or a space you manage ----
+
+let spaces = [];
+
+async function loadScope() {
+  try {
+    const data = await api.listSpaces();
+    spaces = data.spaces || [];
+  } catch {
+    spaces = [];
+  }
+
+  const picker = el("scopePicker");
+  const current = currentScope();
+  picker.innerHTML =
+    '<option value="">Your own feed</option>' +
+    spaces
+      .map(
+        (s) =>
+          `<option value="${s.id}">${escapeHtml(s.label)} (${
+            s.platform === "discord" ? "server" : "group"
+          })</option>`
+      )
+      .join("");
+  picker.value = current || "";
+
+  // A picker with one option is noise, so it only appears when there is a
+  // choice to make.
+  el("scopeBar").classList.toggle("hidden", spaces.length === 0);
+  paintScopeNote();
+  renderSpaces();
+}
+
+function paintScopeNote() {
+  const space = spaces.find((s) => String(s.id) === String(currentScope()));
+  document.body.classList.toggle("scoped", Boolean(space));
+
+  if (!space) {
+    el("scopeNote").textContent = "";
+    return;
+  }
+  const where = space.platform === "discord" ? "Discord" : "Telegram";
+  el("scopeNote").textContent =
+    `Shared with everyone who manages this, and separate from your own feed. ` +
+    `Your access is checked with ${where} each time this list loads.`;
+}
+
+function wireScope() {
+  el("scopePicker").addEventListener("change", async () => {
+    setScope(el("scopePicker").value);
+    paintScopeNote();
+    banner(el("accountBanner"), "ok", null);
+    banner(el("sourcesBanner"), "ok", null);
+    feed.reset();
+    await refreshAll();
+  });
+}
+
+function renderSpaces() {
+  const box = el("spaceList");
+  if (!spaces.length) {
+    box.innerHTML =
+      '<p class="route-hint">Nothing yet. Run <code>/link</code> in a server or group you ' +
+      "manage, and it appears here.</p>";
+    return;
+  }
+
+  box.innerHTML = spaces
+    .map((s) => {
+      const kind = s.platform === "discord" ? "Discord server" : "Telegram group or channel";
+      // null means the bot could not be asked, which is different from
+      // knowing it is absent, and the wording has to keep them apart.
+      const missing =
+        s.bot_present === false && s.invite_url
+          ? `<a class="btn secondary" href="${escapeHtml(s.invite_url)}" target="_blank"
+               rel="noopener noreferrer"><span data-icon="plus"></span>Add the bot</a>`
+          : "";
+      const note =
+        s.bot_present === false
+          ? '<span class="route-hint">The bot is not in this one yet.</span>'
+          : "";
+
+      return `<div class="destination">
+        <div><strong>${escapeHtml(s.label)}</strong>
+          <span class="route-hint">${kind}, ${s.sources} source${s.sources === 1 ? "" : "s"}</span>
+          ${note}</div>
+        ${missing}
+      </div>`;
+    })
+    .join("");
+  hydrateIcons(box);
+}
+
+// ---- linked services ----
+
+async function loadIdentities() {
+  const box = el("identityList");
+  try {
+    const { identities } = await api.listIdentities();
+    if (!identities.length) {
+      box.innerHTML =
+        '<p class="route-hint">Nothing connected. Linking Telegram or Discord gives you a ' +
+        "private way back in if you forget your password.</p>";
+      return;
+    }
+
+    box.innerHTML = identities
+      .map(
+        (i) => `<div class="destination">
+          <div><strong>${escapeHtml(i.label)}</strong>
+            <span class="route-hint">${escapeHtml(i.display_name || "connected")}, verified ${
+              i.verified_via === "oauth" ? "by signing in" : "with a link code"
+            }</span></div>
+          <button class="btn secondary" type="button" data-unlink="${i.id}">Unlink</button>
+        </div>`
+      )
+      .join("");
+    hydrateIcons(box);
+  } catch (err) {
+    box.innerHTML = "";
+    banner(el("accountBanner"), "error", describe(err));
+  }
+}
+
+function wireIdentities() {
+  el("identityList").addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-unlink]");
+    if (!btn) return;
+
+    const sure = await confirmDialog({
+      title: "Unlink this service?",
+      body:
+        "Password resets stop going there, and any server or group it gave you access to " +
+        "disappears from your list. Nothing about those servers changes.",
+      confirmLabel: "Unlink",
+      cancelLabel: "Keep it",
+    });
+    if (!sure) return;
+
+    try {
+      await api.unlinkIdentity(Number(btn.dataset.unlink));
+      banner(el("accountBanner"), "ok", "Unlinked.");
+      await Promise.all([loadIdentities(), loadScope()]);
+    } catch (err) {
+      banner(el("accountBanner"), "error", describe(err));
+    }
   });
 }
 
@@ -797,6 +984,8 @@ async function boot() {
   wirePassword();
   wireRecoveryCodes();
   wirePasskey();
+  wireScope();
+  wireIdentities();
   paintPasskeyOffer();
   wireSources();
   wireOpml();
@@ -819,6 +1008,12 @@ async function boot() {
   // Optimistic, from the stored hint, so the shell does not flicker.
   auth.primeFromHint();
   paintAuthState();
+
+  const outcome = readDiscordOutcome();
+  if (outcome) {
+    const [kind, message] = DISCORD_OUTCOMES[outcome] || ["error", "Discord sign in did not finish."];
+    if (message) banner(kind === "ok" ? el("accountBanner") : el("authBanner"), kind, message);
+  }
 
   el("loadMore").addEventListener("click", () =>
     feed.loadFeed(el("itemList"), el("feedBanner"), el("loadMore"), { append: true })

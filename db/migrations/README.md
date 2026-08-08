@@ -17,6 +17,8 @@ You do **not** need to re-run everything. Run these, in this order:
 | `0014_subscription_targets.sql` | Per source routing to specific destinations |
 | `0015_hardening.sql` | Delivery preferences, last_checked_at, deferred status, health functions |
 | `0016_identities.sql` | Linked services per account, for recovery and dashboard access |
+| `0017_recovery_codes_and_passkeys.sql` | Recovery codes and WebAuthn credentials |
+| `0018_spaces_and_provenance.sql` | Guilds and groups, who manages them, and where a subscription came from |
 
 `0001` has to run before `0012`, since the constraint it adds points at
 `uwufeed_users`.
@@ -49,6 +51,8 @@ publication.
 | `0014_subscription_targets.sql` | Per source routing, and both fan out functions updated |
 | `0015_hardening.sql` | Quiet hours and digest on targets, `last_checked_at`, the `deferred` delivery status, and the health and release functions |
 | `0016_identities.sql` | `uwufeed_identities`: one row per linked service per account, holding who somebody is on Telegram or Discord. Not a delivery target, because a target can be a shared space and a reset code sent to one is a broadcast |
+| `0017_recovery_codes_and_passkeys.sql` | `uwufeed_recovery_codes`, encrypted rather than hashed so the Account page can show them again behind a password, and `uwufeed_passkeys` holding SPKI DER public keys |
+| `0018_spaces_and_provenance.sql` | `uwufeed_spaces` and `uwufeed_space_managers` for guilds and groups, plus `added_via` and `origin_label` on subscriptions and targets |
 
 ## uwuFeed owns its accounts
 

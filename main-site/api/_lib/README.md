@@ -18,7 +18,11 @@ with an underscore, so nothing here is reachable over HTTP.
 | [`password.js`](password.js) | scrypt hashing, parameters stored in the hash |
 | [`linktoken.js`](linktoken.js) | Signed account link tokens, verified by the bots |
 | [`resettoken.js`](resettoken.js) | Signed password reset codes, bound to the hash they reset |
-| [`notify.js`](notify.js) | One off account messages to a Telegram chat or a Discord webhook |
+| [`notify.js`](notify.js) | Direct messages to one person, for account recovery. Never to a shared space |
+| [`discordoauth.js`](discordoauth.js) | Discord OAuth2, the guild list, and the Manage Server filter |
+| [`telegramapi.js`](telegramapi.js) | `getChatMember`, so Telegram admin status is checked live |
+| [`scope.js`](scope.js) | Which account a request acts as, and the one place management is checked |
+| [`recoverystore.js`](recoverystore.js) | Issuing and reading a set of recovery codes |
 | [`gmail.js`](gmail.js) | Mail through the Workspace mailbox, Gmail API, service account signed with `node:crypto` |
 
 ## normalize.js

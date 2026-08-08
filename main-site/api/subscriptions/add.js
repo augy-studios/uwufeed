@@ -7,6 +7,7 @@
 import { insertIgnoreDuplicates, count } from "../_lib/db.js";
 import { json, readJsonBody, methodNotAllowed } from "../_lib/http.js";
 import { readSession } from "../_lib/session.js";
+import { resolveScope } from "../_lib/scope.js";
 import { parseUrl, resolveAndStore, publicSource } from "../_lib/sources.js";
 
 // The plan's starting cap. Easy to raise later and painful to introduce
@@ -19,13 +20,18 @@ export default async function handler(req, res) {
   const session = await readSession(req);
   if (!session) return json(res, 401, { error: "not_signed_in" });
 
+  // ?as=<space id> acts as a server or group this person manages.
+  // The permission check lives in resolveScope, not here.
+  const scope = await resolveScope(session, new URL(req.url, "http://localhost").searchParams.get("as"));
+  if (scope.error) return json(res, 403, { error: scope.error });
+
   const body = await readJsonBody(req);
   if (!body || typeof body.url !== "string") return json(res, 400, { error: "url_required" });
 
   const parsed = parseUrl(body.url);
   if (parsed.error) return json(res, 400, { error: parsed.error });
 
-  const following = await count("uwufeed_subscriptions", `user_id=eq.${session.userId}`);
+  const following = await count("uwufeed_subscriptions", `user_id=eq.${scope.userId}`);
   if (following >= MAX_SOURCES) {
     return json(res, 409, { error: "source_limit_reached", limit: MAX_SOURCES });
   }
@@ -37,7 +43,7 @@ export default async function handler(req, res) {
     "uwufeed_subscriptions",
     // Stamped now rather than inferred later. A merge deletes the account a
     // row came from, so the surface has to be recorded while it is known.
-    [{ user_id: session.userId, source_id: result.source.id, added_via: "web" }],
+    [{ user_id: scope.userId, source_id: result.source.id, added_via: "web" }],
     ["user_id", "source_id"]
   );
   const added = Array.isArray(inserted) && inserted.length > 0;

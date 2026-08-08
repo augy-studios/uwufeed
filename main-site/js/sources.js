@@ -43,6 +43,17 @@ function render(listEl, data) {
   hydrateIcons(listEl);
 }
 
+// Where a source was added from. A null reads as untracked rather than as
+// the web, because a row that predates provenance genuinely does not say,
+// and guessing would make the interface confidently wrong.
+const ORIGINS = { web: "added on the web", telegram: "added on Telegram", discord: "added on Discord" };
+
+function origin(source) {
+  if (!source.added_via) return "";
+  const label = source.origin_label || ORIGINS[source.added_via] || source.added_via;
+  return `<span class="chip-origin">${escapeHtml(label)}</span>`;
+}
+
 function card(source) {
   const speed =
     source.tier === "push"
@@ -61,7 +72,7 @@ function card(source) {
           <span data-icon="trash"></span>
         </button>
       </div>
-      <div class="source-meta">${speed}${retired}</div>
+      <div class="source-meta">${speed}${retired}${origin(source)}</div>
       ${routing(source)}
     </div>`;
 }

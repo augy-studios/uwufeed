@@ -48,6 +48,14 @@
             </button>
         </header>
 
+        <div class="scope-bar glass hidden" id="scopeBar">
+            <label class="scope-label" for="scopePicker">Viewing</label>
+            <select id="scopePicker" aria-label="Which account to view">
+                <option value="">Your own feed</option>
+            </select>
+            <span class="scope-note" id="scopeNote"></span>
+        </div>
+
         <nav class="tabs glass" id="tabs" role="tablist">
             <button class="tab active" type="button" role="tab" aria-selected="true" data-panel="panelFeed">
                 <span data-icon="list"></span>Feed
@@ -115,6 +123,12 @@
                     <button class="btn" type="submit" id="authSubmit">Sign in</button>
                     <button class="btn secondary" type="button" id="authToggle">I need an account</button>
                 </form>
+
+                <div class="btn-row" id="discordSignInRow">
+                    <a class="btn" id="discordSignIn" href="/api/auth/discord/start">
+                        <span data-icon="shield"></span>Continue with Discord
+                    </a>
+                </div>
 
                 <div class="btn-row" id="passkeySignInRow">
                     <button class="btn secondary" type="button" id="passkeySignIn">
@@ -202,6 +216,26 @@
                     </button>
                 </div>
                 <div class="link-result hidden" id="linkResult"></div>
+
+                <h2>Linked services</h2>
+                <p class="route-hint">Who you are on Telegram and Discord. This is where a
+                    password reset is sent, and it is what your servers are listed from.</p>
+                <div class="destination-list" id="identityList"></div>
+
+                <h2>Servers and groups</h2>
+                <p class="route-hint">Servers, groups and channels you administer, and where the
+                    bot is. Each keeps its own sources, because they belong to everyone there
+                    rather than to you. Your access is rechecked with Discord or Telegram every
+                    time this list loads.</p>
+                <div class="destination-list" id="spaceList"></div>
+
+                <div id="mergeSection" class="hidden">
+                    <h2>Combine an account</h2>
+                    <p class="route-hint">A chat you used before signing in has its own sources.
+                        Combining brings them here. This cannot be undone.</p>
+                    <div class="destination-list" id="mergeList"></div>
+                    <div class="link-result hidden" id="mergeResult"></div>
+                </div>
 
                 <h2>Passkey</h2>
                 <p class="route-hint" id="passkeyHint">Sign in on this device with its fingerprint,
