@@ -20,7 +20,7 @@
     ],
     "rewrites": [
         {
-            "source": "/((?!api/|js/|css/|images/|sitemap.xml|robots.txt|manifest.json|sw.js|favicon.ico|.well-known/).*)",
+            "source": "/((?!api/).*)",
             "destination": "/index.html"
         }
     ],
