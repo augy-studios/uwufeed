@@ -13,11 +13,11 @@ import buttons
 import commands
 import config
 import db
-from commands import remove
+from commands import remove, route
 
 # Callback kind to handler. A button carries a token, the token resolves to
 # a kind, and the kind is dispatched here.
-HANDLERS = {"remove": remove.on_confirm}
+HANDLERS = {"remove": remove.on_confirm, "route": route.on_toggle}
 
 
 async def on_callback(event) -> None:

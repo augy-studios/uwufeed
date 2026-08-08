@@ -8,6 +8,7 @@ import asyncio
 
 import httpx
 
+from ..errors import PermanentFailure
 from ..ratelimit import DISCORD_WEBHOOK
 from ..templates import RenderContext, headline, summary_for
 
@@ -65,6 +66,11 @@ async def send(client: httpx.AsyncClient, webhook_url: str, ctx: RenderContext) 
         if 500 <= res.status_code < 600:
             await asyncio.sleep(2 ** attempt)
             continue
+
+        # A deleted webhook is gone for good. Retrying it forever costs a
+        # request per item and never succeeds.
+        if res.status_code in (401, 403, 404):
+            raise PermanentFailure(f"discord webhook gone: {res.status_code}")
 
         print(f"discord rejected the message: {res.status_code} {res.text[:200]}")
         return False

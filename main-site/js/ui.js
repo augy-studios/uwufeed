@@ -22,6 +22,46 @@ export function closeModal(id) {
   }
 }
 
+// A reusable yes or no dialog. Resolves true or false, and never leaves a
+// listener behind, so it is safe to call as often as you like.
+export function confirmDialog({ title, body, confirmLabel = "Confirm", cancelLabel = "Cancel" }) {
+  const backdrop = document.getElementById("confirmModal");
+  document.getElementById("confirmTitle").textContent = title;
+  document.getElementById("confirmBody").textContent = body;
+
+  const confirmBtn = document.getElementById("confirmYes");
+  const cancelBtn = document.getElementById("confirmNo");
+  confirmBtn.textContent = confirmLabel;
+  cancelBtn.textContent = cancelLabel;
+
+  openModal("confirmModal");
+  confirmBtn.focus();
+
+  return new Promise((resolve) => {
+    const finish = (answer) => {
+      confirmBtn.removeEventListener("click", onYes);
+      cancelBtn.removeEventListener("click", onNo);
+      backdrop.removeEventListener("click", onBackdrop);
+      document.removeEventListener("keydown", onKey);
+      closeModal("confirmModal");
+      resolve(answer);
+    };
+    const onYes = () => finish(true);
+    const onNo = () => finish(false);
+    const onBackdrop = (e) => {
+      if (e.target === backdrop) finish(false);
+    };
+    const onKey = (e) => {
+      if (e.key === "Escape") finish(false);
+    };
+
+    confirmBtn.addEventListener("click", onYes);
+    cancelBtn.addEventListener("click", onNo);
+    backdrop.addEventListener("click", onBackdrop);
+    document.addEventListener("keydown", onKey);
+  });
+}
+
 export function escapeHtml(value) {
   return String(value ?? "")
     .replace(/&/g, "&amp;")

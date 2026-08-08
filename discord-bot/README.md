@@ -12,14 +12,15 @@ followed in any of the three is the same source everywhere.
 | Command | What it does | Status |
 | --- | --- | --- |
 | `/help` | What this is, every command, and links to the app and the donation page | Working |
-| `/add` | Follow a channel, a blog or a feed | Phase 5 |
-| `/list` | Everything this server follows | Phase 5 |
-| `/remove` | Stop following one of them | Phase 5 |
-| `/pause` | Hold delivery here, run it again to resume | Working, stored |
-| `/latest` | The most recent items, on demand | Phase 5 |
-| `/status` | Health of the sources this server follows | Phase 5 |
-| `/settings` | Which channel receives posts, quiet hours, digest | Phase 5 |
-| `/link` | Connect this server to a web account | Phase 5, needs Phase 4 auth |
+| `/add` | Follow a channel, a blog or a feed | Working |
+| `/list` | Everything this server follows | Working |
+| `/remove` | Stop following one of them | Working |
+| `/pause` | Hold delivery here, run it again to resume | Working |
+| `/latest` | The most recent items, on demand | Working |
+| `/status` | Health of the sources this server follows | Working |
+| `/settings` | Choose the channel that receives posts | Working |
+| `/route` | Send one source only to some destinations | Working |
+| `/link` | Connect this server to a web account | Working |
 
 There is deliberately no start command. Everything belongs in `/help`.
 
@@ -57,7 +58,13 @@ Python 3.11 or newer.
    message content, and asking for an intent that is unused means a review
    for nothing.
 4. OAuth2 URL Generator, scopes `bot` and `applications.commands`,
-   permissions Send Messages, Embed Links and Use Slash Commands.
+   permissions Send Messages, Embed Links, Use Slash Commands and
+   **Manage Webhooks**.
+
+   Manage Webhooks is what lets `/settings channel:#feeds` create the
+   webhook itself, so nobody has to copy a webhook URL through a chat
+   box. Without it that command fails with a clear message rather than
+   silently.
 5. Open the generated URL and add it to a server.
 
 Set `DISCORD_DEV_GUILD_ID` while developing. Commands sync to that one

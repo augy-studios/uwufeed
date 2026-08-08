@@ -319,6 +319,15 @@
 #loadMore { align-self: center; }
 #loadMore.hidden { display: none; }
 
+/* ---- confirm dialog ---- */
+.modal-body {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.modal-actions { margin-top: 4px; }
+.modal-actions .btn { flex: 1; }
+
 /* ---- footer ---- */
 .footer {
   padding: 14px;

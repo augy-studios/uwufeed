@@ -18,6 +18,7 @@ COMMANDS = [
     ("add", "Follow a channel, a blog or a feed. Send a link with it"),
     ("list", "Everything this chat follows"),
     ("remove", "Stop following one of them"),
+    ("route", "Send one source only to some destinations"),
     ("pause", "Hold delivery here, run it again to resume"),
     ("latest", "The most recent items, on demand"),
     ("status", "Health of the sources this chat follows"),

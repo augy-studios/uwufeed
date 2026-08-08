@@ -18,7 +18,8 @@ COMMANDS = [
     ("pause", "Hold delivery here, run it again to resume"),
     ("latest", "The most recent items, on demand"),
     ("status", "Health of the sources this server follows"),
-    ("settings", "Which channel receives posts, quiet hours, digest"),
+    ("settings", "Choose the channel that receives posts"),
+    ("route", "Send one source only to some destinations"),
     ("link", "Connect this server to a web account"),
 ]
 

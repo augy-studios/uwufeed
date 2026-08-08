@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 
 from . import store
 from .channels import discord, telegram, webpush
-from .channels.webpush import PermanentFailure
+from .errors import PermanentFailure
 from .templates import context_from_item
 
 load_dotenv()

@@ -5,4 +5,5 @@ EXTENSIONS = [
     "cogs.sources",
     "cogs.prefs",
     "cogs.items",
+    "cogs.routing",
 ]

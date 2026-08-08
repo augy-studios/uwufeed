@@ -9,6 +9,7 @@ import asyncio
 import json
 import os
 
+from ..errors import PermanentFailure
 from ..templates import RenderContext, summary_for
 
 try:
@@ -74,7 +75,3 @@ async def send(client, subscription: str | dict, ctx: RenderContext) -> bool:
     except Exception as err:
         print(f"web push error: {type(err).__name__}: {err}")
         return False
-
-
-class PermanentFailure(Exception):
-    """A target that should be deactivated rather than retried."""

@@ -25,7 +25,7 @@ VPS, in [`../../workers/`](../../workers/).
 | Path | Method | Status |
 | --- | --- | --- |
 | `/api/hooks/websub` | GET, POST | Working |
-| `/api/hooks/eventsub` | POST | Stub, Phase 5 |
+| `/api/hooks/eventsub` | POST | Working |
 | `/api/sources/resolve` | POST | Working |
 | `/api/sources/subscribe` | POST | Working |
 | `/api/sources/unsubscribe` | POST | Working |

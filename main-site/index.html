@@ -148,6 +148,23 @@
         </footer>
     </div>
 
+    <div class="modal-backdrop hidden" id="confirmModal">
+        <div class="modal glass" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+            <div class="modal-head">
+                <h2 id="confirmTitle">Are you sure?</h2>
+                <button class="icon-btn small" type="button" data-close-modal="confirmModal"
+                    aria-label="Close">
+                    <span data-icon="close"></span>
+                </button>
+            </div>
+            <p class="modal-body" id="confirmBody"></p>
+            <div class="btn-row modal-actions">
+                <button class="btn" type="button" id="confirmYes">Confirm</button>
+                <button class="btn secondary" type="button" id="confirmNo">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-backdrop hidden" id="themeModal">
         <div class="modal glass" role="dialog" aria-modal="true" aria-labelledby="themeModalTitle">
             <div class="modal-head">

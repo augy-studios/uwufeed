@@ -9,6 +9,7 @@ import os
 
 import httpx
 
+from ..errors import PermanentFailure
 from ..ratelimit import TELEGRAM_GLOBAL
 from ..templates import RenderContext, headline, summary_for
 
@@ -81,11 +82,10 @@ async def send(client: httpx.AsyncClient, chat_id: str, ctx: RenderContext) -> b
             continue
 
         # 403 is the user blocking the bot, 400 with "chat not found" is a
-        # deleted chat. Both are permanent, so stop rather than retrying
-        # this message forever.
+        # deleted chat. Both are permanent, so the target is deactivated
+        # rather than this message being retried forever.
         if res.status_code in (400, 403):
-            print(f"telegram rejected chat {chat_id}: {res.text[:160]}")
-            return False
+            raise PermanentFailure(f"telegram rejected chat {chat_id}: {res.text[:160]}")
 
         if 500 <= res.status_code < 600:
             await asyncio.sleep(2 ** attempt)
@@ -95,8 +95,3 @@ async def send(client: httpx.AsyncClient, chat_id: str, ctx: RenderContext) -> b
         return False
 
     return False
-
-
-def is_permanent_failure(status: int) -> bool:
-    """A target worth deactivating rather than retrying."""
-    return status in (400, 403)

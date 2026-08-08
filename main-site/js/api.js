@@ -1,6 +1,15 @@
 // One place that knows how to talk to /api. Same origin, so the session
 // cookie rides along on its own.
 
+// Any 401 from anywhere means the session is gone, whatever the stored
+// hint claimed. One handler keeps the whole interface honest rather than
+// each caller remembering to check.
+let onUnauthorized = null;
+
+export function handleUnauthorized(fn) {
+  onUnauthorized = fn;
+}
+
 async function request(path, { method = "GET", body } = {}) {
   const res = await fetch(path, {
     method,
@@ -23,6 +32,9 @@ async function request(path, { method = "GET", body } = {}) {
     const error = new Error((payload && payload.error) || `http_${res.status}`);
     error.status = res.status;
     error.payload = payload;
+    // Logout answers 204, so it never lands here. Everything else that
+    // meets an expired session flips the interface to signed out.
+    if (res.status === 401 && onUnauthorized) onUnauthorized();
     throw error;
   }
   return payload;

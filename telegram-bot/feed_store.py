@@ -140,6 +140,35 @@ async def set_target_active(user_id: str, chat_id: int, active: bool) -> None:
         res.raise_for_status()
 
 
+async def targets(user_id: str) -> list[dict]:
+    async with _client() as client:
+        res = await client.get(
+            "/uwufeed_targets",
+            params={"user_id": f"eq.{user_id}", "select": "id,channel,target_ref,active",
+                    "order": "created_at.asc"},
+        )
+        res.raise_for_status()
+        return res.json()
+
+
+async def set_routing(subscription_id: int, target_ids: list[int]) -> None:
+    """No rows means every destination, which is the default."""
+    async with _client() as client:
+        res = await client.delete(
+            "/uwufeed_subscription_targets",
+            params={"subscription_id": f"eq.{subscription_id}"},
+        )
+        res.raise_for_status()
+        if target_ids:
+            res = await client.post(
+                "/uwufeed_subscription_targets",
+                params={"on_conflict": "subscription_id,target_id"},
+                headers={"prefer": "resolution=ignore-duplicates,return=minimal"},
+                json=[{"subscription_id": subscription_id, "target_id": t} for t in target_ids],
+            )
+            res.raise_for_status()
+
+
 # ---- sources and subscriptions ----
 
 async def resolve_source(url: str) -> dict:
@@ -205,13 +234,24 @@ async def subscriptions(user_id: str) -> list[dict]:
             "/uwufeed_subscriptions",
             params={
                 "user_id": f"eq.{user_id}",
-                "select": "source_id,uwufeed_sources(id,title,feed_url,platform,tier,"
-                          "lease_expires_at,next_check_at,poll_interval_s,fail_count,retired_at)",
+                "select": "id,source_id,uwufeed_sources(id,title,feed_url,platform,tier,"
+                          "lease_expires_at,next_check_at,poll_interval_s,fail_count,retired_at),"
+                          "uwufeed_subscription_targets(target_id)",
                 "order": "source_id.asc",
             },
         )
         res.raise_for_status()
-        return [row["uwufeed_sources"] for row in res.json() if row.get("uwufeed_sources")]
+        rows = []
+        for row in res.json():
+            source = row.get("uwufeed_sources")
+            if not source:
+                continue
+            source["subscription_id"] = row["id"]
+            source["target_ids"] = [
+                int(r["target_id"]) for r in (row.get("uwufeed_subscription_targets") or [])
+            ]
+            rows.append(source)
+        return rows
 
 
 async def latest_items(user_id: str, limit: int = 10) -> list[dict]:

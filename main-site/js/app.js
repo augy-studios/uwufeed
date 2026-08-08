@@ -6,8 +6,8 @@ import {
   getStoredMode,
   initTheme,
 } from "./theme.js";
-import { hydrateIcons, openModal, closeModal, banner, escapeHtml } from "./ui.js";
-import { api, describe } from "./api.js";
+import { hydrateIcons, openModal, closeModal, banner, escapeHtml, confirmDialog } from "./ui.js";
+import { api, describe, handleUnauthorized } from "./api.js";
 import * as auth from "./auth.js";
 import * as feed from "./feed.js";
 import * as sources from "./sources.js";
@@ -18,6 +18,8 @@ const el = (id) => document.getElementById(id);
 
 // ---- signed in chrome ----
 
+// Everything that only makes sense signed in is hidden rather than
+// disabled, so there is never a control that looks available and is not.
 function paintAuthState() {
   const signedIn = auth.state.signedIn;
   document.body.classList.toggle("signed-in", signedIn);
@@ -27,6 +29,19 @@ function paintAuthState() {
   el("sourcesSignedOut").classList.toggle("hidden", signedIn);
   el("feedSignedOut").classList.toggle("hidden", signedIn);
   el("whoami").textContent = signedIn ? auth.state.username || auth.state.email || "" : "";
+
+  if (!signedIn) {
+    // A signed out account tab should carry nothing from the last session:
+    // no stale link code, no notification state, no leftover message.
+    el("linkResult").classList.add("hidden");
+    el("linkResult").innerHTML = "";
+    banner(el("accountBanner"), "ok", null);
+    banner(el("sourcesBanner"), "ok", null);
+    el("itemList").innerHTML = "";
+    el("sourceList").innerHTML = "";
+    el("loadMore").classList.add("hidden");
+    feed.reset();
+  }
 }
 
 async function refreshAll() {
@@ -77,11 +92,25 @@ function wireAuth() {
   });
 
   el("signOut").addEventListener("click", async () => {
+    // The button is only visible when signed in, but the hint that paints
+    // it is optimistic, so check the real state before promising anything.
+    if (!auth.state.signedIn) {
+      paintAuthState();
+      return;
+    }
+
+    const sure = await confirmDialog({
+      title: "Sign out?",
+      body:
+        "This browser will stop showing your feed. Anything you follow stays, " +
+        "and connected chats keep receiving posts.",
+      confirmLabel: "Sign out",
+      cancelLabel: "Stay signed in",
+    });
+    if (!sure) return;
+
     await auth.logout();
     paintAuthState();
-    feed.reset();
-    el("itemList").innerHTML = "";
-    el("sourceList").innerHTML = "";
   });
 }
 
@@ -191,6 +220,9 @@ function wireOpml() {
 // ---- notifications ----
 
 async function paintPushState() {
+  // Nothing to paint when the panel holding it is hidden.
+  if (!auth.state.signedIn) return;
+
   const btn = el("pushToggle");
   if (!pushSupported()) {
     btn.disabled = true;
@@ -361,6 +393,14 @@ async function boot() {
   wirePush();
   wireLink();
   registerServiceWorker();
+
+  // Any 401, from any call, means the session is gone whatever the hint
+  // said. This is what stops a stale hint leaving signed in controls on
+  // screen with nothing behind them.
+  handleUnauthorized(() => {
+    auth.applySignedOut();
+    paintAuthState();
+  });
 
   // Optimistic, from the stored hint, so the shell does not flicker.
   auth.primeFromHint();

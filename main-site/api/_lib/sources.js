@@ -23,8 +23,64 @@ export function parseUrl(input) {
   return { url: url.toString() };
 }
 
+// Twitch publishes no feed, so it never reaches resolveFeed. The source is
+// built from the Helix user lookup and kept live by EventSub instead.
+async function resolveTwitch(inputUrl) {
+  const { configured, lookupUser, subscribeStreamOnline } = await import("./twitch.js");
+  if (!configured()) return { error: "twitch_not_configured" };
+
+  let login;
+  try {
+    login = new URL(inputUrl).pathname.split("/").filter(Boolean)[0];
+  } catch {
+    return { error: "invalid_url" };
+  }
+  if (!login) return { error: "no_feed_found" };
+
+  const user = await lookupUser(login);
+  if (!user) return { error: "no_feed_found" };
+
+  const feedUrl = `https://www.twitch.tv/${user.login}`;
+  const existing = await selectOne(
+    "uwufeed_sources",
+    `feed_url=eq.${encodeURIComponent(feedUrl)}&select=*`
+  );
+
+  const upserted = await upsert(
+    "uwufeed_sources",
+    [
+      {
+        platform: "twitch",
+        tier: "push",
+        feed_url: feedUrl,
+        external_ref: user.id,
+        title: user.name || user.login,
+        hub_url: "https://api.twitch.tv/helix/eventsub/subscriptions",
+        next_check_at: null,
+        retired_at: null,
+      },
+    ],
+    ["feed_url"]
+  );
+  const source = Array.isArray(upserted) && upserted.length ? upserted[0] : existing;
+  if (!source) return { error: "source_write_failed" };
+
+  let subscription = null;
+  if (!existing) {
+    const base = (process.env.PUBLIC_BASE_URL || "").replace(/\/+$/, "");
+    const result = await subscribeStreamOnline(user.id, `${base}/api/hooks/eventsub`);
+    subscription = { ok: result.ok, status: result.status };
+  }
+
+  // Nothing to seed: a stream that is not live has no item, and a stream
+  // that is live already was not announced by us.
+  return { source, created: !existing, fetches: 1, seeded: 0, subscription };
+}
+
 // Resolve, store, seed and subscribe. Returns the source row.
 export async function resolveAndStore(inputUrl, { subscribeToHub = true } = {}) {
+  if (platformFor(inputUrl) === "twitch") return resolveTwitch(inputUrl);
+
   const resolved = await resolveFeed(inputUrl);
   if (resolved.error) return { error: resolved.error, status: resolved.status };
 

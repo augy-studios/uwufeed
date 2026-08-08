@@ -15,6 +15,7 @@ followed in any of the three is the same source everywhere.
 | `/add` | Follow a channel, a blog or a feed | Working |
 | `/list` | Everything this chat follows | Working |
 | `/remove` | Stop following one of them | Working |
+| `/route` | Send one source only to some destinations | Working |
 | `/pause` | Hold delivery here, run it again to resume | Working |
 | `/latest` | The most recent items, on demand | Working |
 | `/status` | Health of the sources this chat follows | Working |
