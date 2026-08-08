@@ -10,6 +10,7 @@ with an underscore, so nothing here is reachable over HTTP.
 | [`normalize.js`](normalize.js) | Feed XML in, the item shape from `db/schema.md` out |
 | [`discover.js`](discover.js) | URL in, feed URL and hub out. Autodiscovery, Link headers, the YouTube special case |
 | [`websub.js`](websub.js) | Callback URLs, signature verification, hub subscription requests |
+| [`alert.js`](alert.js) | Operational alerts to the Discord webhook. Swallows its own failures |
 | [`session.js`](session.js) | Stub, Phase 4. Custom sessions against `uwu_sessions` |
 
 ## normalize.js

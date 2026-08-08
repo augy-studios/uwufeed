@@ -32,7 +32,7 @@ VPS, in [`../../workers/`](../../workers/).
 | `/api/items/list` | GET | Stub, Phase 4 |
 | `/api/targets/webpush` | POST, DELETE | Stub, Phase 4 |
 | `/api/targets/ntfy` | POST, DELETE | Stub, Phase 6 |
-| `/api/cron/renew-leases` | GET | Stub, scheduled daily |
+| `/api/cron/renew-leases` | GET | Working, scheduled daily |
 | `/api/cron/cleanup` | GET | Working, scheduled daily |
 | `/api/cron/digest`, `/heartbeat` | GET | Stub, scheduled |
 
@@ -68,7 +68,12 @@ WebSub secret. See [`hooks/README.md`](hooks/README.md).
 
 `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `PUBLIC_BASE_URL`,
 `WEBSUB_CALLBACK_SECRET`, `WEBSUB_LEASE_SECONDS`, `ADMIN_TOKEN`,
-`CRON_SECRET`, `USER_AGENT_CONTACT`. See [`../../.env.example`](../../.env.example).
+`CRON_SECRET`, `USER_AGENT_CONTACT`, `DISCORD_WEBHOOK_URL`. See
+[`../../.env.example`](../../.env.example).
+
+`DISCORD_WEBHOOK_URL` is here as well as on the VPS: the crons use it to
+report operational problems, which is a different job from delivering
+items but the same destination.
 
 ## Local development
 

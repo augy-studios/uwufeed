@@ -8,7 +8,7 @@ Schedules are declared in [`../../vercel.json`](../../vercel.json).
 
 | File | Route | Schedule | Status |
 | --- | --- | --- | --- |
-| [`renew-leases.js`](renew-leases.js) | `/api/cron/renew-leases` | `0 3 * * *` | Stub |
+| [`renew-leases.js`](renew-leases.js) | `/api/cron/renew-leases` | `0 3 * * *` | Working |
 | [`cleanup.js`](cleanup.js) | `/api/cron/cleanup` | `0 4 * * *` | Working |
 | [`digest.js`](digest.js) | `/api/cron/digest` | `0 8 * * *` | Stub |
 | [`heartbeat.js`](heartbeat.js) | `/api/cron/heartbeat` | `*/15 * * * *` | Stub |
@@ -25,9 +25,49 @@ half: no error is raised, no request fails, the feed simply goes quiet.
 That is the worst failure mode in the system because it looks like nothing
 being published.
 
-It is still a stub. Until it is written, either resubscribe by hand through
-`/api/sources/subscribe`, or treat the push tier as good for one lease
-period only.
+### How it runs
+
+Sources are taken soonest expiry first, capped at 100 a run, spaced 150ms
+apart. The three day window means a source gets three consecutive nightly
+attempts before its lease actually lapses, so the cap only ever delays the
+least urgent.
+
+### It cannot confirm its own work
+
+The hub answers `202` and then verifies out of band by calling
+`/api/hooks/websub`, which is what actually writes `lease_expires_at`. So a
+run never learns whether its requests worked.
+
+That is handled by being self healing rather than by tracking state.
+Anything whose lease did not move is still inside the window tomorrow and
+gets requested again. A source that is *still* lapsed when renewal reaches
+it was asked before and never verified, which is the only evidence
+available without a per attempt column, and it increments `fail_count`.
+
+A brand new source with no lease at all gets 24 hours of grace first, since
+`resolve` subscribes the moment a source is created and verification
+normally takes seconds.
+
+### A dead hub falls back to polling
+
+Five consecutive failures and the source is moved to the poll tier with a
+fresh `fail_count`, rather than retired.
+
+A blog that dropped WebSub or a hub that moved still has a perfectly good
+feed behind it. The subscriber gets items in minutes instead of seconds,
+which is much better than never. The counter is reset on the way across
+because the poll tier retires at 20 of its own failures and hub problems
+should not count toward that.
+
+### It alerts
+
+Silence is the failure mode, so the job speaks up through
+`DISCORD_WEBHOOK_URL` whenever a night does not look healthy: sources
+already past their lease, a batch where nothing was accepted, any
+demotions, or errors.
+
+**This means `DISCORD_WEBHOOK_URL` has to be set in Vercel too**, not only
+on the VPS where the dispatcher reads it.
 
 ## cleanup
 

@@ -45,6 +45,7 @@ WEBSUB_CALLBACK_SECRET
 ADMIN_TOKEN
 CRON_SECRET
 USER_AGENT_CONTACT
+DISCORD_WEBHOOK_URL
 ```
 
 `PUBLIC_BASE_URL` has to be the real deployed URL. It is what the hub will
@@ -118,9 +119,9 @@ hand. The recipe is in `main-site/api/hooks/README.md`.
 - Fan out to more than one destination. Everything goes to the single
   configured Discord webhook until targets exist
 
-:::warn Renew the leases
-`/api/cron/renew-leases` is still a stub. A WebSub lease lasts at most ten
-days, so the push tier will go quiet after one lease period with no error
-anywhere. Until that cron is written, resubscribe through
-`/api/sources/subscribe`.
+:::note Leases renew themselves
+`/api/cron/renew-leases` runs nightly and resubscribes anything expiring
+within three days, so the push tier keeps itself alive. It alerts through
+`DISCORD_WEBHOOK_URL` if a night looks wrong, which means that variable
+needs setting in Vercel as well as on the machine running the dispatcher.
 :::

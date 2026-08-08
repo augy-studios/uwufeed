@@ -78,7 +78,11 @@ the `resolve` response.
 
 ## Leases
 
-Nothing here renews anything. `/api/cron/renew-leases` does that, nightly.
-It is still a stub, so the push tier currently works for one lease period
-and then stops with no error. That is the first thing to finish after
-Phase 1.
+Nothing here renews anything. `/api/cron/renew-leases` does that nightly,
+for anything expiring within three days.
+
+The relationship runs the other way too: that cron only ever *requests*
+renewal, and the GET handler in this directory is what writes
+`lease_expires_at` when the hub verifies. A source that keeps arriving here
+for verification is healthy. A source that stops is what the cron's
+alerting is watching for.

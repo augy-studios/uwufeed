@@ -72,17 +72,21 @@ Everything unbuilt answers clearly rather than failing. Vercel functions
 return `501` with the phase they belong to, and the bots reply with a short
 sentence. Nothing fails silently.
 
-## The one outstanding piece of Phase 1
+## Keeping the push tier alive
 
-`main-site/api/cron/renew-leases.js` is still a stub, and it is the highest
-consequence stub in the repository.
+WebSub leases last at most ten days, and a lapsed lease is the worst
+failure mode in the system: the push tier goes quiet with no failed
+request, no exception and no alert, looking exactly like nobody
+publishing.
 
-WebSub leases last at most ten days. Without nightly renewal the push tier
-stops after one lease period and nothing errors anywhere: no failed
-request, no exception, no alert. It looks exactly like nobody publishing.
+`/api/cron/renew-leases` runs nightly against anything expiring within
+three days, and alerts through the Discord webhook when a night does not
+look healthy. A hub that rejects a source five times running drops that
+source to the poll tier rather than retiring it, so a blog that abandoned
+WebSub keeps working, just more slowly.
 
-Until it is written, resubscribe through `/api/sources/subscribe`, or treat
-the push tier as good for one lease period.
+That does mean `DISCORD_WEBHOOK_URL` has to be set in Vercel as well as on
+the VPS.
 
 ## Getting started
 

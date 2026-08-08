@@ -48,6 +48,7 @@ WEBSUB_LEASE_SECONDS
 ADMIN_TOKEN
 CRON_SECRET
 USER_AGENT_CONTACT
+DISCORD_WEBHOOK_URL
 ```
 
 `PUBLIC_BASE_URL` is what hubs call back. If it is wrong, every
@@ -108,11 +109,11 @@ Vercel's environment settings, and a mode 600 `.env` on the VPS.
 
 Never in the repository, never in the browser, never in a bot message.
 
-:::warn Renew the leases
-`/api/cron/renew-leases` is a stub. A WebSub lease lasts at most ten days,
-so an untouched deployment stops receiving push notifications after one
-lease period with nothing logging an error. Finish that cron before
-trusting a deployment, or resubscribe by hand.
+:::warn Set the webhook in Vercel too
+`DISCORD_WEBHOOK_URL` is read in two places: by the dispatcher on the VPS
+to deliver items, and by the Vercel crons to report operational problems.
+Without it in Vercel, lease renewal still works but goes silent when it
+fails, which defeats the point of it alerting.
 :::
 
 ## Costs at rest

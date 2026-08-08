@@ -78,6 +78,28 @@ export async function rpc(fn, args) {
   return pgrest(`rpc/${fn}`, { method: "POST", body: args });
 }
 
+// Row count without pulling the rows. PostgREST reports it in
+// content-range when asked for an exact count.
+export async function count(table, query) {
+  requireConfig();
+  const res = await fetch(`${URL_BASE}/rest/v1/${table}?${query}&select=id&limit=1`, {
+    headers: {
+      apikey: KEY,
+      authorization: `Bearer ${KEY}`,
+      prefer: "count=exact",
+      range: "0-0",
+    },
+  });
+
+  if (!res.ok && res.status !== 206) {
+    const raw = await res.text();
+    throw new Error(`postgrest ${res.status} counting ${table}: ${raw.slice(0, 300)}`);
+  }
+
+  const total = parseInt((res.headers.get("content-range") || "").split("/")[1] || "0", 10);
+  return Number.isFinite(total) ? total : 0;
+}
+
 // Returns how many rows went, which is the only interesting output of a
 // retention pass. PostgREST reports it in content-range when asked.
 export async function remove(table, query) {
