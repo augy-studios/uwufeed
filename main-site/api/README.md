@@ -35,7 +35,7 @@ VPS, in [`../../workers/`](../../workers/).
 | `/api/subscriptions/add`, `/list`, `/remove`, `/route` | GET, POST | Working |
 | `/api/targets/webpush` | GET, POST, DELETE | Working |
 | `/api/targets/list` | GET | Working |
-| `/api/targets/ntfy` | POST, DELETE | Stub, Phase 6 |
+| `/api/targets/ntfy` | GET, POST, DELETE | Working |
 | `/api/cron/renew-leases` | GET | Working, scheduled daily |
 | `/api/cron/cleanup` | GET | Working, scheduled daily |
 | `/api/cron/digest`, `/heartbeat` | GET | Stub, scheduled |

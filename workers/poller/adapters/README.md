@@ -22,7 +22,7 @@ subscribe time, and re-deriving it here would let the two disagree.
 | --- | --- | --- |
 | [`rss.py`](rss.py) | Plain RSS and Atom, the default | Working |
 | [`reddit.py`](reddit.py) | Reddit subreddits and users | Working |
-| [`rsshub.py`](rsshub.py) | Long tail sites through RSSHub | Stub, Phase 6 |
+| [`rsshub.py`](rsshub.py) | Long tail sites through RSSHub | Working |
 
 ## Adding one
 

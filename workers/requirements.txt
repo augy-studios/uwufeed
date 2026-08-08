@@ -11,5 +11,6 @@ feedparser>=6.0,<7.0
 # function, which is what keeps the serverless side dependency free.
 pywebpush>=2.0,<3.0
 
-# Phase 6, the stream listeners
-# websockets>=12.0,<14.0
+# The Bluesky Jetstream listener. Mastodon needs nothing: it goes through
+# the poll tier as ordinary RSS.
+websockets>=12.0,<15.0

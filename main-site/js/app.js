@@ -263,6 +263,7 @@ function wirePush() {
         banner(status, "ok", "Notifications on for this browser.");
       }
       await paintPushState();
+  await suggestNtfyTopic();
       await refreshAll();
     } catch (err) {
       banner(
@@ -276,6 +277,40 @@ function wirePush() {
       el("pushToggle").disabled = false;
     }
   });
+}
+
+// ---- ntfy ----
+
+function wireNtfy() {
+  const status = el("accountBanner");
+
+  el("ntfyAdd").addEventListener("click", async () => {
+    const input = el("ntfyTopic");
+    const topic = input.value.trim();
+    if (!topic) return;
+    try {
+      const result = await api.addNtfy(topic);
+      el("ntfyHint").textContent = `Subscribe to ${result.url} in the ntfy app.`;
+      input.value = "";
+      banner(status, "ok", "That topic will receive posts.");
+      await refreshAll();
+    } catch (err) {
+      banner(status, "error", describe(err));
+    }
+  });
+}
+
+// A generated topic, offered rather than imposed. Anyone who knows the
+// name can read it, so a memorable one is a guessable one.
+async function suggestNtfyTopic() {
+  if (!auth.state.signedIn) return;
+  try {
+    const data = await api.ntfySuggestion();
+    el("ntfyTopic").placeholder = data.suggested_topic;
+    el("ntfyTopic").value = data.suggested_topic;
+  } catch {
+    // Not fatal: the field still accepts a topic typed by hand.
+  }
 }
 
 // ---- linking a chat ----
@@ -392,6 +427,7 @@ async function boot() {
   wireOpml();
   wirePush();
   wireLink();
+  wireNtfy();
   registerServiceWorker();
 
   // Any 401, from any call, means the session is gone whatever the hint
@@ -423,6 +459,7 @@ async function boot() {
 
   await refreshAll();
   await paintPushState();
+  await suggestNtfyTopic();
 }
 
 boot();

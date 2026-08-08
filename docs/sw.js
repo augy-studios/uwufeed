@@ -2,7 +2,7 @@
 // once they have been opened. No push and no background sync here; that is
 // the main site's job.
 
-const CACHE = "uwufeed-docs-v3";
+const CACHE = "uwufeed-docs-v4";
 
 const SHELL = [
   "/",
@@ -28,6 +28,7 @@ const CONTENT = [
   "/content/introduction.md",
   "/content/quick-start.md",
   "/content/how-it-works.md",
+  "/content/platforms.md",
   "/content/web-overview.md",
   "/content/web-sources.md",
   "/content/web-opml.md",

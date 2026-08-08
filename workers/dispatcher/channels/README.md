@@ -15,7 +15,7 @@ dead target is not an exception, it is a fact to record.
 | [`discord.py`](discord.py) | Webhook POST | Working |
 | [`telegram.py`](telegram.py) | Bot API `sendMessage` | Working |
 | [`webpush.py`](webpush.py) | VAPID, aes128gcm | Working |
-| [`ntfy.py`](ntfy.py) | HTTP POST to a topic | Stub, Phase 6 |
+| [`ntfy.py`](ntfy.py) | HTTP POST to a topic | Working |
 
 ## Rate limits
 

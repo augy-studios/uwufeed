@@ -6,7 +6,7 @@ is deployed by Vercel and nothing here is imported by application code.
 | Path | What it is |
 | --- | --- |
 | [`systemd/`](systemd/) | Unit files for the dispatcher, both bots and the poller |
-| [`rsshub/`](rsshub/) | RSSHub container, Phase 6 |
+| [`rsshub/`](rsshub/) | RSSHub container, for the long tail |
 | [`tmux-bootstrap.sh`](tmux-bootstrap.sh) | Start every process in one tmux session |
 
 ## What runs on the VPS and why
@@ -15,7 +15,7 @@ is deployed by Vercel and nothing here is imported by application code.
 | --- | --- |
 | Dispatcher | Holds a websocket open to Supabase Realtime |
 | Poller | A loop with row locks held across statements |
-| Stream listeners | Long lived connections to Bluesky and Mastodon |
+| Bluesky listener | One long lived Jetstream connection covering every Bluesky source |
 | Telegram bot | Long polling or a persistent connection |
 | Discord bot | A gateway websocket that must stay connected |
 | RSSHub | A container, and a stateful cache |

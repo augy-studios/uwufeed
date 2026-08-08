@@ -78,7 +78,5 @@ one message.
 
 ## What works today
 
-Web push, Telegram and Discord all deliver, and each source can be routed
-to specific destinations.
-
-ntfy is Phase 6.
+All four channels deliver, and each source can be routed to specific
+destinations.

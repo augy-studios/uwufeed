@@ -24,8 +24,9 @@ nothing is ever polled.
 | Blogs advertising a hub | WebSub | 2 to 10 seconds |
 | Twitch going live | EventSub | 2 to 10 seconds |
 | Bluesky | Jetstream websocket | Live |
-| Mastodon | Streaming API | Live |
+| Mastodon | RSS through the poll tier | 60 seconds to an hour |
 | Reddit, plain RSS, everything else | Polling | 60 seconds to an hour |
+| Long tail platforms | RSSHub, then polling | 60 seconds to an hour |
 
 Polling is the fallback rather than the design.
 

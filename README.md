@@ -24,7 +24,7 @@ latency, and it costs a single HTTP request at signup.
 | Blogs with a hub | WebSub | 2 to 10s |
 | Twitch | EventSub | 2 to 10s |
 | Bluesky | Jetstream websocket | Live |
-| Mastodon | Streaming API | Live |
+| Mastodon | RSS through the poll tier | 60s to 1h |
 | Reddit, plain RSS, the rest | Adaptive polling | 60s to 1h |
 
 ## Repository layout
@@ -60,7 +60,7 @@ everything as though it exists.
 | 3 | Telegram bot commands, and the auth core | Done |
 | 4 | Timeline, source management in the browser, web push | Done |
 | 5 | Twitch and Discord bot commands | Done |
-| 6 | RSSHub, Bluesky, Mastodon, ntfy | Scaffolded |
+| 6 | RSSHub, Bluesky, Mastodon, ntfy | Done |
 | 7 | Quotas, alerting, backups | Not started |
 
 Both ingestion tiers work. A real YouTube upload reaches Discord in under

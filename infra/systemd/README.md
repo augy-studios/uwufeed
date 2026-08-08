@@ -11,6 +11,7 @@ tmux while working on them.
 | `uwufeed-telegram.service` | `telegram-bot/main.py` | Ready |
 | `uwufeed-discord.service` | `discord-bot/main.py` | Ready |
 | `uwufeed-poller.service` | `python -m poller.main` | Ready |
+| `uwufeed-bluesky.service` | `python -m streams.bluesky` | Ready |
 
 ## Assumptions
 

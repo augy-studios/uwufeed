@@ -7,9 +7,9 @@ what a serverless function cannot do. Request shaped work belongs in
 
 | Directory | What it does | Status |
 | --- | --- | --- |
-| [`dispatcher/`](dispatcher/) | Listens on Supabase Realtime, fans out to targets | Working, Discord only |
+| [`dispatcher/`](dispatcher/) | Listens on Supabase Realtime, fans out to targets | Working |
 | [`poller/`](poller/) | The poll tier, `next_check_at` batches | Working |
-| [`streams/`](streams/) | Bluesky and Mastodon long lived connections | Stub, Phase 6 |
+| [`streams/`](streams/) | Bluesky Jetstream. Mastodon uses the poll tier instead | Working |
 
 ## Setup
 
@@ -31,11 +31,15 @@ ships.
 cd workers
 python -m dispatcher.main
 python -m poller.main
+python -m streams.bluesky
 ```
 
-Two separate processes. Run from this directory, as modules: the submodules
-import their siblings relatively, so running a file as a script fails on
-the first import.
+Three separate processes. Run from this directory, as modules: the
+submodules import their siblings relatively, so running a file as a script
+fails on the first import.
+
+The Bluesky listener is only needed if anyone follows a Bluesky account.
+It idles harmlessly otherwise.
 
 Under tmux and systemd on the VPS, see [`../infra/`](../infra/).
 

@@ -8,7 +8,7 @@ serverless function cannot do.
 | --- | --- | --- |
 | [Dispatcher](#/workers-dispatcher) | Listens for new items and delivers them | Works, Discord only |
 | [Poller](#/workers-poller) | The poll tier, for sources with no hub | Working |
-| [Stream listeners](#/workers-streams) | Bluesky and Mastodon | Phase 6 |
+| [Stream listeners](#/workers-streams) | Bluesky Jetstream | Working |
 
 ## Why these are not serverless
 

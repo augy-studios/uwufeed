@@ -9,6 +9,7 @@ export const SECTIONS = [
       { id: "introduction", title: "Introduction", file: "content/introduction.md" },
       { id: "quick-start", title: "Quick start", file: "content/quick-start.md" },
       { id: "how-it-works", title: "How it works", file: "content/how-it-works.md" },
+      { id: "platforms", title: "What you can follow", file: "content/platforms.md" },
     ],
   },
   {

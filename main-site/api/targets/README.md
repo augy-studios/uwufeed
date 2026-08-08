@@ -8,7 +8,7 @@ whatever that transport needs to reach it.
 | --- | --- | --- |
 | [`webpush.js`](webpush.js) | `GET, POST, DELETE /api/targets/webpush` | Working |
 | [`list.js`](list.js) | `GET /api/targets/list` | Working |
-| [`ntfy.js`](ntfy.js) | `POST, DELETE /api/targets/ntfy` | Stub, Phase 6 |
+| [`ntfy.js`](ntfy.js) | `GET, POST, DELETE /api/targets/ntfy` | Working |
 
 The other two channels do not enrol over HTTP. A Telegram target is created
 by the bot when a chat subscribes, and a Discord target is created by the

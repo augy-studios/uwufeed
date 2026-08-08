@@ -77,13 +77,76 @@ async function resolveTwitch(inputUrl) {
   return { source, created: !existing, fetches: 1, seeded: 0, subscription };
 }
 
+// Bluesky has no feed either. The source is identified by its DID and kept
+// live by the Jetstream listener, which follows every Bluesky source over
+// one shared connection.
+async function resolveBluesky(inputUrl, handle) {
+  const { resolveBlueskyDid } = await import("./platforms.js");
+  const did = await resolveBlueskyDid(handle);
+  if (!did) return { error: "no_feed_found" };
+
+  const feedUrl = `https://bsky.app/profile/${handle}`;
+  const existing = await selectOne(
+    "uwufeed_sources",
+    `feed_url=eq.${encodeURIComponent(feedUrl)}&select=*`
+  );
+
+  const upserted = await upsert(
+    "uwufeed_sources",
+    [
+      {
+        platform: "bluesky",
+        tier: "push",
+        feed_url: feedUrl,
+        external_ref: did,
+        title: handle,
+        // No hub and no lease. The listener is the transport, so lease
+        // renewal has nothing to do here.
+        hub_url: null,
+        next_check_at: null,
+        retired_at: null,
+      },
+    ],
+    ["feed_url"]
+  );
+  const source = Array.isArray(upserted) && upserted.length ? upserted[0] : existing;
+  if (!source) return { error: "source_write_failed" };
+
+  // The listener re-reads its source list every few minutes, so a new
+  // account starts arriving without anyone restarting anything.
+  return { source, created: !existing, fetches: 1, seeded: 0, subscription: null };
+}
+
 // Resolve, store, seed and subscribe. Returns the source row.
 export async function resolveAndStore(inputUrl, { subscribeToHub = true } = {}) {
   if (platformFor(inputUrl) === "twitch") return resolveTwitch(inputUrl);
 
+  const { blueskyHandle, mastodonFeedUrl, rsshubUrl } = await import("./platforms.js");
+
+  const handle = blueskyHandle(inputUrl);
+  if (handle) return resolveBluesky(inputUrl, handle);
+
   const resolved = await resolveFeed(inputUrl);
+
+  // Nothing found by the ordinary route. Two fallbacks before giving up:
+  // a Mastodon profile whose page could not be parsed, and a platform
+  // RSSHub can serve.
+  if (resolved.error === "no_feed_found") {
+    for (const candidate of [mastodonFeedUrl(inputUrl), rsshubUrl(inputUrl)]) {
+      if (!candidate) continue;
+      const retry = await resolveFeed(candidate);
+      if (!retry.error) return storeFeed(retry, subscribeToHub);
+    }
+  }
   if (resolved.error) return { error: resolved.error, status: resolved.status };
 
+  return storeFeed(resolved, subscribeToHub);
+}
+
+// Everything after a feed has been found: store the source, seed the items
+// already in it, and subscribe to the hub if there is one. Separate so the
+// Mastodon and RSSHub fallbacks reach it too.
+async function storeFeed(resolved, subscribeToHub) {
   const platform = platformFor(resolved.feedUrl);
   const parsed = normalizeFeed(resolved.body, {
     sourceId: 0,

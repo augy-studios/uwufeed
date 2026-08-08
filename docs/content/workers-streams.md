@@ -4,12 +4,12 @@ Long lived connections to platforms that push over a socket rather than
 calling a webhook. These are part of the push tier, and their latency is
 live rather than measured in seconds.
 
-**Status: Phase 6, not started.**
+**Status: Bluesky works. Mastodon deliberately does not run here.**
 
 | Platform | Transport |
 | --- | --- |
 | Bluesky | Jetstream websocket |
-| Mastodon | Streaming API, server sent events |
+| Mastodon | Not used. Goes through the poll tier as RSS |
 
 ## Why not webhooks
 

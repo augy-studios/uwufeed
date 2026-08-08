@@ -33,6 +33,10 @@ tmux new-window -t "$SESSION" -n poller -c "$ROOT/workers"
 tmux send-keys -t "$SESSION:poller" \
   ". .venv/bin/activate && python -m poller.main" C-m
 
+tmux new-window -t "$SESSION" -n bluesky -c "$ROOT/workers"
+tmux send-keys -t "$SESSION:bluesky" \
+  ". .venv/bin/activate && python -m streams.bluesky" C-m
+
 tmux new-window -t "$SESSION" -n shell -c "$ROOT"
 
 tmux select-window -t "$SESSION:dispatcher"

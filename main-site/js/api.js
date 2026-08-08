@@ -55,6 +55,8 @@ export const api = {
     }),
 
   listTargets: () => request("/api/targets/list"),
+  ntfySuggestion: () => request("/api/targets/ntfy"),
+  addNtfy: (topic) => request("/api/targets/ntfy", { method: "POST", body: { topic } }),
 
   vapidKey: () => request("/api/targets/webpush"),
   registerWebPush: (subscription) =>
@@ -92,6 +94,7 @@ const MESSAGES = {
   fetch_failed: "That site could not be reached.",
   feed_fetch_failed: "The feed was found but could not be read.",
   invalid_url: "That does not look like a link.",
+  invalid_topic: "Topics need 8 to 64 letters, numbers, dashes or underscores.",
   unsupported_scheme: "Only http and https links work.",
   not_signed_in: "Sign in first.",
   offline: "You appear to be offline.",

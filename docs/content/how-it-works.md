@@ -11,7 +11,7 @@ YouTube hub  ---->  /api/hooks/websub
 blog hub     ---->  /api/hooks/websub  -->  uwufeed_items  -->  dispatcher  -->  Discord
 Twitch       ---->  /api/hooks/eventsub          |                              Telegram
 Bluesky      ---->  stream listener              | realtime                     web push
-Mastodon     ---->  stream listener              | insert event                 ntfy
+Mastodon     ---->  poller (RSS)                 | insert event                 ntfy
 RSS, Reddit  ---->  poller
 ```
 

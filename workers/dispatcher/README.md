@@ -24,14 +24,11 @@ relatively.
 
 ## What happens on startup
 
-1. Find or create the system target: a `uwufeed_targets` row with
-   `channel = 'discord'`, `target_ref = $DISCORD_WEBHOOK_URL` and a null
-   `user_id`. Giving the Phase 1 webhook a real row rather than special
-   casing it means deliveries are recorded the ordinary way.
-2. Open the Realtime socket and subscribe to inserts on `uwufeed_items`.
-3. Run `uwufeed_pending_deliveries()` once for anything inserted while the
+1. Open the Realtime socket and subscribe to inserts on `uwufeed_items`.
+2. Run `uwufeed_pending_fanout()` once for anything that arrived while the
    process was down, and queue it.
-4. Drain the queue, one item at a time.
+3. Drain the queue, fanning each item out to every destination that should
+   receive it.
 
 ## Why it cannot double send
 
@@ -68,9 +65,34 @@ socket is connected.
 3. Add its headline to `HEADLINES` in `templates.py` if the wording differs.
 4. Fan out in `main.py` once per active target, rather than once overall.
 
+## Who receives an item
+
+`uwufeed_targets_for_item()` answers it: the item's source, everyone
+subscribed to that source, and each of their active destinations, minus
+anything already delivered.
+
+Routing narrows it. A subscription with no rows in
+`uwufeed_subscription_targets` goes everywhere, which is the default. With
+rows, it goes only to those. That is why an empty routing list and "all
+destinations" are the same stored state.
+
+## Channels
+
+| Channel | Transport | Permanent failure |
+| --- | --- | --- |
+| Discord | Webhook POST | 401, 403, 404 |
+| Telegram | Bot API `sendMessage` | 400, 403 |
+| Web push | VAPID through pywebpush | 404, 410 |
+| ntfy | HTTP POST to a topic | 401, 403, 404 |
+
+A permanent failure raises `PermanentFailure` from `errors.py`, and the
+dispatcher deactivates that destination rather than retrying it forever. A
+blocked bot, a deleted webhook and a dead browser subscription are all the
+same shape of problem.
+
 ## Not here yet
 
-- Fan out across `uwufeed_subscriptions` and `uwufeed_targets`. Phase 1 has
-  one hardcoded webhook, so there is nothing to fan out to.
 - User templates from `uwufeed_templates`.
 - Retrying a failed delivery. A failure is recorded and left alone.
+- Quiet hours and digests. The preference columns exist and nothing reads
+  them.

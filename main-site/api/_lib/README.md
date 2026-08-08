@@ -11,6 +11,9 @@ with an underscore, so nothing here is reachable over HTTP.
 | [`discover.js`](discover.js) | URL in, feed URL and hub out. Autodiscovery, Link headers, the YouTube special case |
 | [`websub.js`](websub.js) | Callback URLs, signature verification, hub subscription requests |
 | [`alert.js`](alert.js) | Operational alerts to the Discord webhook. Swallows its own failures |
+| [`sources.js`](sources.js) | URL to stored source, shared by the admin and session endpoints |
+| [`platforms.js`](platforms.js) | RSSHub route map, Mastodon fallback, Bluesky handles |
+| [`twitch.js`](twitch.js) | EventSub signatures and subscription creation |
 | [`session.js`](session.js) | Sessions against `uwufeed_sessions`, token stored hashed |
 | [`password.js`](password.js) | scrypt hashing, parameters stored in the hash |
 | [`linktoken.js`](linktoken.js) | Signed account link tokens, verified by the bots |

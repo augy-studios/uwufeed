@@ -17,7 +17,7 @@ import httpx
 from dotenv import load_dotenv
 
 from . import store
-from .channels import discord, telegram, webpush
+from .channels import discord, ntfy, telegram, webpush
 from .errors import PermanentFailure
 from .templates import context_from_item
 
@@ -29,7 +29,12 @@ SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
 QUEUE: asyncio.Queue = asyncio.Queue(maxsize=2000)
 
 # One sender per channel, all with the same signature.
-SENDERS = {"discord": discord.send, "telegram": telegram.send, "webpush": webpush.send}
+SENDERS = {
+    "discord": discord.send,
+    "telegram": telegram.send,
+    "webpush": webpush.send,
+    "ntfy": ntfy.send,
+}
 
 
 def extract_record(payload) -> dict | None:

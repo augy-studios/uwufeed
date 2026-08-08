@@ -2,9 +2,9 @@
 
 RSSHub as a container, for sites that publish nothing machine readable.
 
-**Status: Phase 6.** The compose file is ready, the adapter that would use
-it is a stub in
-[`../../workers/poller/adapters/rsshub.py`](../../workers/poller/adapters/rsshub.py).
+**Status: working.** Set `RSSHUB_BASE_URL` and a curated set of platform
+URLs resolve through it automatically. The map lives in
+`main-site/api/_lib/platforms.js`.
 
 ## What it is for
 
