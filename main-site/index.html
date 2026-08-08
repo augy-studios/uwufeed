@@ -87,11 +87,13 @@
             <div class="hero">
                 <p class="eyebrow">Push first feed aggregator</p>
                 <h1 class="hero-title">Seconds, not thirteen minutes.</h1>
-                <p class="hero-lede">Follow a YouTube channel, a blog, a subreddit or anything
-                    with a feed. New posts arrive on your phone, in Telegram, in Discord or over
-                    ntfy, usually before the tab you left open notices.</p>
+                <p class="hero-lede" id="heroLede">Follow a YouTube channel, a blog, a subreddit
+                    or anything with a feed. New posts arrive on your phone, in Telegram, in
+                    Discord or over ntfy, usually before the tab you left open notices.</p>
                 <div class="btn-row">
-                    <button class="btn" type="button" id="homeStart">Create an account</button>
+                    <button class="btn" type="button" id="homeStart">Start now</button>
+                    <a class="btn hidden" id="homeDashboard" data-route="overview"
+                        href="/dashboard">Go to dashboard</a>
                     <a class="btn secondary" href="https://docs.feed.uwuapps.org"
                         target="_blank" rel="noopener noreferrer">
                         <span data-icon="external"></span>Read the docs

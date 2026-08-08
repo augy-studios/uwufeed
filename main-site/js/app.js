@@ -40,6 +40,15 @@ function paintAuthState() {
   el("sidebar").classList.toggle("hidden", !signedIn);
   el("navToggle").classList.toggle("hidden", !signedIn);
   if (!signedIn) closeNav();
+
+  // Home is still reachable when signed in, so its call to action swaps
+  // rather than the page becoming unreachable. Asking somebody who is
+  // already signed in to create an account is the wrong thing twice.
+  el("homeStart").classList.toggle("hidden", signedIn);
+  el("homeDashboard").classList.toggle("hidden", !signedIn);
+  el("heroLede").textContent = signedIn
+    ? "Everything you follow, arriving wherever you want it. Your dashboard is one click away."
+    : HERO_LEDE;
   el("sourceForm").classList.toggle("hidden", !signedIn);
   el("sourcesSignedOut").classList.toggle("hidden", signedIn);
   el("feedSignedOut").classList.toggle("hidden", signedIn);
@@ -292,6 +301,11 @@ function wireReset() {
     );
   });
 }
+
+const HERO_LEDE =
+  "Follow a YouTube channel, a blog, a subreddit or anything with a feed. New posts arrive " +
+  "on your phone, in Telegram, in Discord or over ntfy, usually before the tab you left open " +
+  "notices.";
 
 // ---- the navigation drawer ----
 
