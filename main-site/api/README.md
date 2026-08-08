@@ -43,6 +43,7 @@ VPS, in [`../../workers/`](../../workers/).
 | `/api/stats` | GET | Working, public, cached an hour |
 | `/api/auth/logout-all` | POST | Working |
 | `/api/account/delete` | POST | Working |
+| `/api/account/passkeys` | GET, DELETE | Working |
 | `/api/items/list` | GET | Working |
 | `/api/subscriptions/add`, `/list`, `/remove`, `/route` | GET, POST | Working |
 | `/api/targets/webpush` | GET, POST, DELETE | Working |

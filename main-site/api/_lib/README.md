@@ -22,6 +22,7 @@ with an underscore, so nothing here is reachable over HTTP.
 | [`discordoauth.js`](discordoauth.js) | Discord OAuth2, the guild list, and the Manage Server filter |
 | [`telegramapi.js`](telegramapi.js) | `getChatMember`, so Telegram admin status is checked live |
 | [`scope.js`](scope.js) | Which account a request acts as, and the one place management is checked |
+| [`waysin.js`](waysin.js) | Whether an account is still reachable after removing a sign in method |
 | [`recoverystore.js`](recoverystore.js) | Issuing and reading a set of recovery codes |
 | [`gmail.js`](gmail.js) | Mail through the Workspace mailbox, Gmail API, service account signed with `node:crypto` |
 

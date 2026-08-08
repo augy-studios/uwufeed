@@ -16,9 +16,13 @@ import { downloadOpml, parseOpml, readFile } from "./opml.js";
 import * as router from "./router.js";
 import { pushSupported, currentSubscription, subscribe, unsubscribe } from "./push.js";
 import {
+  alreadyRegistered,
   assertPasskey,
   deviceCanVerify,
+  forgetLocalPasskey,
+  localPasskeyId,
   registerPasskey,
+  rememberLocalPasskey,
   wasCancelled,
 } from "./passkey.js";
 
@@ -821,6 +825,9 @@ function wirePasskey() {
       const options = await api.passkey({ step: "register-challenge" });
       const result = await registerPasskey(options);
       await api.passkey(result);
+      // Remembered here so the button can become Remove next time. The
+      // browser cannot ask the authenticator what it holds.
+      rememberLocalPasskey(result.credential_id);
       banner(
         status,
         "ok",
@@ -828,8 +835,18 @@ function wirePasskey() {
       );
       await paintPasskeyOffer();
     } catch (err) {
-      if (wasCancelled(err)) banner(status, "ok", null);
-      else banner(status, "error", describe(err));
+      if (wasCancelled(err)) {
+        banner(status, "ok", null);
+      } else if (alreadyRegistered(err)) {
+        // The authenticator refused because it already holds one for this
+        // account, which means the local record was lost rather than that
+        // anything is wrong. Recover the state instead of reporting a
+        // failure nobody can act on.
+        banner(status, "ok", "This device already has a passkey. Reloading its state.");
+        await paintPasskeyOffer({ assumeLocal: true });
+      } else {
+        banner(status, "error", describe(err));
+      }
     } finally {
       el("passkeyAdd").disabled = false;
     }
@@ -842,9 +859,14 @@ function wirePasskey() {
       const options = await api.passkey({ step: "login-challenge" });
       const assertion = await assertPasskey(options);
       const data = await api.passkey(assertion);
+      // Signing in here proves this device holds that credential, which is
+      // the other moment the local record can be established. It covers a
+      // browser whose storage was cleared after registering.
+      rememberLocalPasskey(assertion.credential_id);
       auth.applyUser(data.user);
       banner(status, "ok", null);
       paintAuthState();
+      router.reconcile(true);
       await refreshAll();
     } catch (err) {
       if (wasCancelled(err)) banner(status, "ok", null);
@@ -853,18 +875,89 @@ function wirePasskey() {
       el("passkeySignIn").disabled = false;
     }
   });
+
+  el("passkeyRemove").addEventListener("click", async () => {
+    const credentialId = localPasskeyId();
+    if (!credentialId) return;
+
+    const result = await dangerFlow({
+      title: "Remove this device's passkey",
+      confirmLabel: "Remove passkey",
+      needsName: false,
+      steps: [
+        `<p class="modal-body">This removes the passkey stored on <strong>this device</strong>.
+          Signing in here goes back to a password.</p>
+         <p class="route-hint">Passkeys on your other devices are untouched, and nothing you
+          follow changes.</p>`,
+        `<p class="modal-body">Your device may keep its own copy in the system keychain. That
+          copy stops working, because the account no longer recognises it, but you may still
+          see it listed in your password manager until you delete it there too.</p>
+         <p class="route-hint">If this is the only way you sign in, set a password or keep some
+          recovery codes before removing it.</p>`,
+        account.has_password
+          ? '<p class="modal-body">Confirm with your password.</p>'
+          : `<p class="modal-body">This account signs in without a password, so there is nothing
+             to type. Continue when you are ready.</p>`,
+      ],
+      action: ({ password }) => api.removePasskey(credentialId, password),
+    });
+
+    if (!result) return;
+
+    forgetLocalPasskey();
+    banner(el("accountBanner"), "ok", "Passkey removed from this device.");
+    await paintPasskeyOffer();
+  });
 }
 
-// The offer is only made where it can actually be taken up: a device with
-// biometrics or a screen lock, in a browser that can report the public key.
-async function paintPasskeyOffer() {
+// Which of the two buttons to show, and whether to offer passkeys at all.
+//
+// "Has this device got a passkey" is not answerable by the browser alone,
+// so it is the intersection of two facts: the credential id this browser
+// recorded, and the ids the account still has. Either on its own would be
+// wrong. The local record alone would keep claiming a passkey the account
+// had removed elsewhere; the account list alone cannot tell this device
+// from any other.
+async function paintPasskeyOffer({ assumeLocal = false } = {}) {
   const usable = await deviceCanVerify();
+
   el("passkeyRow").classList.toggle("hidden", !usable);
   el("passkeySignInRow").classList.toggle("hidden", !usable);
+
   if (!usable) {
     el("passkeyHint").textContent =
       "This device cannot do passkeys, so signing in here stays a password.";
+    return;
   }
+
+  let here = false;
+  try {
+    const { passkeys } = await api.listPasskeys();
+    const local = localPasskeyId();
+    here = Boolean(local && passkeys.some((p) => p.credential_id === local));
+
+    // Registration was refused as a duplicate, so this device has one even
+    // though the local record went missing. Adopt whichever id the account
+    // holds if there is exactly one, and otherwise leave it alone rather
+    // than guessing between several.
+    if (!here && assumeLocal && passkeys.length === 1) {
+      rememberLocalPasskey(passkeys[0].credential_id);
+      here = true;
+    }
+
+    // The account dropped it elsewhere, so the stale local record goes.
+    if (local && !passkeys.some((p) => p.credential_id === local)) forgetLocalPasskey();
+  } catch {
+    // Not knowing means offering setup, which the authenticator will refuse
+    // if it is wrong. That is the harmless direction to fail in.
+    here = false;
+  }
+
+  el("passkeyAdd").classList.toggle("hidden", here);
+  el("passkeyRemove").classList.toggle("hidden", !here);
+  el("passkeyHint").textContent = here
+    ? "This device signs in with its fingerprint, face or screen lock."
+    : "Sign in on this device with its fingerprint, face or screen lock instead of typing a password.";
 }
 
 // ---- the danger zone ----

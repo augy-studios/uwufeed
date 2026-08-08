@@ -6,8 +6,8 @@
 
 import { remove, select, selectOne } from "../_lib/db.js";
 import { json, readJsonBody, methodNotAllowed } from "../_lib/http.js";
-import { countUnused } from "../_lib/recoverystore.js";
 import { readSession } from "../_lib/session.js";
+import { hasAnotherWayIn } from "../_lib/waysin.js";
 
 const LABELS = { telegram: "Telegram", discord: "Discord" };
 
@@ -67,7 +67,7 @@ async function unlink(req, res, userId) {
   // explaining. An account with no password, no other identity and no
   // recovery codes left is one nobody can ever sign into again, and there
   // is no undo for that.
-  if (!(await hasAnotherWayIn(userId, identity.id))) {
+  if (!(await hasAnotherWayIn(userId, { identityId: identity.id }))) {
     return json(res, 409, { error: "last_way_in" });
   }
 
@@ -76,19 +76,4 @@ async function unlink(req, res, userId) {
   await remove("uwufeed_identities", `id=eq.${identity.id}&user_id=eq.${userId}`);
 
   return json(res, 200, { unlinked: true });
-}
-
-async function hasAnotherWayIn(userId, excludingIdentityId) {
-  const user = await selectOne("uwufeed_users", `id=eq.${userId}&select=password_hash`);
-  if (user && user.password_hash) return true;
-
-  const others = await select(
-    "uwufeed_identities",
-    `user_id=eq.${userId}&id=neq.${excludingIdentityId}&select=id&limit=1`
-  );
-  if (others.length) return true;
-
-  // Recovery codes count. They are exactly the thing that covers losing a
-  // linked account, so an account holding unused ones is not stranded.
-  return (await countUnused(userId)) > 0;
 }

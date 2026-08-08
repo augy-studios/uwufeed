@@ -133,3 +133,50 @@ export async function assertPasskey(options) {
 export function wasCancelled(err) {
   return err && (err.name === "NotAllowedError" || err.message === "passkey_cancelled");
 }
+
+// ---- remembering which credential belongs to this device ----
+//
+// WebAuthn deliberately gives a site no way to ask an authenticator what it
+// already holds, so "does this device have a passkey" is not a question the
+// browser can answer on its own. What it can do is remember the credential
+// id it registered here, and the server can say which ids the account still
+// has. The two together answer it.
+//
+// A cleared store means falling back to offering registration again. That
+// is safe rather than merely tolerable: excludeCredentials makes the
+// authenticator refuse a second credential for the same account, and the
+// caller records the id when it does.
+
+const LOCAL_KEY = "uwufeed.passkey";
+
+export function rememberLocalPasskey(credentialId) {
+  try {
+    localStorage.setItem(LOCAL_KEY, credentialId);
+  } catch {
+    // Private browsing, or storage full. The feature degrades to offering
+    // registration, which the authenticator then refuses. Not worth failing.
+  }
+}
+
+export function localPasskeyId() {
+  try {
+    return localStorage.getItem(LOCAL_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function forgetLocalPasskey() {
+  try {
+    localStorage.removeItem(LOCAL_KEY);
+  } catch {
+    // Nothing to do about it, and nothing depends on it succeeding.
+  }
+}
+
+// The authenticator refusing because it already holds a credential for this
+// account. Worth telling apart from a real failure, since it means the
+// device is already set up and the local record simply went missing.
+export function alreadyRegistered(err) {
+  return err && err.name === "InvalidStateError";
+}

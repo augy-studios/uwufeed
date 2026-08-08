@@ -121,6 +121,12 @@ export const api = {
     }),
 
   passkey: (body) => request("/api/auth/passkey", { method: "POST", body }),
+  listPasskeys: () => request("/api/account/passkeys"),
+  removePasskey: (credentialId, password) =>
+    request("/api/account/passkeys", {
+      method: "DELETE",
+      body: { credential_id: credentialId, password },
+    }),
 
   confirmReset: (token, password) =>
     request("/api/auth/reset-confirm", { method: "POST", body: { token, password } }),
@@ -172,6 +178,7 @@ const MESSAGES = {
   invalid_recovery_code: "That recovery code is not valid, or has already been used.",
   passkey_not_recognised: "That passkey is not recognised. Sign in another way.",
   passkey_already_registered: "This device already has a passkey on this account.",
+  unknown_passkey: "That passkey is not on this account any more.",
   passkey_replay_suspected: "That passkey looks copied and was refused. Sign in another way.",
   challenge_expired: "That took too long. Try again.",
   user_not_verified: "Your device needs to check it is you, with biometrics or a screen lock.",
