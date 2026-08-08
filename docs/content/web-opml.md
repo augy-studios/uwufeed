@@ -42,8 +42,7 @@ considerably more polite to 200 unsuspecting web servers.
 Importing a feed you already follow does nothing. Sources are keyed on the
 feed URL and subscriptions are unique per user, so a re-import is safe.
 
-:::note Current state
-Parsing and export both work today. Feeding imported URLs through
-resolution needs accounts, which is Phase 4. Importing a file now reports
-how many feeds it found and stops there.
+:::note The 50 source cap
+An import stops when the account hits 50 sources and tells you how many it
+added. Nothing is silently dropped.
 :::

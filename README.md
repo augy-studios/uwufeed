@@ -58,7 +58,7 @@ everything as though it exists.
 | 1 | The push slice: WebSub, YouTube, one Discord webhook | Done |
 | 2 | The poll slice: RSS, adaptive backoff, retention | Done |
 | 3 | Telegram bot commands, and the auth core | Done |
-| 4 | Timeline, source management in the browser, web push | Auth done, UI pending |
+| 4 | Timeline, source management in the browser, web push | Done |
 | 5 | Twitch and Discord bot commands | Scaffolded |
 | 6 | RSSHub, Bluesky, Mastodon, ntfy | Scaffolded |
 | 7 | Quotas, alerting, backups | Not started |

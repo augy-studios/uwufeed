@@ -18,6 +18,7 @@ export const SECTIONS = [
       { id: "web-sources", title: "Adding sources", file: "content/web-sources.md" },
       { id: "web-opml", title: "OPML import and export", file: "content/web-opml.md" },
       { id: "web-notifications", title: "Notifications", file: "content/web-notifications.md" },
+      { id: "web-routing", title: "Sending sources to specific places", file: "content/web-routing.md" },
       { id: "web-themes", title: "Themes", file: "content/web-themes.md" },
     ],
   },

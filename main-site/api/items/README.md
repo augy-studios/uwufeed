@@ -4,11 +4,11 @@ Reading the timeline.
 
 | File | Route | Status |
 | --- | --- | --- |
-| [`list.js`](list.js) | `GET /api/items/list` | Stub, Phase 4 |
+| [`list.js`](list.js) | `GET /api/items/list` | Working |
 
-## The shape it will take
+## What it returns
 
-Items from the sources the signed in user subscribes to, newest first.
+Items from the sources the signed in user follows, newest first.
 
 - Join `uwufeed_subscriptions` to `uwufeed_items` on `source_id`.
 - Order by `published_at desc`, with `id` as a tiebreak, because a feed can
@@ -20,8 +20,11 @@ Items from the sources the signed in user subscribes to, newest first.
   unchanged, plus the source title, so the client does not need a second
   request to render a card.
 
-## Why it is a stub
+## The cursor
 
-There is no session to scope the query to until Phase 4, and an endpoint
-returning everything to everybody is not a smaller version of this one, it
-is a different endpoint. Phase 1 has no UI by design.
+Opaque, base64url of `published_at|id`. Both halves are needed: two entries
+can share a timestamp, and without the id as a tiebreak paging either skips
+or repeats them.
+
+A malformed cursor is ignored rather than rejected, so a stale bookmark
+returns the first page instead of an error.

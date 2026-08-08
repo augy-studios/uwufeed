@@ -64,8 +64,7 @@ told. That matters more than it sounds: the alternative is a source that
 quietly stops producing and looks exactly like a channel that stopped
 posting.
 
-:::warn Not wired up yet
-Adding a source from the browser needs an account, which is Phase 4. The
-resolution described here already works and is reachable through the API
-with an admin token. See [Self hosting](#/self-hosting).
+:::note Where it goes
+A new source reaches every destination you own. To narrow it, see
+[sending sources to specific places](#/web-routing).
 :::

@@ -4,24 +4,22 @@
 // read it and neither can an XSS. Everything here is a non-authoritative
 // hint: it decides what the shell renders on first paint, never what the
 // user is allowed to do. The server decides that, every request.
-//
-// TODO Phase 4. Wire refresh() to a real endpoint and call it on boot.
 
 import { api } from "./api.js";
 
 const HINT_KEY = "uwufeed.session";
 
-export const state = { signedIn: false, username: null, displayName: null };
+export const state = { signedIn: false, username: null, email: null };
 
-// Read the hint before any network call, so the topbar does not flicker
+// Read the hint before any network call, so the shell does not flicker
 // from signed out to signed in on every load.
 export function readHint() {
   try {
     const raw = localStorage.getItem(HINT_KEY);
     if (!raw) return null;
     const hint = JSON.parse(raw);
-    // A stale hint is a cosmetic problem, not a security one, but there is
-    // no reason to render signed in chrome past the session's own window.
+    // A stale hint is cosmetic, not a security problem, but there is no
+    // reason to render signed in chrome past the session's own window.
     if (hint.until && Date.parse(hint.until) < Date.now()) {
       clearHint();
       return null;
@@ -33,24 +31,59 @@ export function readHint() {
 }
 
 // Never put the token here. It is in an HttpOnly cookie on purpose.
-export function writeHint({ username, displayName, until }) {
-  localStorage.setItem(HINT_KEY, JSON.stringify({ username, displayName, until }));
+export function writeHint(user) {
+  const until = new Date(Date.now() + 30 * 86400 * 1000).toISOString();
+  localStorage.setItem(
+    HINT_KEY,
+    JSON.stringify({ username: user.username || null, email: user.email || null, until })
+  );
 }
 
 export function clearHint() {
   localStorage.removeItem(HINT_KEY);
 }
 
-// The authority. A 401 means signed out whatever the hint said.
-export async function refresh() {
-  try {
-    await api.listItems();
+export function applyUser(user) {
+  state.signedIn = true;
+  state.username = user.username || null;
+  state.email = user.email || null;
+  writeHint(user);
+  return state;
+}
+
+export function applySignedOut() {
+  state.signedIn = false;
+  state.username = null;
+  state.email = null;
+  clearHint();
+  return state;
+}
+
+// Optimistic first paint from the hint, corrected by the first real call.
+export function primeFromHint() {
+  const hint = readHint();
+  if (hint) {
     state.signedIn = true;
-  } catch (err) {
-    if (err.status === 401) {
-      state.signedIn = false;
-      clearHint();
-    }
+    state.username = hint.username;
+    state.email = hint.email;
   }
   return state;
+}
+
+export async function login(email, password) {
+  const data = await api.login(email, password);
+  return applyUser(data.user);
+}
+
+export async function register(email, password, username) {
+  const data = await api.register(email, password, username || null);
+  return applyUser(data.user);
+}
+
+export async function logout() {
+  try {
+    await api.logout();
+  } finally {
+    applySignedOut();
+  }
 }

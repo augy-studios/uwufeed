@@ -6,7 +6,8 @@ whatever that transport needs to reach it.
 
 | File | Route | Status |
 | --- | --- | --- |
-| [`webpush.js`](webpush.js) | `POST, DELETE /api/targets/webpush` | Stub, Phase 4 |
+| [`webpush.js`](webpush.js) | `GET, POST, DELETE /api/targets/webpush` | Working |
+| [`list.js`](list.js) | `GET /api/targets/list` | Working |
 | [`ntfy.js`](ntfy.js) | `POST, DELETE /api/targets/ntfy` | Stub, Phase 6 |
 
 The other two channels do not enrol over HTTP. A Telegram target is created

@@ -2,7 +2,7 @@
 // once they have been opened. No push and no background sync here; that is
 // the main site's job.
 
-const CACHE = "uwufeed-docs-v2";
+const CACHE = "uwufeed-docs-v3";
 
 const SHELL = [
   "/",
@@ -32,6 +32,7 @@ const CONTENT = [
   "/content/web-sources.md",
   "/content/web-opml.md",
   "/content/web-notifications.md",
+  "/content/web-routing.md",
   "/content/web-themes.md",
   "/content/telegram-overview.md",
   "/content/telegram-commands.md",

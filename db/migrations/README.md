@@ -6,7 +6,7 @@ migrations: every file is written to be safe to re-run, using
 
 ## If you have already applied 0003 to 0011
 
-You do **not** need to re-run everything. Run these four, in this order:
+You do **not** need to re-run everything. Run these, in this order:
 
 | File | Why |
 | --- | --- |
@@ -14,6 +14,7 @@ You do **not** need to re-run everything. Run these four, in this order:
 | `0002_uwufeed_sessions.sql` | New table |
 | `0012_repoint_user_fks.sql` | Moves the user foreign keys off `uwu_users` |
 | `0013_fanout.sql` | Fan out functions for the dispatcher |
+| `0014_subscription_targets.sql` | Per source routing to specific destinations |
 
 `0001` has to run before `0012`, since the constraint it adds points at
 `uwufeed_users`.
@@ -43,6 +44,7 @@ publication.
 | `0011_pending_deliveries.sql` | Superseded by `0013`, kept so the order stays stable |
 | `0012_repoint_user_fks.sql` | Repoints user foreign keys, a no-op on a fresh database |
 | `0013_fanout.sql` | `uwufeed_targets_for_item()` and `uwufeed_pending_fanout()` |
+| `0014_subscription_targets.sql` | Per source routing, and both fan out functions updated |
 
 ## uwuFeed owns its accounts
 

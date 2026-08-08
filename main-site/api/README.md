@@ -16,6 +16,7 @@ VPS, in [`../../workers/`](../../workers/).
 | [`auth/`](auth/) | Custom auth against `uwufeed_users` and `uwufeed_sessions` |
 | [`sources/`](sources/) | Resolving a URL into a source, and hub subscriptions |
 | [`items/`](items/) | Reading the timeline |
+| [`subscriptions/`](subscriptions/) | Who follows what, and where it goes |
 | [`targets/`](targets/) | Where notifications go, per channel |
 | [`cron/`](cron/) | Scheduled work. Never on the delivery path |
 
@@ -30,8 +31,10 @@ VPS, in [`../../workers/`](../../workers/).
 | `/api/sources/unsubscribe` | POST | Working |
 | `/api/auth/register`, `/login`, `/logout` | POST | Working |
 | `/api/auth/link` | POST | Working |
-| `/api/items/list` | GET | Stub, Phase 4 |
-| `/api/targets/webpush` | POST, DELETE | Stub, Phase 4 |
+| `/api/items/list` | GET | Working |
+| `/api/subscriptions/add`, `/list`, `/remove`, `/route` | GET, POST | Working |
+| `/api/targets/webpush` | GET, POST, DELETE | Working |
+| `/api/targets/list` | GET | Working |
 | `/api/targets/ntfy` | POST, DELETE | Stub, Phase 6 |
 | `/api/cron/renew-leases` | GET | Working, scheduled daily |
 | `/api/cron/cleanup` | GET | Working, scheduled daily |

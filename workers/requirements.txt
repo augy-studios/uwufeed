@@ -7,5 +7,9 @@ python-dotenv>=1.0,<2.0
 psycopg[binary,pool]>=3.1,<4.0
 feedparser>=6.0,<7.0
 
+# Web push delivery. Encryption lives here rather than in a Vercel
+# function, which is what keeps the serverless side dependency free.
+pywebpush>=2.0,<3.0
+
 # Phase 6, the stream listeners
 # websockets>=12.0,<14.0

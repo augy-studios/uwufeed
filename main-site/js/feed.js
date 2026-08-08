@@ -1,22 +1,31 @@
 // The timeline. Renders the item shape from db/schema.md.
 
-import { api, isNotImplemented } from "./api.js";
+import { api, describe } from "./api.js";
 import { hydrateIcons, escapeHtml, relativeTime, banner } from "./ui.js";
 
 const KIND_ICON = { video: "video", article: "article", post: "rss", stream: "bolt" };
 
-export function renderItems(container, items) {
-  if (!items.length) {
+let cursor = null;
+let loading = false;
+
+export function reset() {
+  cursor = null;
+}
+
+export function renderItems(container, items, { append = false } = {}) {
+  if (!items.length && !append) {
     container.innerHTML = `
       <div class="empty">
         <span data-icon="inbox"></span>
-        <p>Nothing here yet. Add a source and new posts show up within seconds.</p>
+        <p>Nothing here yet. Follow a source and new posts show up within seconds.</p>
       </div>`;
     hydrateIcons(container);
     return;
   }
 
-  container.innerHTML = items.map(itemCard).join("");
+  const html = items.map(itemCard).join("");
+  if (append) container.insertAdjacentHTML("beforeend", html);
+  else container.innerHTML = html;
   hydrateIcons(container);
 }
 
@@ -24,7 +33,9 @@ function itemCard(item) {
   const thumb = item.thumbnail_url
     ? `<img class="item-thumb" src="${escapeHtml(item.thumbnail_url)}" alt="" loading="lazy">`
     : "";
-  const meta = [item.author, relativeTime(item.published_at)].filter(Boolean).join(" and ");
+  const meta = [item.source_title || item.author, relativeTime(item.published_at)]
+    .filter(Boolean)
+    .join(" and ");
 
   return `
     <a class="item" href="${escapeHtml(item.url || "#")}" target="_blank" rel="noopener noreferrer">
@@ -39,20 +50,24 @@ function itemCard(item) {
     </a>`;
 }
 
-export async function loadFeed(container, bannerEl) {
+export async function loadFeed(container, bannerEl, moreBtn, { append = false } = {}) {
+  if (loading) return;
+  loading = true;
   try {
-    const data = await api.listItems();
-    renderItems(container, (data && data.items) || []);
+    const data = await api.listItems(append ? cursor : null);
+    if (!append) reset();
+    renderItems(container, data.items || [], { append });
+    cursor = data.cursor || null;
+    moreBtn.classList.toggle("hidden", !cursor);
     banner(bannerEl, "ok", null);
   } catch (err) {
-    if (isNotImplemented(err)) {
-      renderItems(container, []);
-      banner(bannerEl, "busy", "The timeline arrives in Phase 4. Delivery to Discord already works.");
+    if (err.status === 401) {
+      container.innerHTML = "";
+      moreBtn.classList.add("hidden");
       return;
     }
-    banner(bannerEl, "error", "Could not load the timeline.");
+    banner(bannerEl, "error", describe(err));
+  } finally {
+    loading = false;
   }
 }
-
-// TODO Phase 4: keyset pagination, and caching the last 50 items so the
-// service worker can serve them offline.

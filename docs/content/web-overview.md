@@ -50,15 +50,7 @@ confusion than it saves.
 
 ## What works today
 
-The shell, the theme system, the service worker and OPML parsing.
+All of it: accounts, the timeline with paging, following and unfollowing
+sources, per source routing, OPML import and export, and web push.
 
-The timeline, adding a source from the browser, OPML importing and
-notifications all need accounts, which are Phase 4. Those controls are
-present and say what they are waiting for, rather than failing or being
-hidden.
 
-:::note Why the buttons say that
-Hiding an unfinished feature makes the app look smaller than it is, and
-showing a control that fails makes it look broken. A control that says what
-it is waiting for is the honest middle.
-:::

@@ -37,6 +37,7 @@
                 <span class="brand-mark" data-icon="rss"></span>
                 <span class="brand-name">uwuFeed</span>
             </div>
+            <span class="whoami" id="whoami"></span>
             <a class="chip-btn" href="https://donate.stripe.com/28o2akeAr3hv0DK6oo" target="_blank"
                 rel="noopener noreferrer">
                 <span data-icon="coffee"></span>
@@ -61,20 +62,29 @@
 
         <section class="panel glass" id="panelFeed" role="tabpanel">
             <h1>Your feed</h1>
+            <p class="signed-out-note" id="feedSignedOut">Sign in from the Account tab to see your
+                timeline. Everything you follow arrives here, newest first.</p>
             <div class="banner hidden" id="feedBanner"></div>
             <div class="item-list" id="itemList"></div>
+            <button class="btn secondary hidden" type="button" id="loadMore">Load more</button>
         </section>
 
         <section class="panel glass hidden" id="panelSources" role="tabpanel">
             <h1>Sources</h1>
             <p>Paste a channel, a blog or a feed. Anything with a hub is subscribed to directly and
                 arrives within seconds. Everything else is polled.</p>
-            <div class="field">
+
+            <p class="signed-out-note" id="sourcesSignedOut">Sign in from the Account tab to follow
+                sources.</p>
+
+            <form class="field hidden" id="sourceForm">
                 <input type="url" id="sourceUrl" placeholder="https://www.youtube.com/@somechannel"
-                    aria-label="Source URL">
-                <button class="btn" type="button" id="sourceAdd"><span data-icon="plus"></span>Add</button>
-            </div>
+                    aria-label="Source URL" required>
+                <button class="btn" type="submit" id="sourceAdd"><span data-icon="plus"></span>Add</button>
+            </form>
             <div class="banner hidden" id="sourcesBanner"></div>
+
+            <div class="source-list" id="sourceList"></div>
 
             <h2>OPML</h2>
             <div class="btn-row">
@@ -90,12 +100,46 @@
 
         <section class="panel glass hidden" id="panelAccount" role="tabpanel">
             <h1>Account</h1>
-            <p>Accounts, notifications and per source settings arrive in Phase 4. Until then,
-                delivery runs to a single Discord webhook.</p>
-            <div class="btn-row">
-                <button class="btn secondary" type="button" id="pushToggle" disabled>
-                    <span data-icon="bell"></span>Enable notifications
-                </button>
+            <div class="banner hidden" id="accountBanner"></div>
+
+            <div id="authPanel">
+                <h2 id="authTitle">Sign in</h2>
+                <form class="stack" id="authForm" data-mode="login">
+                    <input type="email" id="authEmail" placeholder="Email" aria-label="Email"
+                        autocomplete="email" required>
+                    <input type="text" id="authUsername" class="hidden" placeholder="Username, optional"
+                        aria-label="Username" autocomplete="username">
+                    <input type="password" id="authPassword" placeholder="Password" aria-label="Password"
+                        autocomplete="current-password" minlength="8" required>
+                    <div class="banner hidden" id="authBanner"></div>
+                    <button class="btn" type="submit" id="authSubmit">Sign in</button>
+                    <button class="btn secondary" type="button" id="authToggle">I need an account</button>
+                </form>
+            </div>
+
+            <div id="accountPanel" class="hidden">
+                <h2>Notifications</h2>
+                <p class="route-hint" id="pushHint"></p>
+                <div class="btn-row">
+                    <button class="btn secondary" type="button" id="pushToggle" data-on="no">
+                        <span data-icon="bell"></span><span class="label">Enable notifications</span>
+                    </button>
+                </div>
+
+                <h2>Connect a chat</h2>
+                <p class="route-hint">Link a Telegram chat so it shares these sources. Each source can
+                    then be sent to some destinations rather than all of them, from the Sources tab.</p>
+                <div class="btn-row">
+                    <button class="btn secondary" type="button" id="linkBtn">
+                        <span data-icon="external"></span>Get a link code
+                    </button>
+                </div>
+                <div class="link-result hidden" id="linkResult"></div>
+
+                <h2>Session</h2>
+                <div class="btn-row">
+                    <button class="btn secondary" type="button" id="signOut">Sign out</button>
+                </div>
             </div>
         </section>
 

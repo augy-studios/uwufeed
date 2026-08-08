@@ -17,7 +17,8 @@ import httpx
 from dotenv import load_dotenv
 
 from . import store
-from .channels import discord, telegram
+from .channels import discord, telegram, webpush
+from .channels.webpush import PermanentFailure
 from .templates import context_from_item
 
 load_dotenv()
@@ -28,7 +29,7 @@ SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
 QUEUE: asyncio.Queue = asyncio.Queue(maxsize=2000)
 
 # One sender per channel, all with the same signature.
-SENDERS = {"discord": discord.send, "telegram": telegram.send}
+SENDERS = {"discord": discord.send, "telegram": telegram.send, "webpush": webpush.send}
 
 
 def extract_record(payload) -> dict | None:
@@ -69,7 +70,16 @@ async def deliver_one(client: httpx.AsyncClient, item: dict, target: dict) -> No
     title = await store.source_title(item.get("source_id"))
     ctx = context_from_item(item, source_title=title)
 
-    ok = await sender(client, target["target_ref"], ctx)
+    try:
+        ok = await sender(client, target["target_ref"], ctx)
+    except PermanentFailure as err:
+        # A dead browser subscription or a blocked bot. Retrying this
+        # forever is the wrong answer, so stop sending to it at all.
+        await store.mark_delivery(item_id, target_id, "failed")
+        await store.deactivate_target(target_id)
+        print(f"deactivated {target['channel']} target {target_id}: {err}")
+        return
+
     await store.mark_delivery(item_id, target_id, "sent" if ok else "failed")
 
     if ok:

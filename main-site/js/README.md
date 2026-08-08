@@ -12,10 +12,11 @@ carries its `.js` extension.
 | `ui.js` | `hydrateIcons`, modal open and close, escaping, relative times | Working |
 | `app.js` | Boot and wiring. The only module with side effects at import | Working |
 | `api.js` | Every call to `/api`, in one place | Working |
-| `feed.js` | Rendering the timeline from the item shape | Partly, Phase 4 for data |
-| `opml.js` | Parsing and building OPML | Parsing works, importing is Phase 4 |
-| `push.js` | Web push enrolment | Helpers work, enrolment is Phase 4 |
-| `auth.js` | Signed in state, and the non-authoritative session hint | Partly, Phase 4 for data |
+| `feed.js` | The timeline, with cursor paging | Working |
+| `sources.js` | Following, unfollowing and per source routing | Working |
+| `opml.js` | Parsing and building OPML | Working |
+| `push.js` | Web push enrolment | Working |
+| `auth.js` | Sign in, sign up, sign out, and the session hint | Working |
 | `register-sw.js` | Service worker registration for pages without `app.js` | Working |
 
 ## Two script types, on purpose

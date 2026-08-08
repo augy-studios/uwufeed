@@ -1,7 +1,7 @@
 // Shell precache, the most recent 50 items, and web push.
 // No offline outbox and no background sync, on purpose.
 
-const SHELL_CACHE = "uwufeed-shell-v2";
+const SHELL_CACHE = "uwufeed-shell-v3";
 const ITEMS_CACHE = "uwufeed-items-v1";
 const ITEMS_ENDPOINT = "/api/items/list";
 
@@ -18,6 +18,7 @@ const ASSETS = [
   "/js/ui.js",
   "/js/api.js",
   "/js/feed.js",
+  "/js/sources.js",
   "/js/opml.js",
   "/js/push.js",
   "/js/auth.js",
