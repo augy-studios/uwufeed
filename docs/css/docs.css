@@ -5,6 +5,13 @@ body {
   overflow-y: scroll;
 }
 
+/* Show and hide is a single .hidden flip in JS, so the rule is generic.
+   Scoping it per element means a new element silently ignores the class.
+
+   Modal backdrops opt out: they animate opacity and visibility, so their
+   display value has to be left alone. */
+.hidden:not(.modal-backdrop) { display: none; }
+
 /* The base theme turns selection off, which is right for an app and wrong
    for documentation. */
 .article, .article * {
@@ -105,7 +112,6 @@ body {
   box-shadow: var(--shadow);
   z-index: 40;
 }
-.search-results.hidden { display: none; }
 
 .search-hit {
   display: block;
@@ -179,7 +185,6 @@ body {
   z-index: 24;
   background: rgba(10, 15, 12, 0.35);
 }
-.sidebar-scrim.hidden { display: none; }
 
 /* ---- content ---- */
 .content { padding: 24px 0 48px; min-width: 0; }

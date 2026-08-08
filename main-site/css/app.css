@@ -1,5 +1,13 @@
 /* App layout. Every colour is a token from theme.css. */
 
+/* Show and hide is a single .hidden flip in JS, so the rule has to be
+   generic. Scoping it per element means a new element silently ignores the
+   class, which is how a signed out account panel stays on screen.
+
+   Modal backdrops opt out: they animate opacity and visibility, so they
+   need their display value left alone. */
+.hidden:not(.modal-backdrop) { display: none; }
+
 .wrap {
   max-width: 720px;
   margin: 0 auto;
@@ -88,7 +96,6 @@
 
 /* ---- panels ---- */
 .panel { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-.panel.hidden { display: none; }
 .panel h1 { font-size: 1.15rem; color: var(--brand-ink); }
 .panel h2 { font-size: 1rem; color: var(--brand-ink); }
 .panel p { font-size: 0.9rem; color: var(--muted); line-height: 1.5; }
@@ -204,7 +211,6 @@
 .banner.warn { background: color-mix(in srgb, var(--warn) 14%, transparent); color: var(--warn); }
 .banner.error { background: color-mix(in srgb, var(--error) 14%, transparent); color: var(--error); }
 .banner.busy { background: color-mix(in srgb, var(--busy) 14%, transparent); color: var(--busy); }
-.banner.hidden { display: none; }
 
 /* ---- empty state ---- */
 .empty {
@@ -232,7 +238,6 @@
 }
 .stack input::placeholder { color: var(--muted-strong); opacity: 1; }
 .stack input:focus-visible { outline: 2px solid var(--brand-ink); outline-offset: 1px; }
-.stack input.hidden { display: none; }
 
 .whoami {
   margin-left: auto;
@@ -246,7 +251,6 @@
 .brand { margin-right: 0; }
 
 .signed-out-note { font-size: 0.9rem; color: var(--muted); }
-.signed-out-note.hidden { display: none; }
 
 .count { font-size: 0.78rem; color: var(--muted); }
 
@@ -305,7 +309,6 @@
   background: var(--surface);
   border: 1px solid var(--surface-border);
 }
-.link-result.hidden { display: none; }
 .link-result code {
   display: inline-block;
   padding: 2px 6px;
@@ -317,7 +320,6 @@
 }
 
 #loadMore { align-self: center; }
-#loadMore.hidden { display: none; }
 
 /* ---- confirm dialog ---- */
 .modal-body {
