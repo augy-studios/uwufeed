@@ -88,6 +88,8 @@ function paintAuthState() {
     banner(el("passwordBanner"), "ok", null);
     banner(el("accountBanner"), "ok", null);
     banner(el("sourcesBanner"), "ok", null);
+    banner(el("destinationsBanner"), "ok", null);
+    banner(el("overviewBanner"), "ok", null);
     el("itemList").innerHTML = "";
     el("sourceList").innerHTML = "";
     el("destinationList").innerHTML = "";
@@ -105,7 +107,7 @@ async function refreshAll() {
   await Promise.all([
     feed.loadFeed(el("itemList"), el("feedBanner"), el("loadMore")),
     sources.load(el("sourceList"), el("sourcesBanner")),
-    destinations.load(el("destinationList"), el("accountBanner")),
+    destinations.load(el("destinationList"), el("destinationsBanner")),
   ]);
 }
 
@@ -497,7 +499,7 @@ async function loadOverview() {
     ].join("");
   } catch (err) {
     box.innerHTML = "";
-    banner(el("accountBanner"), "error", describe(err));
+    banner(el("overviewBanner"), "error", describe(err));
   }
 }
 
@@ -586,8 +588,12 @@ function wireHome() {
 
 function wireScope() {
   el("scopePicker").addEventListener("change", () => {
+    // A message about your own account is not about the space you just
+    // switched to, so none of them survive the change.
     banner(el("accountBanner"), "ok", null);
     banner(el("sourcesBanner"), "ok", null);
+    banner(el("destinationsBanner"), "ok", null);
+    banner(el("overviewBanner"), "ok", null);
     // Through the URL rather than directly, so the back button works and a
     // space dashboard can be linked to. onRoute does the rest.
     router.setScopeInUrl(el("scopePicker").value);
@@ -1283,7 +1289,7 @@ async function paintPushState() {
 }
 
 function wirePush() {
-  const status = el("accountBanner");
+  const status = el("destinationsBanner");
 
   el("pushToggle").addEventListener("click", async () => {
     const btn = el("pushToggle");
@@ -1324,7 +1330,7 @@ function wirePush() {
 // ---- ntfy ----
 
 function wireNtfy() {
-  const status = el("accountBanner");
+  const status = el("destinationsBanner");
 
   el("ntfyAdd").addEventListener("click", async () => {
     const input = el("ntfyTopic");
@@ -1465,8 +1471,8 @@ async function boot() {
   wirePush();
   wireLink();
   wireNtfy();
-  destinations.wire(el("destinationList"), el("accountBanner"), () =>
-    destinations.load(el("destinationList"), el("accountBanner"))
+  destinations.wire(el("destinationList"), el("destinationsBanner"), () =>
+    destinations.load(el("destinationList"), el("destinationsBanner"))
   );
   registerServiceWorker();
 
