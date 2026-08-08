@@ -1,0 +1,64 @@
+# uwuFeed
+
+> Push first feed aggregator. Follow a YouTube channel, a blog, a subreddit
+> or anything with a feed, and the new post arrives in seconds rather than
+> minutes. Free for users, with one ingestion pipeline and four delivery
+> channels: the web app, Telegram, Discord and ntfy.
+
+The design decision everything else follows from: when a source is added,
+uwuFeed fetches it once and looks for `<link rel="hub">`. A hub means the
+publisher will announce changes, so the source joins the push tier and is
+never polled. No hub means the poll tier, with conditional requests and an
+interval that adapts between 60 seconds and an hour. That one check at
+signup is the difference between two second and thirteen minute latency.
+
+Documentation pages are Markdown, served from `content/` and rendered
+client side. Each link below is the raw source, which is the best thing to
+read.
+
+## Getting started
+
+- [Introduction](https://docs.feed.uwuapps.org/content/introduction.md): what uwuFeed is and what state it is in
+- [Quick start](https://docs.feed.uwuapps.org/content/quick-start.md): the fastest path to a real notification arriving
+- [How it works](https://docs.feed.uwuapps.org/content/how-it-works.md): the architecture, push tier and poll tier
+- [What you can follow](https://docs.feed.uwuapps.org/content/platforms.md): supported platforms and their latency
+
+## Web app
+
+- [Overview](https://docs.feed.uwuapps.org/content/web-overview.md): the PWA, installing it, what it does
+- [Adding sources](https://docs.feed.uwuapps.org/content/web-sources.md): resolving a URL into a followable source
+- [OPML import and export](https://docs.feed.uwuapps.org/content/web-opml.md)
+- [Notifications](https://docs.feed.uwuapps.org/content/web-notifications.md): web push and ntfy
+- [Routing](https://docs.feed.uwuapps.org/content/web-routing.md): sending some sources to some destinations
+- [Themes](https://docs.feed.uwuapps.org/content/web-themes.md)
+
+## Telegram bot
+
+- [Overview](https://docs.feed.uwuapps.org/content/telegram-overview.md)
+- [Commands](https://docs.feed.uwuapps.org/content/telegram-commands.md)
+- [Running it](https://docs.feed.uwuapps.org/content/telegram-running.md)
+
+## Discord bot
+
+- [Overview](https://docs.feed.uwuapps.org/content/discord-overview.md)
+- [Commands](https://docs.feed.uwuapps.org/content/discord-commands.md)
+- [Running it](https://docs.feed.uwuapps.org/content/discord-running.md)
+
+## Workers
+
+- [Overview](https://docs.feed.uwuapps.org/content/workers-overview.md): what runs on the VPS and why
+- [Dispatcher](https://docs.feed.uwuapps.org/content/workers-dispatcher.md): items to notifications, and the delivery claim
+- [Poller](https://docs.feed.uwuapps.org/content/workers-poller.md): adaptive backoff, conditional requests, dead feed retirement
+- [Stream listeners](https://docs.feed.uwuapps.org/content/workers-streams.md): Bluesky Jetstream and Mastodon
+
+## Reference
+
+- [The item shape](https://docs.feed.uwuapps.org/content/item-shape.md): the contract between the JavaScript and Python halves
+- [Accounts](https://docs.feed.uwuapps.org/content/accounts.md): sign in, linked services, password reset and recovery codes
+- [Self hosting](https://docs.feed.uwuapps.org/content/self-hosting.md)
+- [Questions](https://docs.feed.uwuapps.org/content/faq.md)
+
+## Optional
+
+- [The web app itself](https://feed.uwuapps.org)
+- [Source repository](https://github.com/augy-studios/uwufeed)

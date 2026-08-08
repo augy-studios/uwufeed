@@ -7,12 +7,12 @@ listed in `EXTENSIONS` in `__init__.py`.
 | Module | Commands | Status |
 | --- | --- | --- |
 | `help.py` | `/help` | Working |
-| `sources.py` | `/add`, `/list`, `/remove` | Stubs |
-| `prefs.py` | `/pause`, `/settings`, `/link` | `/pause` works, rest are stubs |
-| `items.py` | `/latest`, `/status` | Stubs |
+| `sources.py` | `/add`, `/list`, `/remove` | Working |
+| `prefs.py` | `/pause`, `/settings`, `/link` | Working |
+| `items.py` | `/latest`, `/status` | Working |
 
-Stubs answer with a short sentence saying the feature is coming. Silence
-reads like a broken bot.
+Anything not built answers with a short sentence saying so. Silence reads
+like a broken bot.
 
 ## Adding a command
 
