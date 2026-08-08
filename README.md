@@ -39,8 +39,18 @@ latency, and it costs a single HTTP request at signup.
 | [`infra/`](infra/) | systemd units, tmux bootstrap, RSSHub | VPS |
 | [`docs/`](docs/) | The documentation site, its own PWA | Vercel |
 
-Every directory has its own README explaining what lives there, how to run
-it and what it depends on.
+Every directory has its own README explaining what lives there and what it
+depends on.
+
+Anything needing a VPS or an external portal has a **`SETUP.md`** next to
+that README, so the steps are not buried in prose:
+
+| Setting up | Page | Needs |
+| --- | --- | --- |
+| The VPS itself | [`infra/SETUP.md`](infra/SETUP.md) | A fresh box. Start here |
+| The three workers | [`workers/SETUP.md`](workers/SETUP.md) | The VPS |
+| The Telegram bot | [`telegram-bot/SETUP.md`](telegram-bot/SETUP.md) | my.telegram.org and BotFather |
+| The Discord bot | [`discord-bot/SETUP.md`](discord-bot/SETUP.md) | The Discord Developer Portal |
 
 Vercel's root directory is set to `main-site`, so paths in
 `main-site/vercel.json` are relative to that directory and functions
@@ -122,16 +132,6 @@ and no key belongs in this repository.
 The Supabase service role key bypasses row level security entirely, so it
 lives in exactly two places: Vercel's environment settings, and a mode 600
 `.env` on the VPS.
-
-## Conventions
-
-- No em dashes anywhere, in code, comments, docs or bot messages
-- No emoji. Every icon is inline SVG
-- Short comments, no decorative banners
-- Light mode is the default, whatever the operating system says
-- Jua everywhere
-- Dedup and delivery deduplication are database concerns, never
-  application ones
 
 ## Licence
 
