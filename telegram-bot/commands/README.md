@@ -33,7 +33,7 @@ def register(client) -> None:
 
 Then import it in `__init__.py`, add it to `MODULES`, add it to `COMMANDS`
 in `start.py`, and add it to the BotFather command list in
-[`../setup.md`](../setup.md). All four, or the command exists but nobody
+[`../SETUP.md`](../SETUP.md). All four, or the command exists but nobody
 finds it.
 
 ## The patterns

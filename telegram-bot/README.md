@@ -38,31 +38,8 @@ two commands that print the same thing is one more thing to keep in sync.
 
 ## Setup
 
-```sh
-cd telegram-bot
-python3 -m venv .venv
-. .venv/bin/activate
-pip install -r requirements.txt
-cp ../.env.example .env   # then fill it in
-python main.py
-```
-
-Python 3.11 or newer. Creating the bot with BotFather, the about text, the
-description, the command list and the profile picture are all covered in
-[`setup.md`](setup.md).
-
-## Running on the VPS
-
-Inside tmux, so it survives an SSH session ending:
-
-```sh
-tmux new -s uwufeed-telegram
-cd ~/uwufeed/telegram-bot && . .venv/bin/activate && python main.py
-# ctrl-b then d to detach
-```
-
-`tmux attach -t uwufeed-telegram` to come back. There is a systemd unit in
-[`../infra/systemd/`](../infra/systemd/) for restart on boot.
+Creating the bot with BotFather, installing it and running it on the VPS
+are all in [`SETUP.md`](SETUP.md).
 
 ## Where state lives
 
@@ -85,15 +62,6 @@ redeploy.
 
 An unknown token means the row was pruned. The router says so rather than
 failing silently. `buttons.prune()` clears anything older than 90 days.
-
-## Style rules for messages
-
-- Rich formatting rather than plain text. HTML parse mode, since feed
-  titles are full of characters Markdown treats as syntax.
-- No em dashes anywhere. Rephrase instead of reaching for one.
-- Never mention the bot's own name inside command text. It reads as an
-  advert, and a renamed bot then contradicts itself.
-- No emoji as icons.
 
 ## Environment
 

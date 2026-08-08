@@ -37,49 +37,9 @@ There is deliberately no start command. Everything belongs in `/help`.
 
 ## Setup
 
-```sh
-cd discord-bot
-python3 -m venv .venv
-. .venv/bin/activate
-pip install -r requirements.txt
-cp ../.env.example .env   # then fill it in
-python main.py
-```
-
-Python 3.11 or newer.
-
-## Creating the application
-
-1. <https://discord.com/developers/applications>, New Application, name it
-   uwuFeed.
-2. Bot tab, Reset Token, copy it into `DISCORD_BOT_TOKEN`. It is shown
-   once.
-3. Leave every privileged intent **off**. Slash commands do not need
-   message content, and asking for an intent that is unused means a review
-   for nothing.
-4. OAuth2 URL Generator, scopes `bot` and `applications.commands`,
-   permissions Send Messages, Embed Links, Use Slash Commands and
-   **Manage Webhooks**.
-
-   Manage Webhooks is what lets `/settings channel:#feeds` create the
-   webhook itself, so nobody has to copy a webhook URL through a chat
-   box. Without it that command fails with a clear message rather than
-   silently.
-5. Open the generated URL and add it to a server.
-
-Set `DISCORD_DEV_GUILD_ID` while developing. Commands sync to that one
-guild instantly, where a global sync can take up to an hour to appear.
-
-## Running on the VPS
-
-```sh
-tmux new -s uwufeed-discord
-cd ~/uwufeed/discord-bot && . .venv/bin/activate && python main.py
-# ctrl-b then d to detach
-```
-
-`tmux attach -t uwufeed-discord` to come back. There is a systemd unit in
-[`../infra/systemd/`](../infra/systemd/) for restart on boot.
+Creating the application in the Discord Developer Portal, the permissions
+the invite URL needs, installing it and running it on the VPS are all in
+[`SETUP.md`](SETUP.md).
 
 ## Where state lives
 
@@ -104,15 +64,6 @@ per stored kind. Discord routes interactions by `custom_id`, so buttons on
 old messages start working again as soon as the class is registered. Skip
 this and every button in the server's history answers with an interaction
 failure.
-
-## Style rules for messages
-
-- Embeds rather than plain text where there is anything to lay out.
-- No em dashes anywhere. Rephrase instead of reaching for one.
-- Never mention the bot's own name inside command text.
-- No emoji as icons.
-- Command replies are ephemeral unless the whole channel benefits from
-  seeing them.
 
 ## Environment
 

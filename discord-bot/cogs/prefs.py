@@ -131,23 +131,18 @@ class Prefs(commands.Cog):
             await interaction.followup.send(EXPIRED, ephemeral=True)
             return
 
-        existing = accounts.linked_user(interaction.guild_id)
-        if existing == user_id:
-            await interaction.followup.send(
-                "This server is already connected to that account.", ephemeral=True
-            )
-            return
+        # The link is to the person who ran it, never to the server. A
+        # server is a shared space: merging it into whichever member linked
+        # first would hand that member everybody else's feed, and would make
+        # a password reset something the whole channel can read.
+        await feed_store.set_identity(user_id, interaction.user.id, interaction.user.name)
 
-        moved = {"subscriptions": 0}
-        if existing:
-            # Carry whatever this server already followed into the web
-            # account, rather than stranding it on one nobody can sign into.
-            moved = await feed_store.merge_user(existing, user_id)
-
-        accounts.set_user(interaction.guild_id, user_id)
-        carried = f" {moved['subscriptions']} sources came with it." if moved["subscriptions"] else ""
         await interaction.followup.send(
-            f"Connected.{carried} The app and this server now share one set.", ephemeral=True
+            "Connected to your account.\n\n"
+            "This server keeps its own sources, because they belong to everyone here rather "
+            "than to you. What this does is let the app recognise you: your servers appear "
+            "there, and a forgotten password can be recovered by direct message.",
+            ephemeral=True,
         )
 
 

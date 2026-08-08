@@ -201,3 +201,39 @@ For restart on boot, see [`../infra/systemd/`](../infra/systemd/).
 - [ ] Privacy mode on
 - [ ] `/start` answers with the intro and both buttons
 - [ ] `.session` file is not in git
+
+## 7. Install and run
+
+Python 3.11 or newer.
+
+```sh
+cd telegram-bot
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -r requirements.txt
+cp ../.env.example .env   # then fill it in
+python main.py
+```
+
+## 8. Run it on the VPS
+
+Inside tmux, so it survives an SSH session ending:
+
+```sh
+tmux new -s uwufeed-telegram
+cd ~/uwufeed/telegram-bot && . .venv/bin/activate && python main.py
+# ctrl-b then d to detach
+```
+
+`tmux attach -t uwufeed-telegram` to come back.
+
+For something that survives a reboot, use the systemd unit in
+[`../infra/systemd/`](../infra/systemd/) instead. The whole box is set up
+in [`../infra/SETUP.md`](../infra/SETUP.md).
+
+## What else needs this bot's token
+
+`TELEGRAM_BOT_TOKEN` goes on **Vercel as well as the VPS**. The site sends
+password reset codes as a direct message from this bot, so without it on
+Vercel an account that linked Telegram falls through to a weaker recovery
+path. Same value, both places.

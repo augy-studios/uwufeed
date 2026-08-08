@@ -3,6 +3,7 @@
 import { insert } from "../_lib/db.js";
 import { json, readJsonBody, methodNotAllowed } from "../_lib/http.js";
 import { hashPassword } from "../_lib/password.js";
+import { issueSet } from "../_lib/recoverystore.js";
 import { createSession, cookieHeader, normalizeEmail } from "../_lib/session.js";
 
 export default async function handler(req, res) {
@@ -52,7 +53,21 @@ export default async function handler(req, res) {
   const { token, expiresAt } = await createSession(user.id);
   res.setHeader("set-cookie", cookieHeader(token, expiresAt));
 
+  // Ten codes, now, because an account cannot generate one after it is
+  // locked out. This is the only moment they are guaranteed to be issuable.
+  //
+  // Failing to issue them must not fail the registration. An account with
+  // no codes is recoverable by every other path and can generate a set
+  // later; an account that failed to be created is nothing.
+  let recoveryCodes = null;
+  try {
+    recoveryCodes = await issueSet(user.id);
+  } catch (err) {
+    console.error(`recovery codes not issued at registration: ${err.message}`);
+  }
+
   return json(res, 201, {
     user: { id: user.id, email: user.email, username: user.username },
+    recovery_codes: recoveryCodes,
   });
 }

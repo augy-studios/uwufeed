@@ -104,13 +104,3 @@ Press `/` anywhere to focus the search box.
 The shell and every page are precached, so once the site has been opened it
 works with no connection. Markdown is served stale while revalidate, so an
 edit appears on the next visit rather than the current one.
-
-## House style
-
-- No em dashes anywhere. A comma, a semicolon or a full stop instead
-- No emoji. Icons are inline SVG from `js/icons.js`
-- Mark what works today. A page describing an unbuilt feature as though it
-  exists is worse than no page
-- Say why, not just what. The interesting parts of this system are the
-  trade offs, and a reference that only lists behaviour loses all of them
-- Short paragraphs, tables where there is a comparison to make

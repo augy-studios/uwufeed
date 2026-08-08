@@ -115,6 +115,58 @@
                     <button class="btn" type="submit" id="authSubmit">Sign in</button>
                     <button class="btn secondary" type="button" id="authToggle">I need an account</button>
                 </form>
+
+                <div class="btn-row" id="passkeySignInRow">
+                    <button class="btn secondary" type="button" id="passkeySignIn">
+                        <span data-icon="key"></span>Sign in with a passkey
+                    </button>
+                </div>
+
+                <div class="btn-row" id="resetOpenRow">
+                    <button class="btn secondary" type="button" id="resetOpen">I forgot my
+                        password</button>
+                </div>
+
+                <div id="resetPanel" class="hidden">
+                    <h2>Reset your password</h2>
+                    <p class="route-hint">A code arrives as a direct message, on Telegram or
+                        Discord if you have connected either, otherwise by email. Never in a group
+                        or a server channel. With nowhere private to send one, the password is
+                        reset to your username and shown here.</p>
+                    <form class="stack" id="resetForm">
+                        <input type="email" id="resetEmail" placeholder="Email" aria-label="Email"
+                            autocomplete="email" required>
+                        <div class="banner hidden" id="resetBanner"></div>
+                        <button class="btn" type="submit" id="resetSubmit">Send a reset code</button>
+                        <button class="btn secondary" type="button" id="resetCancel">Back to sign
+                            in</button>
+                    </form>
+
+                    <div class="link-result hidden" id="resetResult"></div>
+
+                    <h2>Or use a recovery code</h2>
+                    <p class="route-hint">The ten codes you were given when the account was made.
+                        Each works once, and they keep working even if you lose the Discord or
+                        Telegram account you connected.</p>
+                    <form class="stack" id="recoveryForm">
+                        <input type="text" id="recoveryCode" placeholder="Recovery code"
+                            aria-label="Recovery code" autocomplete="one-time-code" required>
+                        <div class="banner hidden" id="recoveryBanner"></div>
+                        <button class="btn secondary" type="submit" id="recoverySubmit">Use this
+                            code</button>
+                    </form>
+
+                    <form class="stack hidden" id="resetConfirmForm">
+                        <input type="text" id="resetToken" placeholder="Reset code"
+                            aria-label="Reset code" autocomplete="one-time-code" required>
+                        <input type="password" id="resetNewPassword" placeholder="New password"
+                            aria-label="New password" autocomplete="new-password" minlength="8"
+                            required>
+                        <div class="banner hidden" id="resetConfirmBanner"></div>
+                        <button class="btn" type="submit" id="resetConfirmSubmit">Set the new
+                            password</button>
+                    </form>
+                </div>
             </div>
 
             <div id="accountPanel" class="hidden">
@@ -141,13 +193,55 @@
 
                 <h2>Connect a chat</h2>
                 <p class="route-hint">Link a Telegram chat so it shares these sources. Each source can
-                    then be sent to some destinations rather than all of them, from the Sources tab.</p>
+                    then be sent to some destinations rather than all of them, from the Sources tab.
+                    It is also the only private way back into this account if you forget the
+                    password.</p>
                 <div class="btn-row">
                     <button class="btn secondary" type="button" id="linkBtn">
                         <span data-icon="external"></span>Get a link code
                     </button>
                 </div>
                 <div class="link-result hidden" id="linkResult"></div>
+
+                <h2>Passkey</h2>
+                <p class="route-hint" id="passkeyHint">Sign in on this device with its fingerprint,
+                    face or screen lock instead of typing a password.</p>
+                <div class="btn-row" id="passkeyRow">
+                    <button class="btn secondary" type="button" id="passkeyAdd">
+                        <span data-icon="key"></span>Set up a passkey on this device
+                    </button>
+                </div>
+
+                <h2>Recovery codes</h2>
+                <p class="route-hint" id="recoveryCodesHint">Ten single use codes. They are the way
+                    back in when nothing else works, including losing the Discord or Telegram
+                    account you connected.</p>
+                <form class="stack" id="recoveryViewForm">
+                    <input type="password" id="recoveryViewPassword" placeholder="Your password"
+                        aria-label="Your password" autocomplete="current-password" minlength="8"
+                        required>
+                    <div class="banner hidden" id="recoveryViewBanner"></div>
+                    <div class="btn-row">
+                        <button class="btn secondary" type="submit" id="recoveryView">Show my
+                            codes</button>
+                        <button class="btn secondary" type="button" id="recoveryRegenerate">Replace
+                            them</button>
+                    </div>
+                </form>
+                <div class="link-result hidden" id="recoveryCodesResult"></div>
+
+                <h2>Password</h2>
+                <p class="route-hint">Changing it ends every other signed in browser and leaves this
+                    one alone.</p>
+                <form class="stack" id="passwordForm">
+                    <input type="password" id="currentPassword" placeholder="Current password"
+                        aria-label="Current password" autocomplete="current-password" minlength="8"
+                        required>
+                    <input type="password" id="newPassword" placeholder="New password"
+                        aria-label="New password" autocomplete="new-password" minlength="8" required>
+                    <div class="banner hidden" id="passwordBanner"></div>
+                    <button class="btn" type="submit" id="passwordSubmit">Change password</button>
+                </form>
 
                 <h2>Session</h2>
                 <div class="btn-row">

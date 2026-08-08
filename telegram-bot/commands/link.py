@@ -59,6 +59,25 @@ async def apply_token(event, token: str) -> None:
         await event.respond(EXPIRED)
         return
 
+    # The link is to the person who ran it, always. That is what makes a
+    # password reset a private message rather than something the room can
+    # read, and it is why this is recorded before anything else happens.
+    sender = await event.get_sender()
+    display = getattr(sender, "username", None) or getattr(sender, "first_name", None)
+    await feed_store.set_identity(user_id, event.sender_id, display)
+
+    # A group is a shared space, so it keeps its own account and its own
+    # sources. Merging one into whichever member linked first would hand
+    # that member everybody else's feed.
+    if not event.is_private:
+        await event.respond(
+            "Connected to your account.\n\nThis group keeps its own sources, because they "
+            "belong to everyone here rather than to one person. Your own sources are in the app."
+        )
+        return
+
+    # A private chat is not a shared space, it is the person, so the two
+    # sets are the same person's and combining them is what they want.
     existing = accounts.linked_user(event.chat_id)
 
     if existing == user_id:

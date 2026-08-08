@@ -11,37 +11,11 @@ what a serverless function cannot do. Request shaped work belongs in
 | [`poller/`](poller/) | The poll tier, `next_check_at` batches | Working |
 | [`streams/`](streams/) | Bluesky Jetstream. Mastodon uses the poll tier instead | Working |
 
-## Setup
+## Setup and running
 
-```sh
-cd workers
-python3 -m venv .venv
-. .venv/bin/activate
-pip install -r requirements.txt
-cp ../.env.example .env   # then fill it in
-```
-
-Python 3.11 or newer. The code uses `str | None` in annotations at runtime
-in a few places, so 3.10 is the hard floor and 3.11 is what Debian 13
-ships.
-
-## Running
-
-```sh
-cd workers
-python -m dispatcher.main
-python -m poller.main
-python -m streams.bluesky
-```
-
-Three separate processes. Run from this directory, as modules: the
-submodules import their siblings relatively, so running a file as a script
-fails on the first import.
-
-The Bluesky listener is only needed if anyone follows a Bluesky account.
-It idles harmlessly otherwise.
-
-Under tmux and systemd on the VPS, see [`../infra/`](../infra/).
+Installing, the three processes and how to keep them up are in
+[`SETUP.md`](SETUP.md). They run as modules from this directory, which is
+the one thing worth knowing before reading anything else here.
 
 ## Database connections
 

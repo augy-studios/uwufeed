@@ -31,6 +31,8 @@ VPS, in [`../../workers/`](../../workers/).
 | `/api/sources/unsubscribe` | POST | Working |
 | `/api/auth/register`, `/login`, `/logout` | POST | Working |
 | `/api/auth/link` | POST | Working |
+| `/api/auth/password` | POST | Working |
+| `/api/auth/reset`, `/reset-confirm` | POST | Working |
 | `/api/items/list` | GET | Working |
 | `/api/subscriptions/add`, `/list`, `/remove`, `/route` | GET, POST | Working |
 | `/api/targets/webpush` | GET, POST, DELETE | Working |
@@ -90,11 +92,3 @@ vercel dev
 `vercel dev` reads `.env` from the `main-site` directory. A hub cannot
 reach `localhost`, so to exercise the push path end to end, point
 `PUBLIC_BASE_URL` at a tunnel and use that as the callback host.
-
-## Conventions
-
-- ES modules, `export default async function handler(req, res)`.
-- One file, one endpoint. Shared logic goes in `_lib/`.
-- Never read a row to decide whether to insert it. Let the unique
-  constraint decide.
-- Short comments. No banners.

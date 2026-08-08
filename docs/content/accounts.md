@@ -87,6 +87,51 @@ difference on the server cannot extend a session.
 `expires_at` is indexed, so the nightly prune is not a sequential scan. The
 shared table it replaces had no such index.
 
+## Changing a password
+
+From the Account tab, with the current one. Every other signed in browser
+is signed out and the one making the change is kept, so the tab doing it is
+not signed out halfway through.
+
+An account created by a bot has no password to prove and says so rather
+than reporting the empty one as wrong.
+
+## Forgetting a password
+
+There is no email in this project, so a reset has to reach somebody through
+something else they already have.
+
+| What the account has | What a reset does |
+| --- | --- |
+| A connected Telegram chat | A code arrives there. Nothing changes until it is used |
+| Only a connected Discord channel | The same code, into that channel |
+| Otherwise, an email address | The same code, by email |
+| None of those | The password is set to the account's username and shown on screen |
+
+Telegram is preferred whenever both exist, because a Telegram target is a
+private chat with the bot and a Discord target is a webhook into a channel
+other people can read. When a code does go to Discord, the message says so.
+
+The code lasts fifteen minutes and works once. It is signed rather than
+stored, and part of what it is signed with is the password it is replacing,
+so it stops working the moment that password changes.
+
+Email is sent through the instance's own Google Workspace mailbox rather
+than a sending service, so a self hosted copy needs no third party account
+for it. Configure it and the last row stops applying to web accounts, since
+registration requires an address.
+
+:::note The last row is a real trade
+Asking for a reset does not require being signed in, because somebody who
+can sign in does not need one. So on that last row, anybody who knows an
+email address can reset that account and read the new password.
+
+It applies only when there is nowhere to send a code, which is why
+configuring email or connecting a chat closes it. A self hosted instance
+can set `RESET_WITHOUT_CHAT=off` to refuse instead, which makes such an
+account unrecoverable.
+:::
+
 ## Merging a chat account
 
 Copy then delete, rather than repointing `user_id`:

@@ -16,6 +16,7 @@ You do **not** need to re-run everything. Run these, in this order:
 | `0013_fanout.sql` | Fan out functions for the dispatcher |
 | `0014_subscription_targets.sql` | Per source routing to specific destinations |
 | `0015_hardening.sql` | Delivery preferences, last_checked_at, deferred status, health functions |
+| `0016_identities.sql` | Linked services per account, for recovery and dashboard access |
 
 `0001` has to run before `0012`, since the constraint it adds points at
 `uwufeed_users`.
@@ -47,6 +48,7 @@ publication.
 | `0013_fanout.sql` | `uwufeed_targets_for_item()` and `uwufeed_pending_fanout()` |
 | `0014_subscription_targets.sql` | Per source routing, and both fan out functions updated |
 | `0015_hardening.sql` | Quiet hours and digest on targets, `last_checked_at`, the `deferred` delivery status, and the health and release functions |
+| `0016_identities.sql` | `uwufeed_identities`: one row per linked service per account, holding who somebody is on Telegram or Discord. Not a delivery target, because a target can be a shared space and a reset code sent to one is a broadcast |
 
 ## uwuFeed owns its accounts
 

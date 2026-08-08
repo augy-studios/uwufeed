@@ -17,6 +17,9 @@ with an underscore, so nothing here is reachable over HTTP.
 | [`session.js`](session.js) | Sessions against `uwufeed_sessions`, token stored hashed |
 | [`password.js`](password.js) | scrypt hashing, parameters stored in the hash |
 | [`linktoken.js`](linktoken.js) | Signed account link tokens, verified by the bots |
+| [`resettoken.js`](resettoken.js) | Signed password reset codes, bound to the hash they reset |
+| [`notify.js`](notify.js) | One off account messages to a Telegram chat or a Discord webhook |
+| [`gmail.js`](gmail.js) | Mail through the Workspace mailbox, Gmail API, service account signed with `node:crypto` |
 
 ## normalize.js
 

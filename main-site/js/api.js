@@ -71,6 +71,29 @@ export const api = {
     request("/api/auth/register", { method: "POST", body: { email, password, username } }),
   logout: () => request("/api/auth/logout", { method: "POST" }),
   linkCode: () => request("/api/auth/link", { method: "POST" }),
+
+  requestReset: (email) => request("/api/auth/reset", { method: "POST", body: { email } }),
+  redeemRecoveryCode: (email, code) =>
+    request("/api/auth/recovery", { method: "POST", body: { email, code } }),
+
+  recoveryCodeCount: () => request("/api/account/recovery-codes"),
+  revealRecoveryCodes: (password) =>
+    request("/api/account/recovery-codes", { method: "POST", body: { password } }),
+  regenerateRecoveryCodes: (password) =>
+    request("/api/account/recovery-codes", {
+      method: "POST",
+      body: { password, regenerate: true },
+    }),
+
+  passkey: (body) => request("/api/auth/passkey", { method: "POST", body }),
+
+  confirmReset: (token, password) =>
+    request("/api/auth/reset-confirm", { method: "POST", body: { token, password } }),
+  changePassword: (currentPassword, newPassword) =>
+    request("/api/auth/password", {
+      method: "POST",
+      body: { current_password: currentPassword, new_password: newPassword },
+    }),
 };
 
 // A 501 means the endpoint is not built yet, which is a different thing
@@ -104,6 +127,21 @@ const MESSAGES = {
   unsupported_scheme: "Only http and https links work.",
   not_signed_in: "Sign in first.",
   offline: "You appear to be offline.",
+  account_not_found: "No account with that email.",
+  invalid_reset_code: "That code is not valid any more. They last 15 minutes and work once.",
+  reset_delivery_failed: "The code could not be sent to your connected chat. Try again.",
+  no_chat_connected: "That account has no connected chat, and resetting without one is switched off here.",
+  current_password_wrong: "That is not your current password.",
+  password_unchanged: "The new password is the same as the old one.",
+  no_password_set: "This account signs in from a chat and has no password to change.",
+  invalid_recovery_code: "That recovery code is not valid, or has already been used.",
+  passkey_not_recognised: "That passkey is not recognised. Sign in another way.",
+  passkey_already_registered: "This device already has a passkey on this account.",
+  passkey_replay_suspected: "That passkey looks copied and was refused. Sign in another way.",
+  challenge_expired: "That took too long. Try again.",
+  user_not_verified: "Your device needs to check it is you, with biometrics or a screen lock.",
+  origin_mismatch: "Something is wrong with this page's address. Do not continue.",
+  unknown_step: "Something went wrong. Try again.",
 };
 
 export function describe(err) {

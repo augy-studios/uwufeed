@@ -72,8 +72,34 @@ that can never be signed into.
    `origin = 'telegram'`. The chat can follow feeds immediately with no
    signup, which is the plan's argument for the bot arriving before the
    PWA.
-3. **A merge.** `/link` moves a chat account's subscriptions and targets
-   into a web account and deletes the chat account.
+3. **A merge.** `/link` in a *private* chat moves that chat account's
+   subscriptions and targets into a web account and deletes the chat
+   account.
+
+## An account owns a list of linked services
+
+```text
+uwuFeed account
+└── linked service      uwufeed_identities, one row per platform
+    └── linked spaces   guilds and groups, per service
+```
+
+`uwufeed_identities` records who somebody is on a platform: the account,
+the platform, the platform user id, and how it was verified. One row per
+platform per account, and a unique index on `(platform, platform_user_id)`
+so two accounts cannot both claim one Discord user and have a reset for
+either DM the same person.
+
+**Linking binds the person who ran it, never the space it ran in.** A
+Discord server and a Telegram group are shared. Merging one into whichever
+member linked first would hand that member everybody else's feed, and would
+make a reset code something the room can read. So a group or a server keeps
+its own account and its own sources, and `/link` there only records the
+identity.
+
+A private Telegram chat is the exception, because it is not a shared space,
+it is the person. Linking one still merges, since both sets belong to the
+same person.
 
 ## Sessions
 
@@ -86,6 +112,61 @@ difference on the server cannot extend a session.
 
 `expires_at` is indexed, so the nightly prune is not a sequential scan. The
 shared table it replaces had no such index.
+
+## Passwords
+
+`POST /api/auth/password` changes one, proving the current password first.
+Every other session for the account is deleted and the calling one is kept.
+A bot created account has a null `password_hash` and answers
+`409 no_password_set`, because telling somebody their current password is
+wrong is misleading when they have never had one.
+
+## Resetting a forgotten password
+
+There is no email in this project, so a reset reaches somebody through a
+destination they already own.
+
+| What the account has | What `POST /api/auth/reset` does |
+| --- | --- |
+| A `telegram` identity | Direct messages a code. Nothing changes yet |
+| A `discord` identity | The same code, by direct message |
+| An `email`, with mail configured | The same code, by email |
+| None, `RESET_WITHOUT_CHAT` not `off` | Sets the password to `username` and returns it |
+| None, `RESET_WITHOUT_CHAT=off` | `409 no_chat_connected` |
+
+**Every path is private to one person, and that is the point.** Recovery
+reads `uwufeed_identities`, never `uwufeed_targets`. A target answers where
+feed items go and can be a shared space: a Telegram group, or a Discord
+webhook pointing into a channel the whole server reads. A reset code sent
+to a shared space is not a reset, it is a broadcast.
+
+The list is tried in order and falls through on failure, because a DM can
+be refused for reasons only the far end knows. Telegram will not let a bot
+open a conversation with somebody who has never messaged it, and Discord
+returns error 50007 when the person has direct messages from server members
+switched off. Neither is detectable in advance.
+
+The code is signed rather than stored, in `_lib/resettoken.js`. It uses
+`LINK_TOKEN_SECRET` with a different HMAC label, so a link token and a
+reset code are never interchangeable, and it signs the account's current
+`password_hash` as part of the message, which makes it single use with no
+table of spent codes: changing the password invalidates the signature.
+
+`POST /api/auth/reset-confirm` takes the code and a new password, deletes
+every session, and signs the account in.
+
+Email goes through `_lib/gmail.js`, which uses the Google Workspace mailbox
+the project already has rather than a sending service. The Gmail API is
+HTTPS and needs no dependency; SMTP would need an SMTP client. Auth is a
+service account with domain wide delegation, scoped to `gmail.send` and
+impersonating `GMAIL_SENDER`.
+
+**The last row is an accepted risk, not an oversight.** The endpoint is
+unauthenticated by necessity, so anybody who knows an email address can
+take that path and read the resulting password. Configuring email removes
+it for every web account, since registration requires an address. A
+username shorter than eight characters cannot be a password, so those
+accounts get a generated one and the response says which happened.
 
 ## Merging a chat account
 

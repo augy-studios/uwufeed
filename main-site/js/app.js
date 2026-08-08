@@ -14,6 +14,12 @@ import * as sources from "./sources.js";
 import * as destinations from "./destinations.js";
 import { downloadOpml, parseOpml, readFile } from "./opml.js";
 import { pushSupported, currentSubscription, subscribe, unsubscribe } from "./push.js";
+import {
+  assertPasskey,
+  deviceCanVerify,
+  registerPasskey,
+  wasCancelled,
+} from "./passkey.js";
 
 const el = (id) => document.getElementById(id);
 
@@ -36,6 +42,21 @@ function paintAuthState() {
     // no stale link code, no notification state, no leftover message.
     el("linkResult").classList.add("hidden");
     el("linkResult").innerHTML = "";
+    // A reset result is a password in plain sight. It must not survive a
+    // sign out and reappear for whoever opens the tab next.
+    el("resetResult").classList.add("hidden");
+    el("resetResult").innerHTML = "";
+    el("resetPanel").classList.add("hidden");
+    el("resetOpenRow").classList.remove("hidden");
+    el("authForm").classList.remove("hidden");
+    el("passwordForm").reset();
+    el("recoveryViewForm").reset();
+    // Ten working codes must not sit on screen for whoever opens the tab
+    // next.
+    el("recoveryCodesResult").classList.add("hidden");
+    el("recoveryCodesResult").innerHTML = "";
+    banner(el("recoveryViewBanner"), "ok", null);
+    banner(el("passwordBanner"), "ok", null);
     banner(el("accountBanner"), "ok", null);
     banner(el("sourcesBanner"), "ok", null);
     el("itemList").innerHTML = "";
@@ -43,6 +64,9 @@ function paintAuthState() {
     el("destinationList").innerHTML = "";
     el("loadMore").classList.add("hidden");
     feed.reset();
+  } else {
+    // Cosmetic, so it is not awaited and a failure changes nothing.
+    refreshRecoveryCount();
   }
 }
 
@@ -81,12 +105,16 @@ function wireAuth() {
 
     el("authSubmit").disabled = true;
     try {
-      if (registering) await auth.register(email, password, username);
-      else await auth.login(email, password);
+      const data = registering
+        ? await auth.register(email, password, username)
+        : await auth.login(email, password);
       banner(status, "ok", null);
       form.reset();
       paintAuthState();
       await refreshAll();
+      // Issued at registration, and backfilled on a first sign in for an
+      // account that predates them. Either way this is the only showing.
+      showFreshCodes(data.recovery_codes);
     } catch (err) {
       banner(status, "error", describe(err));
     } finally {
@@ -114,6 +142,336 @@ function wireAuth() {
 
     await auth.logout();
     paintAuthState();
+  });
+}
+
+// ---- forgotten passwords ----
+
+// Two steps that live in one panel. Requesting shows either a code prompt,
+// when a chat took the code, or the new password itself when there was no
+// chat to send one to.
+function wireReset() {
+  const panel = el("resetPanel");
+  const openRow = el("resetOpenRow");
+  const result = el("resetResult");
+  const confirmForm = el("resetConfirmForm");
+
+  function close() {
+    // The toggle lives inside the form, so hiding the form hides it too.
+    panel.classList.add("hidden");
+    openRow.classList.remove("hidden");
+    el("authForm").classList.remove("hidden");
+    resetPanelState();
+  }
+
+  function resetPanelState() {
+    el("resetForm").reset();
+    confirmForm.reset();
+    confirmForm.classList.add("hidden");
+    result.classList.add("hidden");
+    result.innerHTML = "";
+    el("recoveryForm").reset();
+    banner(el("resetBanner"), "ok", null);
+    banner(el("resetConfirmBanner"), "ok", null);
+    banner(el("recoveryBanner"), "ok", null);
+  }
+
+  el("resetOpen").addEventListener("click", () => {
+    resetPanelState();
+    panel.classList.remove("hidden");
+    openRow.classList.add("hidden");
+    el("authForm").classList.add("hidden");
+    el("resetEmail").value = el("authEmail").value.trim();
+    el("resetEmail").focus();
+  });
+
+  el("resetCancel").addEventListener("click", close);
+
+  el("resetForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const status = el("resetBanner");
+    const email = el("resetEmail").value.trim();
+
+    el("resetSubmit").disabled = true;
+    banner(status, "busy", "Looking that up...");
+    try {
+      const data = await api.requestReset(email);
+
+      if (data.reset) {
+        // No chat was connected, so the password has already changed and
+        // this is the only place it is ever shown.
+        banner(status, "ok", null);
+        result.classList.remove("hidden");
+        result.innerHTML =
+          `<p class="route-hint">No chat is connected to that account, so the password ` +
+          `has been reset ${data.from_username ? "to your username" : "to a new one"}. ` +
+          `It is not shown again.</p>` +
+          `<p><code>${escapeHtml(data.password)}</code></p>` +
+          `<p class="route-hint">Sign in with it, then change it from the Account tab. ` +
+          `Connect a chat while you are there and the next reset arrives privately.</p>`;
+      } else {
+        // The hint already reads as a place, and every one of them is
+        // private to one person, so it stands on its own.
+        banner(status, "ok", `A code is on its way to ${data.hint}.`);
+        result.classList.add("hidden");
+        confirmForm.classList.remove("hidden");
+        el("resetToken").focus();
+      }
+    } catch (err) {
+      banner(status, "error", describe(err));
+    } finally {
+      el("resetSubmit").disabled = false;
+    }
+  });
+
+  confirmForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const status = el("resetConfirmBanner");
+    const token = el("resetToken").value.trim();
+    const password = el("resetNewPassword").value;
+
+    el("resetConfirmSubmit").disabled = true;
+    try {
+      const data = await api.confirmReset(token, password);
+      // The server signs the account in as part of confirming, so there is
+      // nothing left to type.
+      auth.applyUser(data.user);
+      close();
+      paintAuthState();
+      await refreshAll();
+      banner(el("accountBanner"), "ok", "Password set, and every other browser was signed out.");
+    } catch (err) {
+      banner(status, "error", describe(err));
+    } finally {
+      el("resetConfirmSubmit").disabled = false;
+    }
+  });
+
+  // A redeemed recovery code lands on the same confirm step an emailed
+  // code does. One screen sets a password, whatever proved the right to.
+  wireRecoveryRedeem((token, remaining) => {
+    el("resetToken").value = token;
+    result.classList.add("hidden");
+    confirmForm.classList.remove("hidden");
+    el("resetNewPassword").focus();
+    banner(
+      el("recoveryBanner"),
+      "ok",
+      remaining === 0
+        ? "Code accepted, and that was your last one. Choose a new password."
+        : `Code accepted, ${remaining} left. Choose a new password.`
+    );
+  });
+}
+
+// ---- recovery codes ----
+
+// Ten codes, rendered the same way wherever they appear: at registration,
+// on the Account page, and after a regenerate.
+function renderCodes(box, codes, note) {
+  const list = codes
+    .map(
+      (c) =>
+        `<code class="${c.used ? "used" : ""}">${escapeHtml(c.code || "unreadable")}</code>` +
+        (c.used ? " <span class=\"route-hint\">used</span>" : "")
+    )
+    .join("<br>");
+
+  box.classList.remove("hidden");
+  box.innerHTML =
+    `<p class="route-hint">${escapeHtml(note)}</p><p>${list}</p>` +
+    `<p class="route-hint">Each code works once. Keep them somewhere that is not this ` +
+    `browser, because this browser is the thing you might lose.</p>`;
+}
+
+// Shown once, right after an account is created or backfilled at sign in.
+function showFreshCodes(codes) {
+  if (!Array.isArray(codes) || !codes.length) return;
+  renderCodes(
+    el("recoveryCodesResult"),
+    codes.map((code, i) => ({ position: i + 1, code, used: false })),
+    "Save these ten recovery codes. They are the way back into this account if you lose everything else."
+  );
+  banner(el("accountBanner"), "ok", "New recovery codes are on this page. Save them now.");
+}
+
+function wireRecoveryCodes() {
+  const form = el("recoveryViewForm");
+  const status = el("recoveryViewBanner");
+  const box = el("recoveryCodesResult");
+
+  async function reveal(regenerate) {
+    const password = el("recoveryViewPassword").value;
+    if (!password) {
+      banner(status, "error", "Enter your password first.");
+      return;
+    }
+
+    el("recoveryView").disabled = true;
+    el("recoveryRegenerate").disabled = true;
+    try {
+      const data = regenerate
+        ? await api.regenerateRecoveryCodes(password)
+        : await api.revealRecoveryCodes(password);
+      banner(status, "ok", null);
+      el("recoveryViewPassword").value = "";
+      renderCodes(
+        box,
+        data.codes,
+        data.regenerated
+          ? "A fresh set of ten. Any code from the old set has stopped working."
+          : "Your recovery codes."
+      );
+      await refreshRecoveryCount();
+    } catch (err) {
+      banner(status, "error", describe(err));
+    } finally {
+      el("recoveryView").disabled = false;
+      el("recoveryRegenerate").disabled = false;
+    }
+  }
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    reveal(false);
+  });
+
+  el("recoveryRegenerate").addEventListener("click", async () => {
+    const sure = await confirmDialog({
+      title: "Replace your recovery codes?",
+      body:
+        "The ten you have now stop working immediately, including any you have written " +
+        "down or printed. You get a fresh set to save.",
+      confirmLabel: "Replace them",
+      cancelLabel: "Keep the old ones",
+    });
+    if (sure) reveal(true);
+  });
+}
+
+async function refreshRecoveryCount() {
+  try {
+    const { remaining } = await api.recoveryCodeCount();
+    el("recoveryCodesHint").textContent =
+      remaining > 0
+        ? `${remaining} of your codes are unused. They are the way back in when nothing else ` +
+          "works, including losing the Discord or Telegram account you connected."
+        : "You have no unused recovery codes left. Replace them to get a fresh ten.";
+  } catch {
+    // Cosmetic. The controls below still work without the count.
+  }
+}
+
+// Redeeming a code on the sign in screen. It does not set a password, it
+// unlocks the same reset form the emailed code does.
+function wireRecoveryRedeem(showConfirmStep) {
+  el("recoveryForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const status = el("recoveryBanner");
+    const email = el("resetEmail").value.trim();
+    const code = el("recoveryCode").value.trim();
+
+    if (!email) {
+      banner(status, "error", "Enter the account's email above first.");
+      return;
+    }
+
+    el("recoverySubmit").disabled = true;
+    try {
+      const data = await api.redeemRecoveryCode(email, code);
+      banner(status, "ok", null);
+      el("recoveryCode").value = "";
+      showConfirmStep(data.token, data.remaining);
+    } catch (err) {
+      banner(status, "error", describe(err));
+    } finally {
+      el("recoverySubmit").disabled = false;
+    }
+  });
+}
+
+// ---- passkeys ----
+
+function wirePasskey() {
+  el("passkeyAdd").addEventListener("click", async () => {
+    const status = el("accountBanner");
+    el("passkeyAdd").disabled = true;
+    try {
+      const options = await api.passkey({ step: "register-challenge" });
+      const result = await registerPasskey(options);
+      await api.passkey(result);
+      banner(
+        status,
+        "ok",
+        "Passkey saved. Next time you can sign in with this device instead of a password."
+      );
+      await paintPasskeyOffer();
+    } catch (err) {
+      if (wasCancelled(err)) banner(status, "ok", null);
+      else banner(status, "error", describe(err));
+    } finally {
+      el("passkeyAdd").disabled = false;
+    }
+  });
+
+  el("passkeySignIn").addEventListener("click", async () => {
+    const status = el("authBanner");
+    el("passkeySignIn").disabled = true;
+    try {
+      const options = await api.passkey({ step: "login-challenge" });
+      const assertion = await assertPasskey(options);
+      const data = await api.passkey(assertion);
+      auth.applyUser(data.user);
+      banner(status, "ok", null);
+      paintAuthState();
+      await refreshAll();
+    } catch (err) {
+      if (wasCancelled(err)) banner(status, "ok", null);
+      else banner(status, "error", describe(err));
+    } finally {
+      el("passkeySignIn").disabled = false;
+    }
+  });
+}
+
+// The offer is only made where it can actually be taken up: a device with
+// biometrics or a screen lock, in a browser that can report the public key.
+async function paintPasskeyOffer() {
+  const usable = await deviceCanVerify();
+  el("passkeyRow").classList.toggle("hidden", !usable);
+  el("passkeySignInRow").classList.toggle("hidden", !usable);
+  if (!usable) {
+    el("passkeyHint").textContent =
+      "This device cannot do passkeys, so signing in here stays a password.";
+  }
+}
+
+// ---- changing a known password ----
+
+function wirePassword() {
+  const form = el("passwordForm");
+  const status = el("passwordBanner");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const current = el("currentPassword").value;
+    const next = el("newPassword").value;
+
+    el("passwordSubmit").disabled = true;
+    try {
+      const data = await api.changePassword(current, next);
+      form.reset();
+      const others = data.other_sessions_ended
+        ? ` ${data.other_sessions_ended} other signed in browser${
+            data.other_sessions_ended === 1 ? " was" : "s were"
+          } signed out.`
+        : "";
+      banner(status, "ok", `Password changed.${others}`);
+    } catch (err) {
+      banner(status, "error", describe(err));
+    } finally {
+      el("passwordSubmit").disabled = false;
+    }
   });
 }
 
@@ -426,6 +784,11 @@ async function boot() {
   wireModals();
   wireTabs();
   wireAuth();
+  wireReset();
+  wirePassword();
+  wireRecoveryCodes();
+  wirePasskey();
+  paintPasskeyOffer();
   wireSources();
   wireOpml();
   wirePush();

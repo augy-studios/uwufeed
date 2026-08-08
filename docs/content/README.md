@@ -49,15 +49,3 @@ Body text.
 
 `note` for context, `warn` for something that will bite, `ok` for a
 confirmation. Use `warn` sparingly. A page with four warnings has none.
-
-## House style
-
-- No em dashes. A comma, a semicolon or a full stop
-- No emoji
-- Mark what works today. Every page that describes unbuilt behaviour says
-  so plainly
-- Explain the trade off, not only the behaviour. Why the dispatcher would
-  rather lose a notification than repeat one is more useful than the fact
-  that it claims a row first
-- Tables for comparisons, prose for reasoning, code blocks for anything
-  meant to be pasted

@@ -47,6 +47,30 @@ async def user_exists(user_id: str) -> bool:
         res.raise_for_status()
         return bool(res.json())
 
+async def set_identity(user_id: str, platform_user_id: int, display_name: str | None = None) -> None:
+    """Record who this account is on Discord.
+
+    An identity, not a target. A target is where feed items are delivered
+    and can be a server channel; an identity is a person. Password reset needs the
+    second, because a reset code sent to a channel is a broadcast.
+    """
+    async with _client() as client:
+        res = await client.post(
+            "/uwufeed_identities",
+            params={"on_conflict": "user_id,platform"},
+            headers={"prefer": "resolution=merge-duplicates,return=minimal"},
+            json=[
+                {
+                    "user_id": user_id,
+                    "platform": "discord",
+                    "platform_user_id": str(platform_user_id),
+                    "display_name": display_name,
+                    "verified_via": "bot",
+                }
+            ],
+        )
+        res.raise_for_status()
+
 
 async def merge_user(from_user: str, into_user: str) -> dict:
     """Move a guild account's subscriptions and targets into a web account.

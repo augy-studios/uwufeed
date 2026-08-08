@@ -40,7 +40,7 @@ Python 3.11 or newer.
 
 The about text, the description, the command list and the profile picture
 are all set through BotFather, and the full walkthrough with the exact text
-to paste is in `telegram-bot/setup.md` in the repository.
+to paste is in `telegram-bot/SETUP.md` in the repository.
 
 Keep the BotFather command list in step with the list in `/start`. They are
 two places saying the same thing, and only one of them is in version

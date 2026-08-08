@@ -25,42 +25,10 @@ The webhook receivers are on Vercel even though they are part of the
 instant path, because a webhook is request shaped. The rule is not push
 versus poll, it is request shaped versus continuous.
 
-## First run on a fresh box
+## Setting up a fresh box
 
-```sh
-sudo apt update
-sudo apt install -y python3 python3-venv python3-pip git tmux
-
-sudo adduser --system --group --home /home/uwufeed uwufeed
-sudo -u uwufeed git clone <repo> /home/uwufeed/uwufeed
-cd /home/uwufeed/uwufeed
-
-cp .env.example .env    # then fill it in
-chmod 600 .env
-
-for dir in workers telegram-bot discord-bot; do
-  python3 -m venv "$dir/.venv"
-  "$dir/.venv/bin/pip" install -r "$dir/requirements.txt"
-done
-```
-
-Debian 13 ships Python 3.13, which is comfortably above the 3.11 floor.
-
-## Two ways to run
-
-**tmux**, for working on things:
-
-```sh
-./infra/tmux-bootstrap.sh
-tmux attach -t uwufeed
-```
-
-**systemd**, for anything that should survive a reboot. See
-[`systemd/README.md`](systemd/README.md).
-
-Use systemd for the real thing and tmux while iterating. Running both at
-once means two dispatchers, which is survivable, because the delivery claim
-stops a double send, but confusing.
+Packages, the service user, virtualenvs, the clock, systemd and backups are
+all in [`SETUP.md`](SETUP.md).
 
 ## Secrets
 
@@ -88,24 +56,6 @@ and hold button state, per chat preferences and the chat to account
 mapping. Losing one means every button in that bot's history stops working
 and every linked chat forgets which account it belongs to.
 
-```sh
-./infra/backup.sh
-```
-
-Daily, from crontab:
-
-```text
-0 5 * * * /home/uwufeed/uwufeed/infra/backup.sh
-```
-
-It uses `sqlite3 .backup` rather than `cp`, because copying a database
-while the bot has it open can capture a torn write.
-
-## Time
-
-The lease renewal cron, quiet hours and digests all reason about time.
-Keep the box on UTC and let the presentation layer localise:
-
-```sh
-sudo timedatectl set-timezone UTC
-```
+[`backup.sh`](backup.sh) handles it, and the crontab line is in
+[`SETUP.md`](SETUP.md). It uses `sqlite3 .backup` rather than `cp`, because
+copying a database while a bot has it open can capture a torn write.

@@ -63,14 +63,3 @@ loadFeed(...);
 
 Theme first, so nothing renders in the wrong colours. Icons before anything
 reads them.
-
-## Conventions
-
-- Icons are never written inline in HTML. Markup carries
-  `<span data-icon="name">` and `hydrateIcons()` fills it in.
-- Anything user supplied goes through `escapeHtml` before reaching
-  `innerHTML`.
-- Show and hide is a single `.hidden` class flip. Timing lives in CSS, so
-  reduced motion is handled in one place.
-- A 501 from the API means the endpoint is not built yet, and reads
-  differently in the UI from a real failure.
