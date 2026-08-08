@@ -35,8 +35,11 @@ function paintAuthState() {
   el("accountPanel").classList.toggle("hidden", !signedIn);
   // The sidebar is for people with somewhere to go. On narrow screens CSS
   // hides it and the tab bar takes over.
+  // There is one navigation now, and it is a drawer at every width. Hidden
+  // outright when signed out, since there is nowhere to go.
   el("sidebar").classList.toggle("hidden", !signedIn);
-  el("tabs").classList.toggle("hidden", !signedIn);
+  el("navToggle").classList.toggle("hidden", !signedIn);
+  if (!signedIn) closeNav();
   el("sourceForm").classList.toggle("hidden", !signedIn);
   el("sourcesSignedOut").classList.toggle("hidden", signedIn);
   el("feedSignedOut").classList.toggle("hidden", signedIn);
@@ -287,6 +290,60 @@ function wireReset() {
         ? "Code accepted, and that was your last one. Choose a new password."
         : `Code accepted, ${remaining} left. Choose a new password.`
     );
+  });
+}
+
+// ---- the navigation drawer ----
+
+// Off canvas until asked for, at every width. The alternative was a sidebar
+// on desktop and a tab bar on mobile, which is two things to keep right and
+// two sets of markup that drift.
+function openNav() {
+  el("sidebar").classList.add("open");
+  el("navScrim").hidden = false;
+  // Next frame, so the element is laid out before the class that animates
+  // it lands. Setting both at once means no transition.
+  requestAnimationFrame(() => el("navScrim").classList.add("open"));
+  document.body.classList.add("nav-open");
+  el("navToggle").setAttribute("aria-expanded", "true");
+}
+
+function closeNav() {
+  el("sidebar").classList.remove("open");
+  el("navScrim").classList.remove("open");
+  document.body.classList.remove("nav-open");
+  el("navToggle").setAttribute("aria-expanded", "false");
+
+  // Wait for the fade before removing it from the tree, or it vanishes
+  // instantly and the drawer appears to slide out from behind nothing.
+  setTimeout(() => {
+    if (!el("sidebar").classList.contains("open")) el("navScrim").hidden = true;
+  }, 240);
+}
+
+function navIsOpen() {
+  return el("sidebar").classList.contains("open");
+}
+
+function wireNav() {
+  el("navToggle").addEventListener("click", () => {
+    if (navIsOpen()) closeNav();
+    else openNav();
+  });
+
+  el("navScrim").addEventListener("click", closeNav);
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && navIsOpen()) {
+      closeNav();
+      el("navToggle").focus();
+    }
+  });
+
+  // Choosing a destination is the whole point, so the drawer gets out of
+  // the way afterwards.
+  el("sidebar").addEventListener("click", (e) => {
+    if (e.target.closest("[data-route]")) closeNav();
   });
 }
 
@@ -1291,6 +1348,7 @@ async function boot() {
   wirePasskey();
   wireScope();
   wireHome();
+  wireNav();
   wireSignOutAll();
   wireDeleteAccount();
   wireIdentities();

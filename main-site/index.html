@@ -33,6 +33,10 @@
 <body>
     <div class="wrap">
         <header class="topbar glass">
+            <button class="icon-btn hidden" id="navToggle" type="button" aria-label="Menu"
+                aria-expanded="false" aria-controls="sidebar">
+                <span data-icon="menu"></span>
+            </button>
             <div class="brand">
                 <span class="brand-mark" data-icon="rss"></span>
                 <span class="brand-name">uwuFeed</span>
@@ -47,6 +51,8 @@
                 <span data-icon="sun"></span>
             </button>
         </header>
+
+        <div class="nav-scrim" id="navScrim" hidden></div>
 
         <nav class="sidebar glass hidden" id="sidebar" aria-label="Sections">
             <a class="nav-item" data-route="overview" href="/dashboard">
@@ -76,21 +82,6 @@
             </select>
             <span class="scope-note" id="scopeNote"></span>
         </div>
-
-        <nav class="tabs glass" id="tabs" role="tablist">
-            <a class="tab" data-route="overview" href="/dashboard">
-                <span data-icon="list"></span>Home
-            </a>
-            <a class="tab" data-route="feed" href="/feed">
-                <span data-icon="inbox"></span>Feed
-            </a>
-            <a class="tab" data-route="sources" href="/sources">
-                <span data-icon="rss"></span>Sources
-            </a>
-            <a class="tab" data-route="account" href="/account">
-                <span data-icon="user"></span>Account
-            </a>
-        </nav>
 
         <section class="panel glass hidden" id="panelHome">
             <div class="hero">

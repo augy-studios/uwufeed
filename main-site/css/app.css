@@ -71,29 +71,6 @@
   .chip-btn .chip-label { display: none; }
 }
 
-/* ---- tabs ---- */
-.tabs {
-  display: flex;
-  gap: 6px;
-  padding: 4px;
-  border-radius: 14px;
-  background: var(--surface);
-}
-.tab {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 9px;
-  border-radius: 10px;
-  font-size: 0.88rem;
-  color: var(--muted);
-  transition: background 0.15s ease, color 0.15s ease;
-}
-.tab svg { width: 16px; height: 16px; }
-.tab.active { background: var(--brand-fill); color: var(--on-brand); }
-
 /* ---- panels ---- */
 .panel { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 .panel h1 { font-size: 1.15rem; color: var(--brand-ink); }
@@ -486,21 +463,50 @@ body.scoped .scope-bar { border-left: 3px solid var(--brand-ink); }
 .stat.linky { text-decoration: none; transition: transform 0.15s ease; }
 .stat.linky:hover { transform: translateY(-1px); }
 
-/* ---- sidebar, wide screens only ---- */
-/* A sidebar is a desktop pattern. On a phone the existing tab bar is
-   genuinely better for the few things people do most, so the two swap
-   rather than one collapsing into a drawer nobody opens. */
-.sidebar { display: none; }
+/* ---- sidebar, a drawer at every width ---- */
+/* One navigation instead of a sidebar on desktop and a tab bar on mobile.
+   Off canvas until the hamburger opens it, which keeps the content column
+   the same width at every size and means one thing to get right rather
+   than two.
 
-@media (min-width: 900px) {
-  .wrap { max-width: 1040px; }
-  .sidebar:not(.hidden) {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 8px;
-  }
-  .tabs { display: none; }
+   .hidden still means display:none, which is the signed out state. The
+   open and closed states are a transform, so they can animate. */
+.sidebar:not(.hidden) {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+
+  position: fixed;
+  z-index: 60;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: min(268px, 82vw);
+  border-radius: 0 16px 16px 0;
+  overflow-y: auto;
+
+  transform: translateX(-100%);
+  transition: transform 0.22s ease;
+}
+.sidebar.open { transform: translateX(0); }
+
+.nav-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+.nav-scrim.open { opacity: 1; }
+
+/* Nothing behind the drawer should scroll while it is open. */
+body.nav-open { overflow: hidden; }
+
+/* Timing lives here, so reduced motion is handled in one place. */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar:not(.hidden), .nav-scrim { transition: none; }
 }
 
 .nav-item {
@@ -517,5 +523,3 @@ body.scoped .scope-bar { border-left: 3px solid var(--brand-ink); }
 .nav-item svg { width: 17px; height: 17px; }
 .nav-item:hover { background: var(--surface); }
 .nav-item.active { background: var(--brand-fill); color: var(--on-brand); }
-.tab.active { background: var(--brand-fill); color: var(--on-brand); }
-.tab { text-decoration: none; }
